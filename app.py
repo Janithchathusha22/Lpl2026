@@ -1,8 +1,4 @@
-"""
-LPL 2026 — Premium Streamlit Dashboard
-Connects to FastAPI backend (http://127.0.0.1:8000)
-Tabs: Match Predictor | Player Analyzer | Live Simulator | Squad Intel
-"""
+"""LPL 2026 premium Streamlit prediction dashboard."""
 
 import sys, os, json, time, base64, html
 import streamlit as st
@@ -22,11 +18,14 @@ matplotlib.rcParams['axes.labelcolor'] = '#94a3b8'
 matplotlib.rcParams['xtick.color']     = '#94a3b8'
 matplotlib.rcParams['ytick.color']     = '#94a3b8'
 
-API = "http://127.0.0.1:8000"
-HTML_DASHBOARD_URL = f"{API}/dashboard.html"
-HTML_FIELD_URL = f"{API}/field.html"
-HTML_FORECAST_URL = f"{API}/forecast.html"
-HTML_TACTICS_URL = f"{API}/forecast.html#tactics"
+API = os.environ.get("LPL_API_URL", "http://127.0.0.1:8000").rstrip("/")
+
+# Keep navigation inside the public Streamlit URL. The FastAPI service is an
+# internal prediction engine on Community Cloud and is not exposed publicly.
+HTML_DASHBOARD_URL = "?page=tournament"
+HTML_FIELD_URL = "?page=field"
+HTML_FORECAST_URL = "?page=tournament"
+HTML_TACTICS_URL = "?page=field"
 
 # ── Page Config ───────────────────────────────────────────────────────────────
 st.set_page_config(
