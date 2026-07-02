@@ -1,0 +1,2162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LPL 2026 - Venue-Aware 3D Fielding Analyzer</title>
+<style>
+  :root {
+    --bg:#05070d;
+    --panel:#0b101b;
+    --panel2:#111827;
+    --border:#24314a;
+    --gold:#f5a623;
+    --mint:#47d18c;
+    --cyan:#65d7ff;
+    --coral:#ff6f61;
+    --text:#edf4ff;
+    --muted:#8c99b5;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    background:
+      radial-gradient(circle at 12% 8%, rgba(71,209,140,0.14), transparent 28%),
+      radial-gradient(circle at 82% 16%, rgba(101,215,255,0.12), transparent 30%),
+      linear-gradient(135deg,#06090f 0%,#0d1017 46%,#07110d 100%);
+    color:var(--text);
+    font-family:'Segoe UI',system-ui,sans-serif;
+    height:100vh;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+  body::before {
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size:42px 42px;
+    mask-image:linear-gradient(to bottom, rgba(0,0,0,0.75), transparent 78%);
+  }
+  header {
+    background:linear-gradient(135deg,rgba(10,16,27,0.96),rgba(7,13,14,0.92));
+    border-bottom:1px solid rgba(245,166,35,0.5);
+    padding:13px 18px;
+    display:flex;
+    align-items:center;
+    gap:13px;
+    flex-shrink:0;
+    position:relative;
+    z-index:2;
+  }
+  header::after {
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:-1px;
+    height:1px;
+    background:linear-gradient(90deg,transparent,var(--mint),var(--gold),var(--cyan),transparent);
+  }
+  .brand-mark {
+    width:44px;
+    height:44px;
+    border-radius:8px;
+    display:grid;
+    place-items:center;
+    background:
+      radial-gradient(circle at 50% 38%, rgba(245,166,35,0.42), transparent 52%),
+      linear-gradient(145deg,rgba(71,209,140,0.22),rgba(101,215,255,0.1));
+    border:1px solid rgba(245,166,35,0.4);
+    box-shadow:0 14px 38px rgba(0,0,0,0.28);
+    font-size:1.55rem;
+    flex-shrink:0;
+  }
+  header h1 { font-size:1.12rem; color:#ffd37a; line-height:1.22; letter-spacing:0; }
+  header p { font-size:0.74rem; color:var(--muted); margin-top:3px; }
+  .team-tabs, .venue-strip {
+    display:flex;
+    gap:7px;
+    padding:10px 14px 0;
+    background:rgba(7,11,18,0.9);
+    border-bottom:1px solid rgba(36,49,74,0.8);
+    flex-shrink:0;
+    flex-wrap:wrap;
+    position:relative;
+    z-index:2;
+  }
+  .venue-strip { padding-top:8px; padding-bottom:10px; }
+  .team-tab, .venue-pill { cursor:pointer; transition:transform .18s, border-color .18s, background .18s, box-shadow .18s; }
+  .team-tab {
+    border:1px solid rgba(255,255,255,0.08);
+    padding:8px 14px;
+    border-radius:8px 8px 0 0;
+    font-size:0.8rem;
+    font-weight:800;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.12);
+  }
+  .team-tab:hover, .venue-pill:hover, .view-btn:hover { transform:translateY(-1px); }
+  .venue-pill {
+    min-width:180px;
+    padding:10px 12px;
+    border-radius:8px;
+    background:linear-gradient(145deg,rgba(255,255,255,0.055),rgba(255,255,255,0.025));
+    border:1px solid rgba(255,255,255,0.08);
+    text-align:left;
+    color:#e4edff;
+  }
+  .venue-pill strong { display:block; font-size:0.8rem; }
+  .venue-pill small { display:block; margin-top:3px; color:#91a0bd; font-size:0.68rem; }
+  .venue-pill.active {
+    border-color:rgba(245,166,35,0.82);
+    box-shadow:0 0 0 1px rgba(245,166,35,0.18) inset, 0 12px 30px rgba(245,166,35,0.08);
+  }
+  .main { display:flex; flex:1; overflow:hidden; min-height:0; }
+  .canvas-wrap {
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    cursor:grab;
+    background:
+      radial-gradient(ellipse at 50% 46%, rgba(40,125,74,0.32) 0%, rgba(8,20,17,0.2) 38%, transparent 66%),
+      linear-gradient(180deg,#05090f,#060b10 45%,#07110e);
+    overflow:hidden;
+    min-width:0;
+  }
+  .canvas-wrap::before {
+    content:"";
+    position:absolute;
+    inset:7%;
+    border:1px solid rgba(255,255,255,0.055);
+    border-radius:50%;
+    transform:perspective(700px) rotateX(60deg);
+    pointer-events:none;
+  }
+  .canvas-wrap::after {
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:linear-gradient(to bottom, rgba(255,255,255,0.04), transparent 24%, rgba(0,0,0,0.18));
+    mix-blend-mode:screen;
+  }
+  .canvas-wrap:active { cursor:grabbing; }
+  #threeMount { position:absolute; inset:0; z-index:0; }
+  #threeMount canvas { width:100% !important; height:100% !important; display:block; }
+  #fld { position:absolute; z-index:0; display:block; max-width:100%; max-height:100%; }
+  .field-hud {
+    position:absolute;
+    top:14px;
+    left:14px;
+    right:14px;
+    z-index:3;
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    pointer-events:none;
+  }
+  .hud-chip {
+    min-width:144px;
+    max-width:340px;
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:8px;
+    padding:9px 11px;
+    background:rgba(5,8,13,0.64);
+    backdrop-filter:blur(16px);
+    box-shadow:0 18px 38px rgba(0,0,0,0.18);
+  }
+  .hud-chip span { display:block; font-size:0.58rem; color:#7f8da8; text-transform:uppercase; letter-spacing:.9px; }
+  .hud-chip strong { display:block; font-size:0.82rem; color:#f4f8ff; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .view-controls {
+    position:absolute;
+    left:14px;
+    bottom:14px;
+    z-index:3;
+    display:flex;
+    gap:7px;
+  }
+  .view-btn {
+    width:38px;
+    height:34px;
+    border-radius:8px;
+    border:1px solid rgba(255,255,255,0.14);
+    color:#e9f4ff;
+    background:rgba(8,13,21,0.72);
+    cursor:pointer;
+    font-weight:800;
+    backdrop-filter:blur(12px);
+  }
+  .hint {
+    position:absolute;
+    right:14px;
+    bottom:14px;
+    z-index:3;
+    font-size:0.66rem;
+    color:#8f9ab0;
+    pointer-events:none;
+    padding:8px 10px;
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:8px;
+    background:rgba(5,8,13,0.52);
+  }
+  .result-banner {
+    position:absolute;
+    top:86px;
+    left:50%;
+    transform:translate(-50%, -8px);
+    z-index:4;
+    min-width:260px;
+    max-width:min(520px, calc(100% - 32px));
+    border:1px solid rgba(255,255,255,0.14);
+    border-radius:8px;
+    padding:11px 14px;
+    background:rgba(5,8,13,0.72);
+    backdrop-filter:blur(16px);
+    box-shadow:0 24px 60px rgba(0,0,0,0.28);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .18s, transform .18s, border-color .18s;
+    text-align:center;
+  }
+  .result-banner.visible { opacity:1; transform:translate(-50%, 0); }
+  .result-banner.live { border-color:rgba(101,215,255,0.44); }
+  .result-banner.impact { border-color:rgba(245,166,35,0.58); }
+  .result-banner.out {
+    border-color:rgba(71,209,140,0.74);
+    background:linear-gradient(135deg,rgba(7,24,17,0.88),rgba(5,8,13,0.78));
+  }
+  .result-banner strong {
+    display:block;
+    color:#fff;
+    font-size:0.92rem;
+    letter-spacing:.5px;
+  }
+  .result-banner span {
+    display:block;
+    margin-top:4px;
+    color:#b8c7df;
+    font-size:0.72rem;
+    line-height:1.35;
+  }
+  .sidebar {
+    width:360px;
+    background:linear-gradient(180deg,rgba(12,17,29,0.98),rgba(9,14,22,0.98));
+    border-left:1px solid rgba(36,49,74,0.9);
+    overflow-y:auto;
+    padding:14px;
+    flex-shrink:0;
+    position:relative;
+    z-index:2;
+  }
+  .sidebar h2 { font-size:0.69rem; text-transform:uppercase; letter-spacing:1px; color:#ffd37a; margin-bottom:10px; }
+  .bat-btn {
+    display:block;
+    width:100%;
+    padding:10px 11px;
+    background:linear-gradient(145deg,rgba(255,255,255,0.06),rgba(255,255,255,0.025));
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:8px;
+    cursor:pointer;
+    text-align:left;
+    margin-bottom:8px;
+    color:var(--text);
+    transition:transform .15s, background .15s, border-color .15s;
+  }
+  .bat-btn:hover { background:rgba(255,255,255,0.085); transform:translateX(2px); }
+  .bat-btn.active { background:rgba(255,255,255,0.1); }
+  .bat-btn .nm { display:flex; justify-content:space-between; gap:8px; font-weight:800; font-size:0.86rem; }
+  .bat-btn .dt { font-size:0.72rem; color:#91a0bd; margin-top:4px; }
+  .tag {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:32px;
+    padding:2px 8px;
+    border-radius:999px;
+    font-size:0.66rem;
+    font-weight:800;
+    background:rgba(255,255,255,0.1);
+  }
+  .ibox {
+    background:linear-gradient(145deg,rgba(255,255,255,0.055),rgba(255,255,255,0.025));
+    border-radius:8px;
+    padding:12px;
+    margin-top:13px;
+    border:1px solid rgba(255,255,255,0.085);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  .ibox h3 { font-size:0.66rem; color:#91a0bd; text-transform:uppercase; letter-spacing:.7px; margin-bottom:8px; }
+  .irow { display:flex; justify-content:space-between; align-items:flex-start; font-size:0.76rem; padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.055); gap:8px; }
+  .irow:last-child { border-bottom:none; }
+  .irow span:last-child { text-align:right; }
+  .metric-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+  .metric-card { background:rgba(0,0,0,0.26); border:1px solid rgba(255,255,255,0.065); border-radius:8px; padding:9px; }
+  .metric-card b { display:block; font-size:0.92rem; color:#fff; margin-bottom:2px; }
+  .metric-card span { font-size:0.68rem; color:#91a0bd; }
+  .timing-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .timing-pill { flex:1; min-width:125px; background:rgba(0,0,0,0.24); border:1px solid rgba(255,255,255,0.06); border-radius:8px; padding:8px; }
+  .timing-pill strong { display:block; font-size:0.74rem; color:#fff; }
+  .timing-pill span { display:block; margin-top:2px; font-size:0.67rem; color:#91a0bd; line-height:1.45; }
+  .sim-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+  .sim-field { display:flex; flex-direction:column; gap:5px; }
+  .sim-field label { font-size:0.6rem; color:#7f8da8; text-transform:uppercase; letter-spacing:.8px; }
+  .sim-field select {
+    width:100%;
+    min-width:0;
+    background:#0d1422;
+    border:1px solid rgba(255,255,255,0.12);
+    color:#edf4ff;
+    border-radius:8px;
+    padding:8px 9px;
+    font-size:0.76rem;
+    cursor:pointer;
+  }
+  .sim-start {
+    width:100%;
+    margin-top:10px;
+    border:0;
+    border-radius:8px;
+    padding:10px 12px;
+    background:linear-gradient(135deg,#f5a623,#ffd37a);
+    color:#06100a;
+    font-weight:900;
+    cursor:pointer;
+    box-shadow:0 14px 28px rgba(245,166,35,0.18);
+  }
+  .sim-start:disabled { opacity:.62; cursor:wait; box-shadow:none; }
+  .sim-status {
+    margin-top:9px;
+    padding:9px;
+    border-radius:8px;
+    background:rgba(0,0,0,0.28);
+    border:1px solid rgba(255,255,255,0.07);
+    font-size:0.72rem;
+    color:#cbd6ea;
+    line-height:1.45;
+  }
+  .tactical-head {
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .tactical-head h3 { margin-bottom:3px; }
+  .tactical-head p { font-size:0.69rem; color:#9ba9c5; line-height:1.42; }
+  .ai-pill {
+    flex-shrink:0;
+    border:1px solid rgba(101,215,255,0.28);
+    color:#9fe8ff;
+    background:rgba(101,215,255,0.09);
+    border-radius:999px;
+    padding:4px 8px;
+    font-size:0.58rem;
+    font-weight:900;
+    letter-spacing:.8px;
+    text-transform:uppercase;
+  }
+  .ai-run {
+    width:100%;
+    margin-top:10px;
+    border:0;
+    border-radius:8px;
+    padding:10px 12px;
+    background:linear-gradient(135deg,#47d18c,#65d7ff);
+    color:#03110e;
+    font-weight:900;
+    cursor:pointer;
+    box-shadow:0 14px 28px rgba(71,209,140,0.16);
+  }
+  .ai-run:disabled { opacity:.62; cursor:wait; box-shadow:none; }
+  .ai-error {
+    margin-top:9px;
+    padding:9px;
+    border-radius:8px;
+    border:1px solid rgba(255,111,97,0.45);
+    background:rgba(255,111,97,0.08);
+    color:#ffbdb6;
+    font-size:0.72rem;
+    line-height:1.45;
+  }
+  .ai-note {
+    margin-top:9px;
+    padding:9px;
+    border-radius:8px;
+    border:1px solid rgba(101,215,255,0.18);
+    background:rgba(101,215,255,0.06);
+    color:#c9eaff;
+    font-size:0.72rem;
+    line-height:1.45;
+  }
+  .prob-row {
+    display:grid;
+    grid-template-columns:minmax(86px,1fr) 48px;
+    gap:8px;
+    align-items:center;
+    font-size:0.7rem;
+    color:#c8d3e8;
+    margin-top:7px;
+  }
+  .prob-track {
+    height:6px;
+    border-radius:999px;
+    background:rgba(255,255,255,0.09);
+    overflow:hidden;
+    margin-top:4px;
+  }
+  .prob-fill {
+    height:100%;
+    border-radius:999px;
+    background:linear-gradient(90deg,var(--mint),var(--gold));
+  }
+  .detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:9px; }
+  .detail-chip {
+    border:1px solid rgba(255,255,255,0.07);
+    border-radius:8px;
+    background:rgba(0,0,0,0.24);
+    padding:8px;
+    min-width:0;
+  }
+  .detail-chip span { display:block; color:#8190ab; font-size:0.58rem; text-transform:uppercase; letter-spacing:.7px; }
+  .detail-chip b { display:block; color:#fff; font-size:0.76rem; margin-top:3px; line-height:1.28; overflow-wrap:anywhere; }
+  .leg-item { display:flex; align-items:center; gap:7px; font-size:0.74rem; margin-bottom:6px; color:#c0c9dc; }
+  .leg-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .error-box { margin-top:13px; background:#241018; border-radius:8px; padding:12px; border:1px solid #a43d3d; color:#ffb4b4; font-size:0.78rem; line-height:1.45; }
+  @media(max-width:980px) {
+    body { overflow:auto; height:auto; min-height:100vh; }
+    .main { flex-direction:column; overflow:visible; }
+    .canvas-wrap { min-height:560px; flex:none; }
+    .sidebar { width:100%; height:auto; max-height:none; }
+    .venue-pill { min-width:150px; flex:1; }
+  }
+  @media(max-width:620px) {
+    header { align-items:flex-start; }
+    header h1 { font-size:0.98rem; }
+    header p { font-size:0.68rem; }
+    .brand-mark { width:38px; height:38px; font-size:1.25rem; }
+    .canvas-wrap { min-height:470px; }
+    .field-hud { flex-direction:column; right:auto; max-width:72%; }
+    .hint { display:none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand-mark">🏏</div>
+  <div>
+    <h1>LPL 2026 - Venue-Aware 3D Fielding Setup Analyzer</h1>
+    <p>Backend model + pitch CSV driven key-player plans, venue surfaces, and boundary-risk mapping for every ground.</p>
+  </div>
+  <a id="homeLink" href="http://localhost:8501" title="Back to the home dashboard" style="margin-left:auto;font-size:0.78rem;color:#9fb0d0;text-decoration:none;padding:8px 14px;border:1px solid rgba(255,255,255,.14);border-radius:8px;font-weight:700;white-space:nowrap" onmouseover="this.style.color='#ffd37a';this.style.borderColor='rgba(245,166,35,.6)'" onmouseout="this.style.color='#9fb0d0';this.style.borderColor='rgba(255,255,255,.14)'">🏠 Home</a>
+</header>
+<script>if(location.protocol==='file:'){var _h=document.getElementById('homeLink');if(_h)_h.setAttribute('href','index.html');}</script>
+<div class="team-tabs" id="teamTabs"></div>
+<div class="venue-strip" id="venueStrip"></div>
+<div class="main">
+  <div class="canvas-wrap" id="cWrap">
+    <div id="threeMount"></div>
+    <canvas id="fld" width="700" height="500"></canvas>
+    <div class="field-hud">
+      <div class="hud-chip"><span>Field Plan</span><strong id="hudPlan">Loading ground model</strong></div>
+      <div class="hud-chip"><span>Surface</span><strong id="hudSurface">Venue profile pending</strong></div>
+    </div>
+    <div class="result-banner" id="resultBanner">
+      <strong id="resultTitle">AI PLAN READY</strong>
+      <span id="resultDetail">Generate a plan, then start the delivery execution.</span>
+    </div>
+    <div class="view-controls">
+      <button class="view-btn" type="button" id="viewBroadcast" title="Broadcast angle">3D</button>
+      <button class="view-btn" type="button" id="viewTop" title="Top tactical map">TOP</button>
+      <button class="view-btn" type="button" id="viewReset" title="Reset camera">↺</button>
+    </div>
+    <div class="hint" id="viewStatus">Orbit 0° | Zoom 1.0x</div>
+  </div>
+  <div class="sidebar" id="sidebar"></div>
+</div>
+
+<script async src="https://unpkg.com/three@0.160.0/build/three.min.js" onload="window.__fieldingThreeLoaded=true;window.upgradeFieldingThree&&window.upgradeFieldingThree()" onerror="window.__fieldingThreeFailed=true"></script>
+<script>
+const API_CANDIDATES = location.protocol === 'file:' ? ['http://127.0.0.1:8001', 'http://127.0.0.1:8000'] : [''];
+const SHORT_NAMES = {
+  'Colombo Kaps':'🦁 Kaps',
+  'Galle Gallants':'⚔️ Gallants',
+  'Jaffna Kings':'👑 Kings',
+  'Dambulla Sixers':'💥 Sixers',
+  'Kandy Royals':'🔥 Royals'
+};
+const RCOL = {
+  wk:    {dot:'#a0dfff', ring:'#55aee0', lbl:'#b0e8ff', desc:'Wicket Keeper'},
+  close: {dot:'#ff6868', ring:'#e03030', lbl:'#ff9090', desc:'Close Catching'},
+  ring:  {dot:'#ffe055', ring:'#e0a010', lbl:'#ffe880', desc:'Ring Field'},
+  deep:  {dot:'#55e07a', ring:'#20b040', lbl:'#80e8a0', desc:'Boundary Cover'},
+};
+
+let TEAMS = [];
+let VENUES = [];
+let curTeam = null;
+let curBat = null;
+let curVenue = null;
+let rotX = -0.60;
+let rotY = 0.18;
+let zoom = 1.0;
+let dragging = false;
+let lx = 0;
+let ly = 0;
+
+const canvas = document.getElementById('fld');
+const ctx = canvas.getContext('2d');
+const wrap = document.getElementById('cWrap');
+const threeMount = document.getElementById('threeMount');
+const hudPlan = document.getElementById('hudPlan');
+const hudSurface = document.getElementById('hudSurface');
+const viewStatus = document.getElementById('viewStatus');
+const resultBanner = document.getElementById('resultBanner');
+const resultTitle = document.getElementById('resultTitle');
+const resultDetail = document.getElementById('resultDetail');
+const W = canvas.width;
+const H = canvas.height;
+const CX = W / 2;
+const CY = H / 2 + 24;
+const FS = 210;
+
+let renderer3d = null;
+let scene3d = null;
+let camera3d = null;
+let fieldGroup3d = null;
+let playerGroup3d = null;
+let tacticalGroup3d = null;
+let ballMesh3d = null;
+let batsmanRole3d = null;
+let bowlerRole3d = null;
+let batMesh3d = null;
+let sceneKey3d = '';
+let threeAnimationStarted = false;
+let threeReady = false;
+let playerMarkerRefs3d = [];
+let catchSim = null;
+let catchTargetIndex = 0;
+let catchShotType = 'lofted';
+let catchStatusText = 'Ready for predictive delivery simulation.';
+let catchStatusDirty = false;
+let canvasCatchAnimating = false;
+let tacticalPlanPayload = null;
+let tacticalLoading = false;
+let tacticalErrorText = '';
+let selectedBowlingType = 'Right-Arm Fast';
+let selectedMatchPhase = 'Powerplay';
+
+const FIELD_SCALE_X = 9.6;
+const FIELD_SCALE_Z = 8.2;
+const FIELD_UNIT_METERS = 6.25;
+const VERTICAL_SCALE_3D = 0.22;
+const VERTICAL_SCALE_CANVAS = 0.026;
+const MATCH_PHASES = ['Powerplay', 'Middle', 'Death'];
+const BOWLING_TYPES = ['Right-Arm Fast', 'Left-Arm Fast', 'Right-Arm Medium', 'Left-Arm Medium', 'Off Spin', 'Leg Spin', 'Left-Arm Orthodox'];
+
+function setHud(plan) {
+  if (hudPlan) {
+    const player = curBat?.name || 'Loading';
+    const setup = plan?.fieldType || curBat?.fieldType || 'Field plan';
+    const phase = catchSim?.active ? `${String(catchSim.phase || 'delivery').toUpperCase()} | ` : '';
+    hudPlan.textContent = `${phase}${player} | ${setup}`;
+  }
+  if (hudSurface) {
+    const venue = curVenue?.label || curVenue?.venue_name || 'Venue';
+    const pitch = curVenue?.pitch_type || 'Balanced surface';
+    const safe = Math.round(Number(curVenue?.safe_score_target || 0));
+    hudSurface.textContent = `${venue} | ${pitch}${safe ? ` | Safe ${safe}` : ''}`;
+  }
+  if (viewStatus) {
+    const orbit = Math.round((rotY * 180) / Math.PI);
+    viewStatus.textContent = `Orbit ${orbit}° | Zoom ${zoom.toFixed(1)}x`;
+  }
+}
+
+function initThree() {
+  if (renderer3d) return true;
+  if (!window.THREE || !threeMount) {
+    threeReady = false;
+    canvas.style.display = 'block';
+    return false;
+  }
+  try {
+    const THREE = window.THREE;
+    scene3d = new THREE.Scene();
+    scene3d.fog = new THREE.FogExp2(0x05080d, 0.035);
+
+    camera3d = new THREE.PerspectiveCamera(42, 1, 0.1, 140);
+    renderer3d = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+    renderer3d.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    if (THREE.SRGBColorSpace) renderer3d.outputColorSpace = THREE.SRGBColorSpace;
+    renderer3d.shadowMap.enabled = true;
+    renderer3d.shadowMap.type = THREE.PCFSoftShadowMap;
+    threeMount.appendChild(renderer3d.domElement);
+    canvas.style.display = 'none';
+
+    const ambient = new THREE.HemisphereLight(0xcfe9ff, 0x16361d, 1.25);
+    scene3d.add(ambient);
+    const key = new THREE.DirectionalLight(0xffe2a8, 1.3);
+    key.position.set(-6, 10, 4);
+    key.castShadow = true;
+    key.shadow.mapSize.width = 1024;
+    key.shadow.mapSize.height = 1024;
+    scene3d.add(key);
+
+    fieldGroup3d = new THREE.Group();
+    playerGroup3d = new THREE.Group();
+    tacticalGroup3d = new THREE.Group();
+    scene3d.add(fieldGroup3d, playerGroup3d, tacticalGroup3d);
+    buildStaticThreeField();
+    fitThreeRenderer();
+    window.addEventListener('resize', () => {
+      fitThreeRenderer();
+      render();
+    });
+
+    threeReady = true;
+    if (!threeAnimationStarted) {
+      threeAnimationStarted = true;
+      requestAnimationFrame(animateThree);
+    }
+    return true;
+  } catch (error) {
+    console.warn('Three.js renderer failed, falling back to canvas.', error);
+    threeReady = false;
+    canvas.style.display = 'block';
+    if (renderer3d?.domElement?.parentNode) renderer3d.domElement.parentNode.removeChild(renderer3d.domElement);
+    renderer3d = null;
+    return false;
+  }
+}
+
+function fitThreeRenderer() {
+  if (!renderer3d || !camera3d || !wrap) return;
+  const rect = wrap.getBoundingClientRect();
+  const width = Math.max(320, Math.floor(rect.width));
+  const height = Math.max(320, Math.floor(rect.height));
+  renderer3d.setSize(width, height, false);
+  camera3d.aspect = width / height;
+  camera3d.updateProjectionMatrix();
+}
+
+function clearThreeGroup(group) {
+  if (!group) return;
+  while (group.children.length) group.remove(group.children[0]);
+}
+
+function ovalGeometry(rx, rz, segments = 144) {
+  const THREE = window.THREE;
+  const shape = new THREE.Shape();
+  shape.absellipse(0, 0, rx, rz, 0, Math.PI * 2, false, 0);
+  const geometry = new THREE.ShapeGeometry(shape, segments);
+  geometry.rotateX(-Math.PI / 2);
+  return geometry;
+}
+
+function ovalLine(rx, rz, color, opacity, y, width = 1) {
+  const THREE = window.THREE;
+  const points = [];
+  for (let i = 0; i <= 192; i++) {
+    const a = (i / 192) * Math.PI * 2;
+    points.push(new THREE.Vector3(Math.cos(a) * rx, y, Math.sin(a) * rz));
+  }
+  const line = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints(points),
+    new THREE.LineBasicMaterial({ color, transparent:opacity < 1, opacity, linewidth:width })
+  );
+  return line;
+}
+
+function makeTextSprite(text, color = '#ffffff', bg = 'rgba(4,8,14,0.64)', scale = 1) {
+  const THREE = window.THREE;
+  const cnv = document.createElement('canvas');
+  const c = cnv.getContext('2d');
+  cnv.width = 512;
+  cnv.height = 128;
+  c.clearRect(0, 0, cnv.width, cnv.height);
+  c.fillStyle = bg;
+  c.strokeStyle = 'rgba(255,255,255,0.14)';
+  c.lineWidth = 2;
+  roundRect(c, 18, 24, 476, 74, 18);
+  c.fill();
+  c.stroke();
+  c.font = '700 32px Segoe UI, Arial';
+  c.fillStyle = color;
+  c.textAlign = 'center';
+  c.textBaseline = 'middle';
+  c.fillText(String(text).slice(0, 28), 256, 62);
+  const texture = new THREE.CanvasTexture(cnv);
+  if (THREE.SRGBColorSpace) texture.colorSpace = THREE.SRGBColorSpace;
+  const material = new THREE.SpriteMaterial({ map:texture, transparent:true, depthWrite:false });
+  const sprite = new THREE.Sprite(material);
+  sprite.scale.set(1.85 * scale, 0.46 * scale, 1);
+  return sprite;
+}
+
+function roundRect(c, x, y, w, h, r) {
+  c.beginPath();
+  c.moveTo(x + r, y);
+  c.arcTo(x + w, y, x + w, y + h, r);
+  c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r);
+  c.arcTo(x, y, x + w, y, r);
+  c.closePath();
+}
+
+function buildStaticThreeField() {
+  if (!fieldGroup3d || !window.THREE) return;
+  const THREE = window.THREE;
+  clearThreeGroup(fieldGroup3d);
+
+  const grassOuter = new THREE.Mesh(
+    ovalGeometry(10.9, 9.15),
+    new THREE.MeshStandardMaterial({ color:0x15401f, roughness:0.72, metalness:0.05 })
+  );
+  grassOuter.receiveShadow = true;
+  fieldGroup3d.add(grassOuter);
+
+  for (let i = 0; i < 14; i++) {
+    const radius = 0.16 + i * 0.068;
+    const stripe = new THREE.Mesh(
+      ovalGeometry(10.9 * radius, 9.15 * radius),
+      new THREE.MeshStandardMaterial({
+        color:i % 2 ? 0x2a662e : 0x25582b,
+        transparent:true,
+        opacity:0.26,
+        roughness:0.85
+      })
+    );
+    stripe.position.y = 0.012 + i * 0.001;
+    fieldGroup3d.add(stripe);
+  }
+
+  const inner = new THREE.Mesh(
+    ovalGeometry(4.25, 3.45),
+    new THREE.MeshStandardMaterial({ color:0x2e692b, roughness:0.8, transparent:true, opacity:0.72 })
+  );
+  inner.position.y = 0.03;
+  inner.receiveShadow = true;
+  fieldGroup3d.add(inner);
+
+  fieldGroup3d.add(ovalLine(10.35, 8.72, 0xf5d37a, 0.92, 0.075, 2));
+  fieldGroup3d.add(ovalLine(4.25, 3.45, 0x65d7ff, 0.72, 0.085, 1));
+  fieldGroup3d.add(ovalLine(9.2, 7.8, 0xffffff, 0.12, 0.055, 1));
+
+  const pitch = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.88, 5.15),
+    new THREE.MeshStandardMaterial({ color:0xc69a4e, roughness:0.74 })
+  );
+  pitch.rotation.x = -Math.PI / 2;
+  pitch.position.y = 0.095;
+  pitch.receiveShadow = true;
+  fieldGroup3d.add(pitch);
+
+  [-1.34, 1.34].forEach(z => {
+    const crease = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.02, 0.035),
+      new THREE.MeshBasicMaterial({ color:0xffffff, transparent:true, opacity:0.72 })
+    );
+    crease.rotation.x = -Math.PI / 2;
+    crease.position.set(0, 0.11, z);
+    fieldGroup3d.add(crease);
+  });
+
+  for (let i = 0; i < 40; i++) {
+    const a = (i / 40) * Math.PI * 2;
+    const post = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.028, 0.038, 0.32, 8),
+      new THREE.MeshStandardMaterial({ color:0xeed17d, emissive:0x4f3200, emissiveIntensity:0.3 })
+    );
+    post.position.set(Math.cos(a) * 10.38, 0.19, Math.sin(a) * 8.72);
+    fieldGroup3d.add(post);
+  }
+
+  const standMat = new THREE.MeshStandardMaterial({ color:0x111a26, transparent:true, opacity:0.46, roughness:0.55 });
+  for (let i = 0; i < 18; i++) {
+    const a = (i / 18) * Math.PI * 2;
+    const stand = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.42, 0.16), standMat);
+    stand.position.set(Math.cos(a) * 12.0, 0.32, Math.sin(a) * 10.2);
+    stand.rotation.y = -a;
+    fieldGroup3d.add(stand);
+  }
+
+  [[-10.8,-8.6],[10.8,-8.6],[-10.8,8.6],[10.8,8.6]].forEach(([x,z]) => {
+    const pole = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.045, 0.07, 4.6, 12),
+      new THREE.MeshStandardMaterial({ color:0x5d708a, metalness:0.35, roughness:0.42 })
+    );
+    pole.position.set(x, 2.3, z);
+    fieldGroup3d.add(pole);
+    const lamp = new THREE.PointLight(0xfff0bf, 1.3, 30, 1.7);
+    lamp.position.set(x * 0.95, 4.7, z * 0.95);
+    fieldGroup3d.add(lamp);
+  });
+}
+
+function colorNumber(cssColor) {
+  const THREE = window.THREE;
+  return new THREE.Color(cssColor || '#ffffff').getHex();
+}
+
+function makePlayerMarker(pos, idx) {
+  const THREE = window.THREE;
+  const rc = RCOL[pos.t] || RCOL.ring;
+  const group = new THREE.Group();
+  const x = Number(pos.x || 0) * FIELD_SCALE_X;
+  const z = Number(pos.z || 0) * FIELD_SCALE_Z;
+  group.position.set(x, 0, z);
+
+  const glow = new THREE.Mesh(
+    new THREE.CircleGeometry(0.48, 48),
+    new THREE.MeshBasicMaterial({ color:colorNumber(rc.dot), transparent:true, opacity:0.18, depthWrite:false })
+  );
+  glow.rotation.x = -Math.PI / 2;
+  glow.position.y = 0.12;
+  group.add(glow);
+
+  const body = new THREE.Mesh(
+    new THREE.SphereGeometry(0.22, 24, 16),
+    new THREE.MeshStandardMaterial({ color:colorNumber(rc.dot), emissive:colorNumber(rc.ring), emissiveIntensity:0.28, roughness:0.38, metalness:0.08 })
+  );
+  body.position.y = 0.5;
+  body.castShadow = true;
+  group.add(body);
+
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(0.34, 0.018, 8, 48),
+    new THREE.MeshBasicMaterial({ color:colorNumber(rc.ring), transparent:true, opacity:0.82 })
+  );
+  ring.rotation.x = Math.PI / 2;
+  ring.position.y = 0.51;
+  group.add(ring);
+
+  const number = makeTextSprite(idx + 1, '#071018', 'rgba(255,255,255,0.86)', 0.34);
+  number.position.set(0, 0.88, 0);
+  group.add(number);
+
+  const label = makeTextSprite(pos.n, rc.lbl, 'rgba(4,8,14,0.58)', 0.58);
+  label.position.set(0, 1.24, 0);
+  group.add(label);
+  return group;
+}
+
+function makeRoleMarker(label, x, z, color, ringColor) {
+  const THREE = window.THREE;
+  const group = new THREE.Group();
+  group.position.set(x, 0, z);
+  const base = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.35, 0.4, 0.1, 48),
+    new THREE.MeshStandardMaterial({ color, emissive:ringColor, emissiveIntensity:0.34, roughness:0.45 })
+  );
+  base.position.y = 0.18;
+  base.castShadow = true;
+  group.add(base);
+  const sprite = makeTextSprite(label, '#ffffff', 'rgba(4,8,14,0.7)', 0.58);
+  sprite.position.y = 0.84;
+  group.add(sprite);
+  return group;
+}
+
+function addBatsmanRig(group) {
+  if (!window.THREE || !group) return;
+  const THREE = window.THREE;
+  const accent = colorNumber(curTeam?.accent || '#ffd37a');
+  const body = new THREE.Mesh(
+    THREE.CapsuleGeometry ? new THREE.CapsuleGeometry(0.13, 0.34, 4, 12) : new THREE.CylinderGeometry(0.12, 0.16, 0.5, 14),
+    new THREE.MeshStandardMaterial({ color:accent, roughness:0.4, emissive:accent, emissiveIntensity:0.12 })
+  );
+  body.position.set(0, 0.58, 0);
+  body.castShadow = true;
+  group.add(body);
+
+  batMesh3d = new THREE.Mesh(
+    new THREE.BoxGeometry(0.055, 0.9, 0.035),
+    new THREE.MeshStandardMaterial({ color:0xe0b067, roughness:0.56, metalness:0.04 })
+  );
+  const isLeft = String(curBat?.hand || '').toUpperCase().includes('L');
+  batMesh3d.position.set(isLeft ? -0.34 : 0.34, 0.58, 0.08);
+  batMesh3d.rotation.set(0.22, 0, isLeft ? -0.42 : 0.42);
+  batMesh3d.userData = { restZ:batMesh3d.rotation.z, isLeft };
+  group.add(batMesh3d);
+}
+
+function syncThreeScene() {
+  if (!threeReady || !playerGroup3d || !tacticalGroup3d || !curTeam || !curBat) return;
+  const plan = activePlan();
+  const key = [curTeam.name, curBat.name, curVenue?.venue_name, plan?.fieldType].join('|');
+  if (sceneKey3d === key) return;
+  sceneKey3d = key;
+  clearThreeGroup(playerGroup3d);
+  clearThreeGroup(tacticalGroup3d);
+  playerMarkerRefs3d = [];
+  batsmanRole3d = null;
+  bowlerRole3d = null;
+  batMesh3d = null;
+
+  (plan?.pos || []).forEach((pos, i) => {
+    const marker = makePlayerMarker(pos, i);
+    marker.userData.home = marker.position.clone();
+    playerMarkerRefs3d[i] = marker;
+    playerGroup3d.add(marker);
+  });
+  batsmanRole3d = makeRoleMarker('BATSMAN', 0, 1.45, colorNumber(curTeam?.color || '#ffffff'), colorNumber(curTeam?.accent || '#f5a623'));
+  addBatsmanRig(batsmanRole3d);
+  playerGroup3d.add(batsmanRole3d);
+  bowlerRole3d = makeRoleMarker('BOWLER', 0, -4.95, 0xff8b3d, 0xffb36c);
+  playerGroup3d.add(bowlerRole3d);
+
+  const THREE = window.THREE;
+  ballMesh3d = new THREE.Mesh(
+    new THREE.SphereGeometry(0.105, 24, 16),
+    new THREE.MeshStandardMaterial({ color:0xffffff, emissive:colorNumber(curTeam?.accent || '#65d7ff'), emissiveIntensity:0.65, roughness:0.24 })
+  );
+  ballMesh3d.position.copy(catchPointToThree({x:0, z:0.15}, 0.9));
+  ballMesh3d.castShadow = true;
+  tacticalGroup3d.add(ballMesh3d);
+  if (catchSim?.model) drawCatchTrajectory3d(catchSim.model);
+}
+
+function catchPointToThree(point, heightM) {
+  const THREE = window.THREE;
+  return new THREE.Vector3(
+    Number(point.x || 0) * FIELD_SCALE_X,
+    Math.max(0.12, Number(heightM || 0) * VERTICAL_SCALE_3D),
+    Number(point.z || 0) * FIELD_SCALE_Z
+  );
+}
+
+function catchPointToCanvas(point, heightM) {
+  return project(Number(point.x || 0), Math.max(0.02, Number(heightM || 0) * VERTICAL_SCALE_CANVAS), Number(point.z || 0));
+}
+
+function lerpValue(a, b, t) {
+  return a + (b - a) * Math.max(0, Math.min(1, t));
+}
+
+function easeInOut(t) {
+  const x = Math.max(0, Math.min(1, t));
+  return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+}
+
+function sampleCatchModel(model, progress) {
+  const t = Math.max(0, Math.min(1, progress)) * model.flightTime;
+  const k = t / model.flightTime;
+  const heightM = Math.max(0.25, model.startHeightM + model.launchVy * t - 0.5 * 9.81 * t * t);
+  return {
+    x: model.start.x + (model.target.x - model.start.x) * k,
+    z: model.start.z + (model.target.z - model.start.z) * k,
+    heightM,
+    progress:k
+  };
+}
+
+function sampleDeliveryModel(model, elapsedSec) {
+  const sec = Math.max(0, elapsedSec);
+  if (sec < model.deliveryTime) {
+    const t = easeInOut(sec / model.deliveryTime);
+    const bounce = Math.sin(t * Math.PI) * 0.18;
+    return {
+      phase:'delivery',
+      phaseProgress:t,
+      shotProgress:0,
+      x:lerpValue(model.deliveryStart.x, model.start.x, t),
+      z:lerpValue(model.deliveryStart.z, model.start.z, t),
+      heightM:lerpValue(model.deliveryStartHeightM, model.startHeightM, t) + bounce
+    };
+  }
+  if (sec < model.deliveryTime + model.impactTime) {
+    const t = (sec - model.deliveryTime) / model.impactTime;
+    return {
+      phase:'impact',
+      phaseProgress:t,
+      shotProgress:0,
+      x:model.start.x,
+      z:model.start.z,
+      heightM:model.startHeightM + Math.sin(t * Math.PI) * 0.18
+    };
+  }
+  const shotProgress = Math.max(0, Math.min(1, (sec - model.deliveryTime - model.impactTime) / model.flightTime));
+  const sample = sampleCatchModel(model, shotProgress);
+  return {
+    ...sample,
+    phase:'shot',
+    phaseProgress:shotProgress,
+    shotProgress
+  };
+}
+
+function catchPositions(plan = activePlan()) {
+  const positions = (plan?.pos || []).filter(pos => Number.isFinite(Number(pos.x)) && Number.isFinite(Number(pos.z)));
+  return positions.length ? positions : [];
+}
+
+function buildCatchModel(pos, index, shotType) {
+  const aiPlan = tacticalPlanMatches() ? currentTacticalPlan() : null;
+  const aiDelivery = aiPlan?.recommended_delivery || {};
+  const aiOutcome = aiPlan?.expected_outcome || {};
+  const plannedTargetName = aiOutcome.catch_target_node || '';
+  const selectedIsPlanTarget = plannedTargetName && String(plannedTargetName).toLowerCase() === String(pos.n || '').toLowerCase();
+  const resolvedShotType = aiPlan ? shotModelFromOutcome(aiOutcome) : shotType;
+  const start = {x:0, z:0.15};
+  const deliveryStart = {x:0, z:-0.52};
+  const target = {x:Number(pos.x || 0), z:Number(pos.z || 0)};
+  const dx = (target.x - start.x) * FIELD_SCALE_X;
+  const dz = (target.z - start.z) * FIELD_SCALE_Z;
+  const distanceUnits = Math.max(0.1, Math.hypot(dx, dz));
+  const distanceM = Math.max(8, distanceUnits * FIELD_UNIT_METERS);
+  const startHeightM = 0.9;
+  const catchHeightM = pos.t === 'deep' ? 1.85 : pos.t === 'wk' ? 1.25 : 1.55;
+  const typeConfig = {
+    lofted: { label:'Lofted Mis-hit', delivery:'Full length seam-up', releaseSpeedKmh:132, apexBase:6.5, apexRatio:0.22, speedBias:1.0, risk:0.04, batSwing:0.95 },
+    topedge: { label:'Top Edge', delivery:'Short ball into body', releaseSpeedKmh:144, apexBase:10.5, apexRatio:0.28, speedBias:0.92, risk:0.02, batSwing:1.18 },
+    flat: { label:'Flat Catch', delivery:'Hard length pace', releaseSpeedKmh:138, apexBase:3.8, apexRatio:0.12, speedBias:1.18, risk:0.12, batSwing:0.72 }
+  }[resolvedShotType] || { label:'Lofted Mis-hit', delivery:'Full length seam-up', releaseSpeedKmh:132, apexBase:6.5, apexRatio:0.22, speedBias:1.0, risk:0.04, batSwing:0.95 };
+  const aiDeliveryLabel = [
+    aiDelivery.type,
+    aiDelivery.line,
+    aiDelivery.length,
+    aiDelivery.movement
+  ].filter(Boolean).join(' | ');
+  const releaseSpeedKmh = parseSpeedKmh(aiDelivery.speed, typeConfig.releaseSpeedKmh);
+  const apexM = Math.max(catchHeightM + 1.2, Math.min(26, typeConfig.apexBase + distanceM * typeConfig.apexRatio));
+  const launchVy = Math.sqrt(Math.max(0.1, 2 * 9.81 * (apexM - startHeightM)));
+  const landingRoot = Math.sqrt(Math.max(0.1, launchVy * launchVy - 2 * 9.81 * (catchHeightM - startHeightM)));
+  const flightTime = Math.max(0.9, (launchVy + landingRoot) / 9.81);
+  const horizontalSpeedKmh = (distanceM / flightTime) * 3.6 * typeConfig.speedBias;
+  const dewPenalty = String(curVenue?.dew_factor || '').toLowerCase().includes('high') ? 0.08 : 0;
+  const typeBase = { wk:0.82, close:0.76, ring:0.68, deep:0.62 }[pos.t] ?? 0.66;
+  const distancePenalty = Math.min(0.18, distanceM / 420);
+  const localCatchChance = typeBase - typeConfig.risk - dewPenalty - distancePenalty + (apexM > 14 ? 0.04 : 0);
+  const aiCatchChance = selectedIsPlanTarget ? Number(aiOutcome.probability) / 100 : NaN;
+  const catchChance = Math.max(0.38, Math.min(0.93, Number.isFinite(aiCatchChance) && aiCatchChance > 0 ? aiCatchChance : localCatchChance));
+  const deliveryTime = Math.max(0.72, Math.min(1.42, 155 / releaseSpeedKmh));
+  const impactTime = 0.28;
+  return {
+    batterName:curBat?.name || 'Batter',
+    start,
+    deliveryStart,
+    target,
+    targetName: selectedIsPlanTarget ? plannedTargetName : pos.n,
+    targetType: pos.t,
+    targetIndex:index,
+    shotType:resolvedShotType,
+    shotLabel:aiOutcome.shot_played || typeConfig.label,
+    deliveryLabel:aiDeliveryLabel || typeConfig.delivery,
+    releaseSpeedKmh,
+    batSwing:typeConfig.batSwing,
+    startHeightM,
+    deliveryStartHeightM:1.15,
+    catchHeightM,
+    apexM,
+    launchVy,
+    flightTime,
+    distanceM,
+    horizontalSpeedKmh,
+    catchChance,
+    deliveryTime,
+    impactTime,
+    totalTime:deliveryTime + impactTime + flightTime,
+    outcome:aiOutcome.outcome || 'CAUGHT'
+  };
+}
+
+function drawCatchTrajectory3d(model) {
+  if (!threeReady || !tacticalGroup3d || !window.THREE) return;
+  const THREE = window.THREE;
+  const keepBall = ballMesh3d;
+  clearThreeGroup(tacticalGroup3d);
+  if (keepBall) tacticalGroup3d.add(keepBall);
+  const deliveryPoints = [];
+  for (let i = 0; i <= 32; i++) {
+    const sample = sampleDeliveryModel(model, (model.deliveryTime * i) / 32);
+    deliveryPoints.push(catchPointToThree(sample, sample.heightM));
+  }
+  const deliveryLine = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints(deliveryPoints),
+    new THREE.LineBasicMaterial({ color:0xffb36c, transparent:true, opacity:0.72 })
+  );
+  tacticalGroup3d.add(deliveryLine);
+
+  const points = [];
+  for (let i = 0; i <= 80; i++) {
+    const sample = sampleCatchModel(model, i / 80);
+    points.push(catchPointToThree(sample, sample.heightM));
+  }
+  const line = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints(points),
+    new THREE.LineBasicMaterial({ color:colorNumber(curTeam?.accent || '#65d7ff'), transparent:true, opacity:0.72 })
+  );
+  tacticalGroup3d.add(line);
+  const targetRing = new THREE.Mesh(
+    new THREE.TorusGeometry(0.5, 0.018, 8, 64),
+    new THREE.MeshBasicMaterial({ color:colorNumber(curTeam?.accent || '#65d7ff'), transparent:true, opacity:0.86 })
+  );
+  const targetBase = catchPointToThree(model.target, 0.12);
+  targetRing.position.set(targetBase.x, 0.16, targetBase.z);
+  targetRing.rotation.x = Math.PI / 2;
+  tacticalGroup3d.add(targetRing);
+  const label = makeTextSprite(`${model.shotLabel} | ${Math.round(model.catchChance * 100)}%`, '#ffffff', 'rgba(4,8,14,0.72)', 0.52);
+  label.position.set(targetBase.x, 1.05, targetBase.z);
+  tacticalGroup3d.add(label);
+}
+
+function setCatchStatus(text) {
+  catchStatusText = text;
+  catchStatusDirty = true;
+  const el = document.getElementById('catchStatus');
+  if (el) el.textContent = catchStatusText;
+}
+
+function setResultBanner(mode, title, detail = '') {
+  if (!resultBanner || !resultTitle || !resultDetail) return;
+  resultBanner.className = `result-banner${mode ? ` visible ${mode}` : ''}`;
+  resultTitle.textContent = title || '';
+  resultDetail.textContent = detail || '';
+}
+
+function hideResultBanner() {
+  setResultBanner('', '', '');
+}
+
+function updateCatchStatusDom() {
+  if (!catchStatusDirty) return;
+  const el = document.getElementById('catchStatus');
+  if (el) el.textContent = catchStatusText;
+  catchStatusDirty = false;
+}
+
+function startCatchSimulation() {
+  const plan = activePlan();
+  const positions = catchPositions(plan);
+  if (!positions.length) return;
+  const safeIndex = Math.max(0, Math.min(Number(catchTargetIndex || 0), positions.length - 1));
+  const pos = positions[safeIndex];
+  const model = buildCatchModel(pos, safeIndex, catchShotType);
+  catchSim = {
+    active:true,
+    complete:false,
+    startedAt:performance.now(),
+    durationMs:model.totalTime * 1000,
+    model,
+    phase:'delivery'
+  };
+  setResultBanner('live', 'DELIVERY EXECUTING', `${model.deliveryLabel} at ${model.releaseSpeedKmh} km/h to ${model.batterName}.`);
+  if (threeReady) {
+    sceneKey3d = '';
+    syncThreeScene();
+    drawCatchTrajectory3d(model);
+  }
+  setCatchStatus(`DELIVERY: ${model.deliveryLabel} at ${model.releaseSpeedKmh} km/h to ${model.batterName}.`);
+  render();
+  if (!threeReady && !canvasCatchAnimating) {
+    canvasCatchAnimating = true;
+    requestAnimationFrame(animateCanvasCatch);
+  }
+}
+
+function updateCatchSimulation(time) {
+  if (!catchSim?.model) return;
+  const elapsedSec = catchSim.active ? Math.max(0, (time - catchSim.startedAt) / 1000) : catchSim.model.totalTime;
+  const sample = sampleDeliveryModel(catchSim.model, elapsedSec);
+  if (catchSim.phase !== sample.phase) {
+    catchSim.phase = sample.phase;
+    setHud(activePlan());
+    if (sample.phase === 'impact') {
+      setCatchStatus(`IMPACT: ${catchSim.model.batterName} plays ${catchSim.model.shotLabel}.`);
+      setResultBanner('impact', 'BAT IMPACT', `${catchSim.model.shotLabel} predicted from ${catchSim.model.deliveryLabel}.`);
+    } else if (sample.phase === 'shot') {
+      setCatchStatus(`SHOT: ball travelling to ${catchSim.model.targetName}. Catch chance ${Math.round(catchSim.model.catchChance * 100)}%.`);
+      setResultBanner('live', 'CATCH TRAJECTORY', `Ball travelling to ${catchSim.model.targetName}. Catch chance ${Math.round(catchSim.model.catchChance * 100)}%.`);
+    }
+  }
+  if (ballMesh3d) {
+    ballMesh3d.position.copy(catchPointToThree(sample, sample.heightM));
+    if (batMesh3d?.userData) {
+      const swing = sample.phase === 'delivery'
+        ? 0
+        : sample.phase === 'impact'
+          ? Math.sin(sample.phaseProgress * Math.PI) * catchSim.model.batSwing
+          : Math.max(0, 1 - sample.shotProgress * 2.8) * catchSim.model.batSwing * 0.45;
+      const direction = batMesh3d.userData.isLeft ? -1 : 1;
+      batMesh3d.rotation.z = batMesh3d.userData.restZ + direction * swing;
+      batMesh3d.rotation.x = 0.22 + Math.abs(swing) * 0.32;
+    }
+    if (bowlerRole3d) {
+      bowlerRole3d.position.y = sample.phase === 'delivery' ? Math.sin(sample.phaseProgress * Math.PI) * 0.18 : 0;
+    }
+    const marker = playerMarkerRefs3d[catchSim.model.targetIndex];
+    if (marker?.userData?.home && sample.phase === 'shot') {
+      const home = marker.userData.home;
+      const target = catchPointToThree(catchSim.model.target, 0);
+      const progress = sample.shotProgress;
+      const react = progress < 0.62 ? 0 : Math.min(1, (progress - 0.62) / 0.32);
+      const sway = Math.sin(progress * Math.PI) * 0.18;
+      marker.position.set(
+        home.x + (target.x - home.x) * 0.1 * react,
+        home.y + sway,
+        home.z + (target.z - home.z) * 0.1 * react
+      );
+    }
+  }
+  if (catchSim.active && elapsedSec >= catchSim.model.totalTime) {
+    catchSim.active = false;
+    catchSim.complete = true;
+    setCatchStatus(`WICKET: ${catchSim.model.targetName} completes the catch. Delivery ${catchSim.model.releaseSpeedKmh} km/h | Shot flight ${catchSim.model.flightTime.toFixed(1)}s | Post-contact ${Math.round(catchSim.model.horizontalSpeedKmh)} km/h.`);
+    setResultBanner('out', 'OUT - CAUGHT', `${catchSim.model.targetName} completes the catch. Shot flight ${catchSim.model.flightTime.toFixed(1)}s.`);
+  }
+}
+
+function animateCanvasCatch() {
+  if (threeReady || !catchSim?.active) {
+    canvasCatchAnimating = false;
+    updateCatchStatusDom();
+    return;
+  }
+  updateCatchSimulation(performance.now());
+  render();
+  updateCatchStatusDom();
+  requestAnimationFrame(animateCanvasCatch);
+}
+
+function updateThreeCamera() {
+  if (!camera3d) return;
+  const pitch = Math.max(0.14, Math.min(1.42, -rotX));
+  const radius = (15.6 / zoom) * Math.max(0.5, 1.36 - pitch * 0.38);
+  camera3d.position.set(Math.sin(rotY) * radius, 3.2 + pitch * 8.0, Math.cos(rotY) * radius);
+  camera3d.lookAt(0, 0.15, 0);
+}
+
+function animateThree(time) {
+  requestAnimationFrame(animateThree);
+  if (!threeReady || !renderer3d || !scene3d || !camera3d) return;
+  updateCatchSimulation(time);
+  updateCatchStatusDom();
+  updateThreeCamera();
+  renderer3d.render(scene3d, camera3d);
+}
+
+window.upgradeFieldingThree = function upgradeFieldingThree() {
+  if (!curTeam) return;
+  if (initThree()) {
+    sceneKey3d = '';
+    render();
+  }
+};
+
+async function api(path, options = {}) {
+  let lastError = null;
+  for (const base of API_CANDIDATES) {
+    try {
+      const response = await fetch(base + path, options);
+      if (!response.ok) {
+        let detail = '';
+        try {
+          const body = await response.json();
+          detail = body.detail ? ` - ${body.detail}` : '';
+        } catch (_) {
+          detail = '';
+        }
+        throw new Error(`${response.status} ${response.statusText}${detail}`);
+      }
+      return response.json();
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError;
+}
+
+function currentTacticalPlan() {
+  return tacticalPlanPayload?.tactical_plan || null;
+}
+
+function resetTacticalPlan(message = 'Ready for predictive delivery simulation.') {
+  tacticalPlanPayload = null;
+  tacticalErrorText = '';
+  tacticalLoading = false;
+  catchSim = null;
+  catchTargetIndex = 0;
+  hideResultBanner();
+  setCatchStatus(message);
+}
+
+function normalizeFieldRole(role) {
+  const text = String(role || '').toLowerCase();
+  if (text.includes('wk') || text.includes('keeper')) return 'wk';
+  if (text.includes('close') || text.includes('slip') || text.includes('gully')) return 'close';
+  if (text.includes('deep') || text.includes('long') || text.includes('boundary')) return 'deep';
+  return 'ring';
+}
+
+function tacticalPositionToLocal(pos) {
+  return {
+    n: pos.name || pos.n || 'Fielder',
+    t: normalizeFieldRole(pos.type || pos.t),
+    x: Number(pos.x),
+    z: Number(pos.z)
+  };
+}
+
+function tacticalPlanMatches(player = curBat) {
+  const plan = currentTacticalPlan();
+  if (!plan || !player) return false;
+  const samePlayer = String(plan.target_batsman || '').toLowerCase() === String(player.name || '').toLowerCase();
+  const sameVenue = !curVenue || String(plan.venue || '').toLowerCase() === String(curVenue.venue_name || '').toLowerCase();
+  return samePlayer && sameVenue;
+}
+
+function shotModelFromOutcome(outcome = {}) {
+  const text = `${outcome.shot_played || ''} ${outcome.dismissal_type || ''} ${outcome.catch_target_node || ''}`.toLowerCase();
+  if (text.includes('top')) return 'topedge';
+  if (text.includes('edge') || text.includes('slip') || text.includes('gully')) return 'topedge';
+  if (text.includes('pull') || text.includes('sweep') || text.includes('loft') || text.includes('deep')) return 'lofted';
+  return 'flat';
+}
+
+function parseSpeedKmh(value, fallback = 132) {
+  const match = String(value || '').match(/[\d.]+/);
+  return match ? Number(match[0]) : fallback;
+}
+
+function tacticalPlanToFieldPlan(plan) {
+  if (!plan) return null;
+  const delivery = plan.recommended_delivery || {};
+  const expected = plan.expected_outcome || {};
+  const positions = (plan.optimal_field_setup || [])
+    .map(tacticalPositionToLocal)
+    .filter(pos => Number.isFinite(pos.x) && Number.isFinite(pos.z));
+  if (!positions.length) return null;
+  const speed = delivery.speed ? ` at ${delivery.speed}` : '';
+  const outcome = expected.dismissal_type || expected.outcome || 'Pressure';
+  const target = expected.catch_target_node ? ` to ${expected.catch_target_node}` : '';
+  return {
+    source:'ai',
+    fieldType:`AI: ${delivery.type || 'Best delivery'} -> ${outcome}`,
+    threat:`${expected.shot_played || 'Predicted shot'}${target}`,
+    summary:`${delivery.line || 'Line'} / ${delivery.length || 'Length'} / ${delivery.movement || 'Movement'}${speed}. Probability ${Math.round(Number(expected.probability || 0))}%.`,
+    pos:positions
+  };
+}
+
+function syncCatchTargetFromTacticalPlan(plan = currentTacticalPlan()) {
+  if (!plan) return;
+  const positions = catchPositions(tacticalPlanToFieldPlan(plan));
+  const target = String(plan.expected_outcome?.catch_target_node || '').toLowerCase();
+  const index = positions.findIndex(pos => String(pos.n || '').toLowerCase() === target);
+  catchTargetIndex = index >= 0 ? index : 0;
+  catchShotType = shotModelFromOutcome(plan.expected_outcome);
+}
+
+function esc(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  }[ch]));
+}
+
+function project(wx, wy, wz) {
+  const cy = Math.cos(rotY), sy = Math.sin(rotY);
+  let x1 = wx * cy + wz * sy, z1 = -wx * sy + wz * cy, y1 = wy;
+  const cx = Math.cos(rotX), sx = Math.sin(rotX);
+  let x2 = x1, y2 = y1 * cx - z1 * sx, z2 = y1 * sx + z1 * cx;
+  const fov = 3.8, sc = (fov / (fov + z2)) * FS * zoom;
+  return { sx: CX + x2 * sc, sy: CY + y2 * sc, depth: z2, sc };
+}
+
+function activePlan(player = curBat) {
+  if (!player) return null;
+  if (tacticalPlanMatches(player)) {
+    const aiPlan = tacticalPlanToFieldPlan(currentTacticalPlan());
+    if (aiPlan) return aiPlan;
+  }
+  if (curVenue && player.plans && player.plans[curVenue.venue_name]) {
+    return player.plans[curVenue.venue_name];
+  }
+  const fallback = player.plans ? Object.values(player.plans)[0] : null;
+  return fallback || { fieldType: player.fieldType, threat: player.threat, summary: player.summary, pos: player.pos || [] };
+}
+
+function pitchPalette() {
+  const pitchType = (curVenue?.pitch_type || '').toLowerCase();
+  if (pitchType.includes('slow') || pitchType.includes('turn') || pitchType.includes('dry')) {
+    return { out:'#214a17', in:'#355f16', stripeA:'rgba(110,88,28,0.22)', stripeB:'rgba(76,112,34,0.18)', pitch:'#bf9a4a' };
+  }
+  if (pitchType.includes('pace') || pitchType.includes('bounce')) {
+    return { out:'#123f23', in:'#1b5e38', stripeA:'rgba(40,116,82,0.22)', stripeB:'rgba(24,92,60,0.18)', pitch:'#bf8c58' };
+  }
+  if (pitchType.includes('flat')) {
+    return { out:'#1f4720', in:'#2c6a24', stripeA:'rgba(58,138,53,0.18)', stripeB:'rgba(42,112,41,0.15)', pitch:'#c89d55' };
+  }
+  return { out:'#173f17', in:'#215823', stripeA:'rgba(28,110,42,0.20)', stripeB:'rgba(18,84,30,0.16)', pitch:'#c4a045' };
+}
+
+function drawGroundOval(rx, rz, fill, stroke, lw, steps = 72) {
+  const pts = Array.from({length:steps + 1}, (_, i) => {
+    const a = i / steps * Math.PI * 2;
+    return project(Math.cos(a) * rx, 0, Math.sin(a) * rz);
+  });
+  ctx.beginPath();
+  ctx.moveTo(pts[0].sx, pts[0].sy);
+  pts.slice(1).forEach(p => ctx.lineTo(p.sx, p.sy));
+  ctx.closePath();
+  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+  if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke(); }
+}
+
+function drawGrassStripes(palette) {
+  for (let i = 0; i < 14; i++) {
+    const r = 0.06 + i * 0.065;
+    drawGroundOval(r * 1.05, r * 0.93, i % 2 === 0 ? palette.stripeA : palette.stripeB, null, 0);
+  }
+}
+
+function drawPitch(palette) {
+  const pts = [[-0.046,0,-0.28],[0.046,0,-0.28],[0.046,0,0.28],[-0.046,0,0.28]].map(c => project(...c));
+  ctx.beginPath();
+  ctx.moveTo(pts[0].sx, pts[0].sy);
+  pts.slice(1).forEach(p => ctx.lineTo(p.sx, p.sy));
+  ctx.closePath();
+  ctx.fillStyle = palette.pitch;
+  ctx.fill();
+  ctx.strokeStyle = '#8f6c2a';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  [[[-0.046,0,0.13],[0.046,0,0.13]],[[-0.046,0,-0.13],[0.046,0,-0.13]]].forEach(([a,b]) => {
+    const p1 = project(...a), p2 = project(...b);
+    ctx.beginPath();
+    ctx.moveTo(p1.sx, p1.sy);
+    ctx.lineTo(p2.sx, p2.sy);
+    ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  });
+
+  [[-0.012,0.15],[0,0.15],[0.012,0.15],[-0.012,-0.15],[0,-0.15],[0.012,-0.15]].forEach(([sx,sz]) => {
+    const b = project(sx,0,sz), t = project(sx,0.05,sz);
+    ctx.beginPath();
+    ctx.moveTo(b.sx,b.sy);
+    ctx.lineTo(t.sx,t.sy);
+    ctx.strokeStyle = '#f5c842';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+  });
+}
+
+function drawLabel(txt, wx, wy, wz, color, size) {
+  const p = project(wx, wy, wz);
+  ctx.save();
+  ctx.shadowColor = '#000';
+  ctx.shadowBlur = 5;
+  ctx.fillStyle = color;
+  ctx.font = `bold ${Math.max(8, size * (p.sc / FS))}px Segoe UI`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(txt, p.sx, p.sy);
+  ctx.restore();
+}
+
+function drawPlayer(pos, idx) {
+  const p = project(pos.x, 0.02, pos.z);
+  const rc = RCOL[pos.t] || RCOL.ring;
+  const r = Math.max(6, 9.5 * (p.sc / FS));
+
+  const g = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, r * 3);
+  g.addColorStop(0, rc.dot + '66');
+  g.addColorStop(1, 'transparent');
+  ctx.beginPath();
+  ctx.arc(p.sx, p.sy, r * 3, 0, Math.PI * 2);
+  ctx.fillStyle = g;
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(p.sx, p.sy, r, 0, Math.PI * 2);
+  ctx.fillStyle = rc.dot;
+  ctx.fill();
+  ctx.strokeStyle = rc.ring;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  ctx.fillStyle = '#111';
+  ctx.font = `bold ${Math.max(7, r * 0.88)}px Segoe UI`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(idx + 1, p.sx, p.sy);
+
+  drawLabel(pos.n, pos.x, 0.14, pos.z, rc.lbl, 10);
+}
+
+function drawSpecial() {
+  const bp = project(0, 0.04, 0.15);
+  const gr = ctx.createRadialGradient(bp.sx, bp.sy, 0, bp.sx, bp.sy, 11);
+  gr.addColorStop(0, '#ffffff');
+  gr.addColorStop(1, (curTeam?.color || '#4a9ae8') + '88');
+  ctx.beginPath();
+  ctx.arc(bp.sx, bp.sy, 9, 0, Math.PI * 2);
+  ctx.fillStyle = gr;
+  ctx.fill();
+  ctx.strokeStyle = curTeam?.accent || '#9ad2ff';
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+  if (catchSim?.model) {
+    const elapsedSec = catchSim.active ? Math.max(0, (performance.now() - catchSim.startedAt) / 1000) : catchSim.model.totalTime;
+    const sample = sampleDeliveryModel(catchSim.model, elapsedSec);
+    const swing = sample.phase === 'delivery'
+      ? 0
+      : sample.phase === 'impact'
+        ? Math.sin(sample.phaseProgress * Math.PI) * catchSim.model.batSwing
+        : Math.max(0, 1 - sample.shotProgress * 2.8) * catchSim.model.batSwing * 0.45;
+    const dir = String(curBat?.hand || '').toUpperCase().includes('L') ? -1 : 1;
+    const batTip = project(0.12 * dir + Math.sin(swing * dir) * 0.15, 0.18 + Math.abs(swing) * 0.03, 0.17 - Math.cos(swing) * 0.12);
+    ctx.beginPath();
+    ctx.moveTo(bp.sx, bp.sy);
+    ctx.lineTo(batTip.sx, batTip.sy);
+    ctx.strokeStyle = '#e0b067';
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+  }
+  drawLabel('BATSMAN', 0, 0.2, 0.15, '#fff', 9.5);
+
+  const bwp = project(0, 0.04, -0.52);
+  ctx.beginPath();
+  ctx.arc(bwp.sx, bwp.sy, 7, 0, Math.PI * 2);
+  ctx.fillStyle = '#ff9944';
+  ctx.fill();
+  ctx.strokeStyle = '#cc6600';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  drawLabel('BOWLER', 0, 0.18, -0.52, '#ffaa55', 9);
+}
+
+function drawCatchOverlay() {
+  if (!catchSim?.model) return;
+  const model = catchSim.model;
+  ctx.save();
+
+  ctx.beginPath();
+  for (let i = 0; i <= 28; i++) {
+    const sample = sampleDeliveryModel(model, (model.deliveryTime * i) / 28);
+    const p = catchPointToCanvas(sample, sample.heightM);
+    if (i === 0) ctx.moveTo(p.sx, p.sy);
+    else ctx.lineTo(p.sx, p.sy);
+  }
+  ctx.strokeStyle = 'rgba(255,179,108,0.74)';
+  ctx.lineWidth = 2;
+  ctx.shadowColor = '#ffb36c';
+  ctx.shadowBlur = 6;
+  ctx.stroke();
+
+  ctx.beginPath();
+  for (let i = 0; i <= 54; i++) {
+    const sample = sampleCatchModel(model, i / 54);
+    const p = catchPointToCanvas(sample, sample.heightM);
+    if (i === 0) ctx.moveTo(p.sx, p.sy);
+    else ctx.lineTo(p.sx, p.sy);
+  }
+  ctx.strokeStyle = (curTeam?.accent || '#65d7ff') + 'dd';
+  ctx.lineWidth = 2.5;
+  ctx.shadowColor = curTeam?.accent || '#65d7ff';
+  ctx.shadowBlur = 8;
+  ctx.stroke();
+
+  const elapsedSec = catchSim.active ? Math.max(0, (performance.now() - catchSim.startedAt) / 1000) : model.totalTime;
+  const sample = sampleDeliveryModel(model, elapsedSec);
+  const ball = catchPointToCanvas(sample, sample.heightM);
+  ctx.beginPath();
+  ctx.arc(ball.sx, ball.sy, 7.5, 0, Math.PI * 2);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+  ctx.strokeStyle = curTeam?.accent || '#65d7ff';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  const target = catchPointToCanvas(model.target, 0.2);
+  ctx.beginPath();
+  ctx.arc(target.sx, target.sy, 19, 0, Math.PI * 2);
+  ctx.strokeStyle = (curTeam?.accent || '#65d7ff') + 'bb';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#eef6ff';
+  ctx.font = 'bold 10px Segoe UI';
+  ctx.textAlign = 'center';
+  ctx.fillText(`${Math.round(model.catchChance * 100)}% catch`, target.sx, target.sy - 23);
+  if (catchSim.complete) {
+    ctx.fillStyle = 'rgba(5,18,12,0.88)';
+    ctx.strokeStyle = '#47d18c';
+    ctx.lineWidth = 2;
+    const labelW = 112;
+    const labelH = 30;
+    ctx.beginPath();
+    ctx.roundRect(target.sx - labelW / 2, target.sy + 22, labelW, labelH, 8);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 13px Segoe UI';
+    ctx.fillText('OUT - CAUGHT', target.sx, target.sy + 42);
+  }
+  ctx.restore();
+}
+
+function drawEndLabels() {
+  drawLabel('BATTING END', 0, 0.04, 0.95, 'rgba(255,255,255,0.3)', 8.5);
+  drawLabel('BOWLING END', 0, 0.04, -0.95, 'rgba(255,255,255,0.3)', 8.5);
+}
+
+function drawCircleLabel() {
+  const p = project(0.41, 0.04, 0);
+  ctx.save();
+  ctx.fillStyle = (curTeam?.accent || '#9ad2ff') + '88';
+  ctx.font = 'bold 8px Segoe UI';
+  ctx.textAlign = 'center';
+  ctx.fillText('30 yd', p.sx, p.sy);
+  ctx.restore();
+}
+
+function render() {
+  const plan = activePlan();
+  if (!curTeam || !curBat || !plan) return;
+  setHud(plan);
+
+  if (threeReady && renderer3d) {
+    fitThreeRenderer();
+    syncThreeScene();
+    updateThreeCamera();
+    renderer3d.render(scene3d, camera3d);
+    return;
+  }
+
+  canvas.style.display = 'block';
+  const palette = pitchPalette();
+  ctx.clearRect(0, 0, W, H);
+
+  drawGroundOval(1.08, 0.95, palette.out, null, 0);
+  drawGrassStripes(palette);
+  drawGroundOval(0.42, 0.37, palette.in, null, 0);
+
+  for (let i = 0; i < 12; i++) {
+    const a = i / 12 * Math.PI * 2;
+    const p0 = project(0, 0, 0), p1 = project(Math.cos(a) * 1.0, 0, Math.sin(a) * 0.88);
+    ctx.beginPath();
+    ctx.moveTo(p0.sx, p0.sy);
+    ctx.lineTo(p1.sx, p1.sy);
+    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  drawGroundOval(0.42, 0.37, null, (curTeam?.color || '#4a9ae8') + '99', 1.5, 48);
+  drawCircleLabel();
+  drawGroundOval(1.02, 0.90, null, (curTeam?.accent || '#9ad2ff') + 'cc', 3, 80);
+
+  for (let i = 0; i < 32; i++) {
+    const a = i / 32 * Math.PI * 2;
+    const p = project(Math.cos(a) * 1.02, 0.015, Math.sin(a) * 0.90);
+    ctx.beginPath();
+    ctx.arc(p.sx, p.sy, 2, 0, Math.PI * 2);
+    ctx.fillStyle = (curTeam?.accent || '#9ad2ff') + 'bb';
+    ctx.fill();
+  }
+
+  drawPitch(palette);
+  drawEndLabels();
+
+  const sorted = (plan.pos || []).map((p, i) => ({p, i}))
+    .sort((a, b) => project(a.p.x, 0, a.p.z).depth - project(b.p.x, 0, b.p.z).depth);
+  sorted.forEach(({p, i}) => drawPlayer(p, i));
+  drawSpecial();
+  drawCatchOverlay();
+}
+
+function buildTeamTabs() {
+  const tabs = document.getElementById('teamTabs');
+  tabs.innerHTML = '';
+  TEAMS.forEach(team => {
+    const button = document.createElement('button');
+    button.className = 'team-tab';
+    button.textContent = team.short;
+    button.style.cssText = `background:${team === curTeam ? team.color : team.color + '33'};color:${team === curTeam ? '#fff' : team.accent};`;
+    button.onclick = () => {
+      curTeam = team;
+      curBat = team.batsmen[0];
+      resetTacticalPlan('Team changed. Generate a new AI tactical plan for this matchup.');
+      sceneKey3d = '';
+      buildUI();
+      render();
+    };
+    tabs.appendChild(button);
+  });
+}
+
+function buildVenueStrip() {
+  const strip = document.getElementById('venueStrip');
+  strip.innerHTML = '';
+  VENUES.forEach(venue => {
+    const button = document.createElement('button');
+    button.className = 'venue-pill' + (curVenue && venue.venue_name === curVenue.venue_name ? ' active' : '');
+    button.innerHTML = `<strong>${esc(venue.label)}</strong><small>${esc(venue.pitch_type)} | Safe ${Math.round(Number(venue.safe_score_target || 0))}</small>`;
+    button.onclick = () => {
+      curVenue = venue;
+      resetTacticalPlan('Venue changed. Generate a new AI tactical plan for this ground.');
+      sceneKey3d = '';
+      buildUI();
+      render();
+    };
+    strip.appendChild(button);
+  });
+}
+
+function renderProbabilityRows(probabilities = []) {
+  if (!probabilities.length) return '<div class="ai-note">Outcome probability list will appear after the AI plan is generated.</div>';
+  return probabilities.map(item => {
+    const value = Math.max(0, Math.min(100, Number(item.probability || 0)));
+    return `<div class="prob-row">
+      <div>
+        <div>${esc(item.outcome || 'Outcome')}</div>
+        <div class="prob-track"><div class="prob-fill" style="width:${value}%"></div></div>
+      </div>
+      <strong>${value.toFixed(value >= 10 ? 0 : 1)}%</strong>
+    </div>`;
+  }).join('');
+}
+
+function formatDateTime(value) {
+  if (!value) return 'Not available';
+  return String(value).slice(0, 19).replace('T', ' ');
+}
+
+async function generateTacticalPlan() {
+  if (!curBat || !curVenue || tacticalLoading) return;
+  tacticalLoading = true;
+  tacticalErrorText = '';
+  catchSim = null;
+  setCatchStatus('AI Tactical Engine is calculating delivery, shot path, and field coordinates...');
+  buildUI();
+  render();
+
+  const payload = {
+    target_batsman: curBat.name,
+    venue: curVenue.venue_name,
+    match_phase: selectedMatchPhase,
+    bowling_type: selectedBowlingType,
+    batter_hand: curBat.hand
+  };
+
+  try {
+    tacticalPlanPayload = await api('/api/tactical-plan', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
+    syncCatchTargetFromTacticalPlan();
+    const plan = currentTacticalPlan();
+    const delivery = plan?.recommended_delivery || {};
+    const expected = plan?.expected_outcome || {};
+    const target = expected.catch_target_node || 'target fielder';
+    catchSim = null;
+    sceneKey3d = '';
+    setCatchStatus(`AI PLAN: ${delivery.type || 'Delivery'} ${delivery.speed || ''} to ${curBat.name}. ${expected.shot_played || 'Predicted shot'} -> ${target}.`);
+    setResultBanner('live', 'AI PLAN READY', `${delivery.type || 'Delivery'} prepared. Press START AI DELIVERY to execute and watch the wicket chance.`);
+  } catch (error) {
+    tacticalPlanPayload = null;
+    tacticalErrorText = error.message || 'Tactical plan request failed.';
+    hideResultBanner();
+    setCatchStatus(`AI plan failed. Local simulator is still available. ${tacticalErrorText}`);
+  } finally {
+    tacticalLoading = false;
+    buildUI();
+    render();
+  }
+}
+
+function renderTacticalPanel(sb) {
+  const plan = currentTacticalPlan();
+  const meta = tacticalPlanPayload?.model_meta || {};
+  const delivery = plan?.recommended_delivery || {};
+  const expected = plan?.expected_outcome || {};
+  const analysis = plan?.analysis || {};
+  const topProbabilities = expected.top_probabilities || [];
+  const hasPlan = Boolean(plan);
+  const panel = document.createElement('div');
+  panel.className = 'ibox';
+  panel.innerHTML = `<div class="tactical-head">
+      <div>
+        <h3>AI Tactical Engine</h3>
+        <p>CSV-trained backend model recommends the delivery, predicts the shot outcome, then moves fielders into 3D coordinates.</p>
+      </div>
+      <span class="ai-pill">${hasPlan ? 'AI Live' : 'Ready'}</span>
+    </div>
+    <div class="sim-grid">
+      <div class="sim-field">
+        <label>Match Phase</label>
+        <select id="phaseSelect">
+          ${MATCH_PHASES.map(phase => `<option value="${esc(phase)}" ${phase === selectedMatchPhase ? 'selected' : ''}>${esc(phase)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="sim-field">
+        <label>Bowling Type</label>
+        <select id="bowlingSelect">
+          ${BOWLING_TYPES.map(type => `<option value="${esc(type)}" ${type === selectedBowlingType ? 'selected' : ''}>${esc(type)}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <button class="ai-run" id="aiPlanRun" type="button" ${tacticalLoading ? 'disabled' : ''}>${tacticalLoading ? 'GENERATING PLAN...' : 'GENERATE AI PLAN'}</button>
+    ${tacticalErrorText ? `<div class="ai-error">${esc(tacticalErrorText)}</div>` : ''}
+    ${hasPlan ? `
+      <div class="ai-note">Applied to field: ${esc(delivery.type || 'Delivery')} / ${esc(delivery.line || 'Line')} / ${esc(delivery.length || 'Length')} / ${esc(delivery.movement || 'Movement')} at ${esc(delivery.speed || '')}. Target node: ${esc(expected.catch_target_node || 'None')}.</div>
+      <div class="metric-grid">
+        <div class="metric-card"><b>${Math.round(Number(expected.probability || 0))}%</b><span>Dismissal/Catch Model</span></div>
+        <div class="metric-card"><b>${esc(delivery.speed || '-')}</b><span>Release Speed</span></div>
+        <div class="metric-card"><b>${esc(expected.shot_played || '-')}</b><span>Predicted Shot</span></div>
+        <div class="metric-card"><b>${esc(expected.dismissal_type || expected.outcome || '-')}</b><span>Outcome</span></div>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-chip"><span>Batsman</span><b>${esc(plan.target_batsman || curBat?.name || '')}</b></div>
+        <div class="detail-chip"><span>Bowler</span><b>${esc(plan.bowler || 'Model selected')}</b></div>
+        <div class="detail-chip"><span>Venue</span><b>${esc(plan.venue || curVenue?.venue_name || '')}</b></div>
+        <div class="detail-chip"><span>Bowling</span><b>${esc(delivery.bowling_type || selectedBowlingType)}</b></div>
+      </div>
+      <div style="margin-top:11px"><h3>Outcome Probabilities</h3>${renderProbabilityRows(topProbabilities)}</div>
+      <div style="margin-top:11px"><h3>Analysis Details</h3>
+        <div class="irow"><span>Batter Style</span><span>${esc(analysis.batter_style || curBat?.style || '-')}</span></div>
+        <div class="irow"><span>Hand</span><span>${esc(analysis.batter_hand || curBat?.hand || '-')}</span></div>
+        <div class="irow"><span>Weakness</span><span>${esc(analysis.batter_weakness || curBat?.threat || '-')}</span></div>
+        <div class="irow"><span>Pitch Type</span><span>${esc(analysis.pitch_type || curVenue?.pitch_type || '-')}</span></div>
+        <div class="irow"><span>Pace / Spin Edge</span><span>${Math.round(Number(analysis.pace_advantage_pct || 0))}% / ${Math.round(Number(analysis.spin_advantage_pct || 0))}%</span></div>
+        <div class="irow"><span>Matchup Rating</span><span>${Number(analysis.bowler_matchup_rating || 0).toFixed(2)}</span></div>
+        <div class="irow"><span>Utility Score</span><span>${Number(analysis.utility_score || 0).toFixed(4)}</span></div>
+      </div>
+      <div style="margin-top:11px"><h3>Model Meta</h3>
+        <div class="irow"><span>Type</span><span>${esc(meta.model_type || 'RandomForestClassifier')}</span></div>
+        <div class="irow"><span>Training Rows</span><span>${esc(meta.training_rows || '-')}</span></div>
+        <div class="irow"><span>Label Source</span><span>${esc(meta.label_source || '-')}</span></div>
+        <div class="irow"><span>Trained At</span><span>${esc(formatDateTime(meta.trained_at))}</span></div>
+      </div>
+    ` : `<div class="ai-note">Select the batsman, venue, phase, and bowling type. Then generate a backend tactical plan to update the full 3D field and delivery animation.</div>`}`;
+  sb.appendChild(panel);
+
+  const phaseSelect = panel.querySelector('#phaseSelect');
+  const bowlingSelect = panel.querySelector('#bowlingSelect');
+  const runButton = panel.querySelector('#aiPlanRun');
+  phaseSelect.addEventListener('change', () => {
+    selectedMatchPhase = phaseSelect.value;
+    resetTacticalPlan('AI input changed. Generate a new tactical plan.');
+    sceneKey3d = '';
+    buildUI();
+    render();
+  });
+  bowlingSelect.addEventListener('change', () => {
+    selectedBowlingType = bowlingSelect.value;
+    resetTacticalPlan('AI input changed. Generate a new tactical plan.');
+    sceneKey3d = '';
+    buildUI();
+    render();
+  });
+  runButton.addEventListener('click', generateTacticalPlan);
+}
+
+function renderCatchPanel(sb, plan) {
+  const positions = catchPositions(plan);
+  if (!positions.length) return;
+  const aiActive = tacticalPlanMatches();
+  if (catchTargetIndex >= positions.length) catchTargetIndex = 0;
+  const previewModel = buildCatchModel(positions[catchTargetIndex], catchTargetIndex, catchShotType);
+  const panel = document.createElement('div');
+  panel.className = 'ibox';
+  panel.innerHTML = `<h3>Predictive Delivery Simulation</h3>
+    <div class="sim-grid">
+      <div class="sim-field">
+        <label>Fielder</label>
+        <select id="catchTarget">
+          ${positions.map((pos, i) => `<option value="${i}" ${i === catchTargetIndex ? 'selected' : ''}>${i + 1}. ${esc(pos.n)} (${esc(pos.t)})</option>`).join('')}
+        </select>
+      </div>
+      <div class="sim-field">
+        <label>Shot</label>
+        <select id="catchShot">
+          <option value="lofted" ${catchShotType === 'lofted' ? 'selected' : ''}>Lofted mis-hit</option>
+          <option value="topedge" ${catchShotType === 'topedge' ? 'selected' : ''}>Top edge</option>
+          <option value="flat" ${catchShotType === 'flat' ? 'selected' : ''}>Flat catch</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-top:9px;font-size:0.69rem;color:#91a0bd;line-height:1.45">
+      ${aiActive ? 'AI mode: backend delivery recommendation drives the ball path, shot model, and target catch node.' : 'Model flow: bowler release -> batsman impact -> predicted shot arc -> fielder catch attempt.'}
+    </div>
+    <div class="metric-grid">
+      <div class="metric-card"><b>${previewModel.releaseSpeedKmh}</b><span>Release km/h</span></div>
+      <div class="metric-card"><b>${previewModel.flightTime.toFixed(1)}s</b><span>Shot flight</span></div>
+      <div class="metric-card"><b>${Math.round(previewModel.apexM)}m</b><span>Predicted apex</span></div>
+      <div class="metric-card"><b>${Math.round(previewModel.catchChance * 100)}%</b><span>Catch model</span></div>
+    </div>
+    <button class="sim-start" id="catchStart" type="button">${aiActive ? 'START AI DELIVERY' : 'START DELIVERY'}</button>
+    <div class="sim-status" id="catchStatus">${esc(catchStatusText)}</div>`;
+  sb.appendChild(panel);
+  const targetSelect = panel.querySelector('#catchTarget');
+  const shotSelect = panel.querySelector('#catchShot');
+  const startButton = panel.querySelector('#catchStart');
+  targetSelect.addEventListener('change', () => {
+    catchTargetIndex = Number(targetSelect.value || 0);
+    catchSim = null;
+    sceneKey3d = '';
+    setCatchStatus(`Target set to ${positions[catchTargetIndex]?.n || 'fielder'}.`);
+    buildUI();
+    render();
+  });
+  shotSelect.addEventListener('change', () => {
+    catchShotType = shotSelect.value;
+    catchSim = null;
+    sceneKey3d = '';
+    setCatchStatus(`Shot model set to ${shotSelect.options[shotSelect.selectedIndex].text}.`);
+    buildUI();
+    render();
+  });
+  startButton.addEventListener('click', () => {
+    startButton.disabled = true;
+    startCatchSimulation();
+    setTimeout(() => { startButton.disabled = false; }, 500);
+  });
+}
+
+function buildUI() {
+  buildTeamTabs();
+  buildVenueStrip();
+
+  const plan = activePlan();
+  const sb = document.getElementById('sidebar');
+  sb.innerHTML = '';
+
+  const h1 = document.createElement('h2');
+  h1.textContent = 'Key Players';
+  sb.appendChild(h1);
+
+  curTeam.batsmen.forEach(player => {
+    const button = document.createElement('button');
+    button.className = 'bat-btn' + (player === curBat ? ' active' : '');
+    button.style.borderColor = player === curBat ? curTeam.color : '#1a2540';
+    button.innerHTML = `<div class="nm"><span>${esc(player.nationality || '')} ${esc(player.name)}</span><span class="tag">${Math.round(Number(player.modelScore || 0))}</span></div><div class="dt">${esc(player.hand)} | ${esc(player.style || 'Key batter')}</div>`;
+    button.onclick = () => {
+      curBat = player;
+      resetTacticalPlan('Batsman changed. Generate a new AI tactical plan for this player.');
+      sceneKey3d = '';
+      buildUI();
+      render();
+    };
+    sb.appendChild(button);
+  });
+
+  const info = document.createElement('div');
+  info.className = 'ibox';
+  info.innerHTML = `<h3>Model Strategy</h3>
+    <div class="irow"><span>Key Player</span><span style="color:${curTeam.accent};font-weight:700">${esc(curBat.name)}</span></div>
+    <div class="irow"><span>Venue</span><span>${esc(curVenue?.venue_name || 'Not set')}</span></div>
+    <div class="irow"><span>Threat</span><span>${esc(plan?.threat || curBat.threat || '')}</span></div>
+    <div class="irow"><span>Model Score</span><span>${Math.round(Number(curBat.modelScore || 0))}</span></div>
+    <div style="margin-top:8px;font-size:0.76rem;color:${curTeam.accent};line-height:1.5;background:rgba(0,0,0,0.3);padding:8px;border-radius:7px">${esc(plan?.fieldType || curBat.fieldType || '')}</div>
+    <div style="margin-top:8px;font-size:0.72rem;color:#b7c2df;line-height:1.5">${esc(plan?.summary || curBat.summary || '')}</div>`;
+  sb.appendChild(info);
+
+  renderTacticalPanel(sb);
+  renderCatchPanel(sb, plan);
+
+  if (curVenue) {
+    const pitch = document.createElement('div');
+    pitch.className = 'ibox';
+    pitch.innerHTML = `<h3>Ground Profile</h3>
+      <div class="irow"><span>Pitch Type</span><span>${esc(curVenue.pitch_type)}</span></div>
+      <div class="irow"><span>Default Timing</span><span>${esc(curVenue.default_match_timing)}</span></div>
+      <div class="irow"><span>Dew</span><span>${esc(curVenue.dew_factor)}</span></div>
+      <div class="metric-grid">
+        <div class="metric-card"><b>${Math.round(Number(curVenue.avg_first_innings_score || 0))}</b><span>Avg 1st Inns</span></div>
+        <div class="metric-card"><b>${Math.round(Number(curVenue.avg_second_innings_score || 0))}</b><span>Avg 2nd Inns</span></div>
+        <div class="metric-card"><b>${Math.round(Number(curVenue.spin_advantage_pct || 0))}%</b><span>Spin Edge</span></div>
+        <div class="metric-card"><b>${Math.round(Number(curVenue.pace_advantage_pct || 0))}%</b><span>Pace Edge</span></div>
+      </div>
+      <div class="metric-grid">
+        <div class="metric-card"><b>${Math.round(Number(curVenue.powerplay_avg_wickets || 0) * 10) / 10}</b><span>PP Wkts</span></div>
+        <div class="metric-card"><b>${Math.round(Number(curVenue.death_over_avg_wickets || 0) * 10) / 10}</b><span>Death Wkts</span></div>
+        <div class="metric-card"><b>${Math.round(Number(curVenue.humidity_pct || 0))}%</b><span>Humidity</span></div>
+        <div class="metric-card"><b>${Math.round(Number(curVenue.temperature_c || 0))} C</b><span>Temperature</span></div>
+      </div>
+      <div class="timing-row">
+        ${(curVenue.timings || []).map(item => `
+          <div class="timing-pill">
+            <strong>${esc(item.match_timing)}</strong>
+            <span>${esc(item.toss_winner_choice)} | Bat 1st Win ${Math.round(Number(item.bat_first_win_rate || 0))}%</span>
+            <span>Safe ${Math.round(Number(item.safe_score_target || 0))} | Dew ${esc(item.dew_factor)}</span>
+          </div>
+        `).join('')}
+      </div>`;
+    sb.appendChild(pitch);
+  }
+
+  const leg = document.createElement('div');
+  leg.style.marginTop = '14px';
+  leg.innerHTML = '<h2 style="margin-bottom:8px">Position Types</h2>' +
+    Object.values(RCOL).map(v =>
+      `<div class="leg-item"><div class="leg-dot" style="background:${v.dot}"></div><span>${esc(v.desc)}</span></div>`
+    ).join('') +
+    `<div class="leg-item"><div class="leg-dot" style="background:#fff;border:2px solid ${curTeam.color}"></div><span>Batsman at Crease</span></div>
+     <div class="leg-item"><div class="leg-dot" style="background:#ff9944"></div><span>Bowler Run-Up</span></div>`;
+  sb.appendChild(leg);
+
+  const pl = document.createElement('div');
+  pl.className = 'ibox';
+  pl.style.marginTop = '12px';
+  pl.innerHTML = '<h3>All Positions</h3>' +
+    (plan?.pos || []).map((p, i) =>
+      `<div class="irow">
+        <span style="display:flex;align-items:center;gap:5px">
+          <span style="width:8px;height:8px;border-radius:50%;background:${(RCOL[p.t] || RCOL.ring).dot};display:inline-block;flex-shrink:0"></span>
+          ${i + 1}. ${esc(p.n)}
+        </span>
+        <span style="font-size:0.68rem;color:${(RCOL[p.t] || RCOL.ring).lbl}">${esc(p.t.toUpperCase())}</span>
+      </div>`
+    ).join('');
+  sb.appendChild(pl);
+}
+
+function normalizeVenues(rawVenues) {
+  return (rawVenues || []).map(venue => ({
+    ...venue,
+    timings: (venue.timings || []).map(item => ({
+      ...item,
+      avg_first_innings_score: Number(item.avg_first_innings_score),
+      avg_second_innings_score: Number(item.avg_second_innings_score),
+      safe_score_target: Number(item.safe_score_target),
+      pace_advantage_pct: Number(item.pace_advantage_pct),
+      spin_advantage_pct: Number(item.spin_advantage_pct),
+      powerplay_avg_wickets: Number(item.powerplay_avg_wickets),
+      death_over_avg_wickets: Number(item.death_over_avg_wickets),
+      humidity_pct: Number(item.humidity_pct),
+      temperature_c: Number(item.temperature_c)
+    })),
+    avg_first_innings_score: Number(venue.avg_first_innings_score),
+    avg_second_innings_score: Number(venue.avg_second_innings_score),
+    safe_score_target: Number(venue.safe_score_target),
+    pace_advantage_pct: Number(venue.pace_advantage_pct),
+    spin_advantage_pct: Number(venue.spin_advantage_pct),
+    powerplay_avg_wickets: Number(venue.powerplay_avg_wickets),
+    death_over_avg_wickets: Number(venue.death_over_avg_wickets),
+    humidity_pct: Number(venue.humidity_pct),
+    temperature_c: Number(venue.temperature_c)
+  }));
+}
+
+function normalizeTeams(rawTeams) {
+  return (rawTeams || []).map(team => ({
+    ...team,
+    short: SHORT_NAMES[team.name] || team.name,
+    batsmen: (team.batsmen || []).map(player => {
+      const plans = Object.fromEntries(Object.entries(player.plans || {}).map(([venueName, plan]) => [
+        venueName,
+        {
+          ...plan,
+          pos: (plan.pos || []).map(pos => ({
+            n: pos.n,
+            t: pos.t,
+            x: Number(pos.x),
+            z: Number(pos.z)
+          }))
+        }
+      ]));
+      return {
+        ...player,
+        modelScore: Number(player.modelScore || 0),
+        plans,
+        pos: (player.pos || []).map(pos => ({
+          n: pos.n,
+          t: pos.t,
+          x: Number(pos.x),
+          z: Number(pos.z)
+        }))
+      };
+    })
+  }));
+}
+
+function showFieldError(message) {
+  const sidebar = document.getElementById('sidebar');
+  sidebar.innerHTML = `<div class="error-box">Backend fielding data load failed.<br>${esc(message)}<br><br>Run <code>.venv\\Scripts\\python.exe -m uvicorn backend:app --port 8001 --reload</code></div>`;
+}
+
+wrap.addEventListener('mousedown', e => { dragging = true; lx = e.clientX; ly = e.clientY; });
+window.addEventListener('mouseup', () => { dragging = false; });
+window.addEventListener('mousemove', e => {
+  if (!dragging || !curTeam) return;
+  rotY += (e.clientX - lx) * 0.008;
+  rotX += (e.clientY - ly) * 0.008;
+  rotX = Math.max(-1.4, Math.min(-0.08, rotX));
+  lx = e.clientX;
+  ly = e.clientY;
+  render();
+});
+wrap.addEventListener('wheel', e => {
+  if (!curTeam) return;
+  zoom *= e.deltaY > 0 ? 0.92 : 1.08;
+  zoom = Math.max(0.45, Math.min(2.2, zoom));
+  render();
+  e.preventDefault();
+}, {passive:false});
+wrap.addEventListener('dblclick', () => { rotX = -0.70; rotY = 0.28; zoom = 1.0; render(); });
+wrap.addEventListener('touchstart', e => {
+  if (e.touches.length === 1) { dragging = true; lx = e.touches[0].clientX; ly = e.touches[0].clientY; }
+});
+wrap.addEventListener('touchmove', e => {
+  if (!dragging || e.touches.length !== 1 || !curTeam) return;
+  rotY += (e.touches[0].clientX - lx) * 0.009;
+  rotX += (e.touches[0].clientY - ly) * 0.009;
+  rotX = Math.max(-1.4, Math.min(-0.08, rotX));
+  lx = e.touches[0].clientX;
+  ly = e.touches[0].clientY;
+  render();
+  e.preventDefault();
+}, {passive:false});
+wrap.addEventListener('touchend', () => { dragging = false; });
+
+document.getElementById('viewBroadcast').addEventListener('click', () => {
+  rotX = -0.70;
+  rotY = 0.28;
+  zoom = 1.0;
+  render();
+});
+document.getElementById('viewTop').addEventListener('click', () => {
+  rotX = -1.28;
+  rotY = 0;
+  zoom = 0.92;
+  render();
+});
+document.getElementById('viewReset').addEventListener('click', () => {
+  rotX = -0.60;
+  rotY = 0.18;
+  zoom = 1.0;
+  render();
+});
+
+async function init() {
+  try {
+    const data = await api('/api/fielding');
+    VENUES = normalizeVenues(data.venues);
+    TEAMS = normalizeTeams(data.teams);
+    if (!VENUES.length) throw new Error('No backend venue profiles returned.');
+    if (!TEAMS.length || !TEAMS[0].batsmen.length) throw new Error('No team fielding data returned from backend.');
+    curVenue = VENUES[0];
+    curTeam = TEAMS[0];
+    curBat = TEAMS[0].batsmen[0];
+    initThree();
+    buildUI();
+    render();
+  } catch (error) {
+    showFieldError(error.message);
+  }
+}
+
+init();
+</script>
+</body>
+</html>

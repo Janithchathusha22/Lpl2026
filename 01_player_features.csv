@@ -1,0 +1,31 @@
+player_id,name,team,role,batting_rating,bowling_rating,fielding_rating,experience_rating,t20_strike_rate_est,batting_avg_est,wickets_per_match_est,price_category,nationality,is_overseas,is_local,is_allrounder,is_batsman,is_bowler,batting_position_est,overall_impact_score
+P01,Rahmanullah Gurbaz,Kandy Royals,WK-Bat,95,0,78,85,162,41.8,0,Platinum,AFG,1,0,0,1,0,1,57
+P02,Wanindu Hasaranga,Kandy Royals,Spin-AR,72,94,80,88,148,22.0,2.5,Icon,LKA,0,1,1,1,1,4,83
+P03,Maheesh Theekshana,Dambulla Sixers,Spinner,30,92,72,85,60,8.0,2.4,Platinum,LKA,0,1,0,0,1,10,66
+P04,Fazalhaq Farooqi,Dambulla Sixers,Pacer,28,90,70,82,55,7.5,2.2,Platinum,AFG,1,0,0,0,1,10,64
+P05,Mujeeb Ur Rahman,Colombo Kaps,Mystery Spin,22,88,68,86,45,6.0,2.1,Platinum,AFG,1,0,0,0,1,10,61
+P06,Nuwan Thushara,Kandy Royals,Pacer,30,85,72,80,55,8.5,1.9,Platinum,LKA,0,1,0,0,1,10,63
+P07,Kusal Mendis,Colombo Kaps,WK-Bat,88,0,76,86,148,36.4,0,Icon,LKA,0,1,0,1,0,1,55
+P08,Kamindu Mendis,Colombo Kaps,Bat-Spin,84,70,78,82,142,30.2,0.5,Star,LKA,0,1,1,1,1,2,77
+P09,Ben McDermott,Colombo Kaps,WK-Bat,85,0,74,80,158,29.2,0,Star,AUS,1,0,0,1,0,2,52
+P10,Charith Asalanka,Galle Gallants,Batsman,82,30,76,84,138,37.6,0.2,Platinum,LKA,0,1,0,1,0,2,63
+P11,Litton Kumar Das,Galle Gallants,WK-Bat,80,0,75,80,144,31.6,0,Star,BAN,1,0,0,1,0,2,51
+P12,Muhammad Nawaz,Galle Gallants,Spin-AR,65,82,74,82,130,20.0,1.8,Platinum,PAK,1,0,1,1,1,4,74
+P13,Shakib Al Hasan,Jaffna Kings,Spin-AR,70,80,72,90,132,22.5,1.6,Icon,BAN,1,0,1,1,1,4,76
+P14,Taskin Ahmed,Jaffna Kings,Pacer,22,86,68,84,45,6.0,2.0,Star,BAN,1,0,0,0,1,10,60
+P15,Avishka Fernando,Jaffna Kings,Batsman,82,15,74,78,155,25.8,0,Platinum,LKA,0,1,0,1,0,2,56
+P16,Bhanuka Rajapaksa,Jaffna Kings,WK-Bat,84,10,72,80,153,28.5,0,Icon,LKA,0,1,0,1,0,2,55
+P17,Sahibzada Farhan,Dambulla Sixers,Batsman,86,0,74,82,156,35.2,0,Icon,PAK,1,0,0,1,0,2,53
+P18,Reeza Hendricks,Dambulla Sixers,Batsman,82,0,75,80,150,27.2,0,Star,RSA,1,0,0,1,0,2,51
+P19,Dinesh Chandimal,Dambulla Sixers,WK-Bat,72,0,74,88,118,32.0,0,Star,LKA,0,1,0,1,0,4,49
+P20,Moeen Ali,Kandy Royals,Spin-AR,76,82,76,90,145,28.0,1.6,Icon,ENG,1,0,1,1,1,4,80
+P21,Angelo Mathews,Kandy Royals,Bat-Pace,68,60,70,90,120,30.0,0.8,Star,LKA,0,1,1,1,0,4,68
+P22,Dunith Wellalage,Jaffna Kings,Spin-AR,65,80,72,75,130,18.0,1.8,Star,LKA,0,1,1,1,1,4,72
+P23,Dushmantha Chameera,Dambulla Sixers,Pacer,20,88,68,82,40,5.5,2.0,Icon,LKA,0,1,0,0,1,10,60
+P24,Dilshan Madushanka,Jaffna Kings,Pacer,18,82,68,78,38,5.0,1.7,Gold,LKA,0,1,0,0,1,10,56
+P25,Binura Fernando,Colombo Kaps,Pacer,22,82,70,80,42,6.5,1.5,Platinum,LKA,0,1,0,0,1,10,58
+P26,Kasun Rajitha,Galle Gallants,Pacer,18,78,68,76,38,5.5,1.5,Gold,LKA,0,1,0,0,1,10,55
+P27,Akif Javed,Galle Gallants,Pacer,18,78,70,74,40,5.8,1.6,Gold,PAK,1,0,0,0,1,10,55
+P28,Sandeep Lamichhane,Jaffna Kings,Leg-Spin,18,78,70,82,38,5.5,1.6,Classic,NEP,1,0,0,0,1,10,56
+P29,Zahir Khan,Kandy Royals,Wrist-Spin,15,76,68,78,30,4.5,1.5,Classic,AFG,1,0,0,0,1,10,53
+P30,Daniel Sams,Kandy Royals,Pace-AR,55,72,75,76,140,18.0,1.4,Gold,AUS,1,0,1,0,1,7,67

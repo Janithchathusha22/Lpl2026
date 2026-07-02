@@ -1,0 +1,65 @@
+{
+  "trained_at": "2026-06-22T21:31:26.411019",
+  "model_path": "D:\\LPL2026_Prediction_dashbord\\models\\tactical_engine.pkl",
+  "training_rows": 20832,
+  "test_rows": 4584,
+  "accuracy": 0.9890924956369983,
+  "class_counts": {
+    "Out - Caught": 11311,
+    "Out - Bowled/LBW": 5412,
+    "4 Runs": 2788,
+    "Dot Ball": 790,
+    "6 Runs": 531
+  },
+  "classification_report": {
+    "4 Runs": {
+      "precision": 0.9631410256410257,
+      "recall": 0.9804241435562806,
+      "f1-score": 0.9717057396928052,
+      "support": 613.0
+    },
+    "6 Runs": {
+      "precision": 0.9140625,
+      "recall": 1.0,
+      "f1-score": 0.9551020408163265,
+      "support": 117.0
+    },
+    "Dot Ball": {
+      "precision": 0.9940476190476191,
+      "recall": 0.9597701149425287,
+      "f1-score": 0.9766081871345029,
+      "support": 174.0
+    },
+    "Out - Bowled/LBW": {
+      "precision": 0.9916597164303587,
+      "recall": 0.998320738874895,
+      "f1-score": 0.994979079497908,
+      "support": 1191.0
+    },
+    "Out - Caught": {
+      "precision": 0.9979716024340771,
+      "recall": 0.9883487344314986,
+      "f1-score": 0.9931368591037545,
+      "support": 2489.0
+    },
+    "accuracy": 0.9890924956369983,
+    "macro avg": {
+      "precision": 0.9721764927106161,
+      "recall": 0.9853727463610407,
+      "f1-score": 0.9783063812490594,
+      "support": 4584.0
+    },
+    "weighted avg": {
+      "precision": 0.9893833088261802,
+      "recall": 0.9890924956369983,
+      "f1-score": 0.9891514196683806,
+      "support": 4584.0
+    }
+  },
+  "label_source": "derived_from_lpl_csv_features_not_real_ball_by_ball",
+  "source_files": [
+    "07_batting_profiles.csv",
+    "06_bowling_matchup_matrix.csv",
+    "LPL_2026_Advanced_Pitch_Data.csv"
+  ]
+}

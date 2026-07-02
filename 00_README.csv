@@ -1,0 +1,13 @@
+file_number,filename,description,rows,columns,use_for_training
+01,01_player_master.csv,Complete player profiles with nationality/category/role/experience,97,12,Player classification model / Team composition analysis
+02,02_player_skill_ratings.csv,Numerical skill scores across batting phases and bowling phases (1-10),97,16,Performance prediction / Player impact model
+03,03_team_composition_analysis.csv,Team-level aggregated squad metrics and predicted outcomes,5,22,Team ranking model / Win probability classifier
+04,04_venue_ground_conditions.csv,Ground-level features affecting match outcomes,4,18,Venue-based match prediction
+05,05_player_venue_suitability.csv,Player-venue compatibility scores for key players,18,9,Lineup optimization model
+06,06_bowling_matchup_matrix.csv,Bowler effectiveness by phase and batting hand,24,16,Bowling strategy model / Economy rate prediction
+07,07_batting_profiles.csv,Batter phase-wise SR estimates and weakness mapping,21,14,Batting order optimization / Target setting model
+08,08_category_breakdown.csv,LPL auction category definitions with impact weights,7,9,Auction strategy model
+09,09_head_to_head_matchups.csv,20 match predictions with win probability and key matchups,20,12,Match outcome prediction classifier
+10,10_team_weaknesses_strengths.csv,Qualitative + strategic analysis per team,5,13,Strategy recommendation / NLP training
+11,11_tournament_prediction_features.csv,Feature engineering table with weights for final model,13,9,Feature importance analysis / Final prediction model
+12,12_nationality_distribution.csv,Player nationalities and value tiers across teams,13,6,Squad building / Diversity analysis

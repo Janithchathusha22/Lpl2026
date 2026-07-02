@@ -1,0 +1,24 @@
+[startup] Loading datasets and models...
+[startup] Backend ready.
+INFO:     127.0.0.1:1638 - "GET /field.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1639 - "GET /api/fielding HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1640 - "GET /api/dashboard HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1706 - "GET /api/model-status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1707 - "GET /dashboard.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1708 - "POST /api/simulate-match HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1756 - "GET /players/Colombo%20Kaps HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1757 - "POST /predict/winner HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1758 - "POST /predict/live HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1896 - "GET /dashboard.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1897 - "GET /field.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3598 - "GET /dashboard.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3599 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:3598 - "GET /api/dashboard HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3624 - "POST /api/simulate-match HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4042 - "GET /api/fielding HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4042 - "OPTIONS /api/dashboard HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4042 - "GET /api/dashboard HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4241 - "GET /dashboard.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4242 - "GET /field.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4240 - "GET /api/fielding HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4239 - "GET /api/dashboard HTTP/1.1" 200 OK

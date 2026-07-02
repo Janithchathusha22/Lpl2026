@@ -1,0 +1,5 @@
+venue_id,venue_name,city,home_team,capacity,pitch_type,avg_first_innings_score,avg_second_innings_score,chase_win_pct,dew_factor,spin_effectiveness,pace_effectiveness,powerplay_avg_runs,death_over_avg_runs,bounce_level,carry_level,turning_track,left_arm_pace_advantage,best_batting_position,best_bowling_type
+V001,R.Premadasa Stadium,Colombo,Colombo Kaps,35000,Flat/Hard,168,162,55,High,7,6,52,58,Medium,Medium,Low,Medium,Chase,Mystery Spin
+V002,Galle International Stadium,Galle,Galle Gallants,10000,Spin-Friendly,155,145,48,Low,9,5,44,52,Low,Low,High,High,First,Left-Arm Spin
+V003,Pallekele International Stadium,Kandy,Jaffna Kings/Kandy Royals,35000,Pace/Bounce,172,160,52,Medium,7,8,55,62,High,High,Low,Medium,First,Leg-Spin/Fast
+V004,Rangiri Dambulla International,Dambulla,Dambulla Sixers,16000,Balanced/Dry,162,148,46,Low,8,7,48,56,Medium,Medium,Medium,Low,First,Off-Spin/Carrom

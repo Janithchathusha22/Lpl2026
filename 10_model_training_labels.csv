@@ -1,0 +1,9 @@
+label_id,label_type,label_value,confidence_pct,basis,feature_columns_used,model_type_recommended
+L01,Tournament Winner,Kandy Royals,72,Team overall rating + venue + squad depth,"batting_rating,bowling_rating,experience_rating,home_venue_advantage,allrounder_depth",Logistic Regression / XGBoost
+L02,Runner Up,Dambulla Sixers,65,Strongest bowling attack compensates weak batting,"bowling_rating,top_bowler_impact,venue_spin_mod,home_advantage",Random Forest
+L03,Orange Cap Winner,Rahmanullah Gurbaz,58,Highest batting_rating × matches × venue SR bonus,"batting_rating,t20_strike_rate_est,matches_est,home_venue_bat_mod",Linear Regression
+L04,Purple Cap Winner,Wanindu Hasaranga,52,Highest bowling_rating × matches + pitch_advantage,"bowling_rating,wickets_per_match_est,venue_spin_mod,experience_rating",Linear Regression
+L05,Player of Tournament,Wanindu Hasaranga,48,Highest impact_score combining bat+bowl+field,"batting_contribution_score,bowling_contribution_score,big_match_temperament,consistency_score",Weighted Scoring / Neural Net
+L06,Match Winner (Binary),Based on match features,78,Home advantage + rating differential + venue,"team1_bat,team1_bowl,team2_bat,team2_bowl,team1_home,venue_bat_mod,exp_diff",XGBoost / Logistic Regression
+L07,Match Score Prediction,130-225 range,68,Batting strength × venue × opposition bowling,"batting_rating,venue_bat_mod,opposition_bowling,venue_dew,phase_scores",Linear Regression / LSTM
+L08,Wickets per Innings,4-10 range,70,Bowling attack quality × pitch conditions,"bowling_rating,venue_spin_mod,venue_pace_mod,batting_strength",Poisson Regression

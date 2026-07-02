@@ -1,0 +1,22 @@
+player_id,player_name,team,batting_position,batting_style,powerplay_sr_estimate,middle_over_sr_estimate,death_over_sr_estimate,avg_estimate,boundary_pct,dot_ball_pct,spin_handling,pace_handling,pressure_avg,best_match_type,weakness
+P001,Ben McDermott,Colombo Kaps,1,Aggressive Opener,155,125,150,28,52,22,6,9,25,Chasing,Spin on turning tracks
+P002,Kamindu Mendis,Colombo Kaps,3,360-Degree Bat,140,145,145,35,45,20,9,8,32,Both,Inconsistent form
+P004,Kusal Mendis,Colombo Kaps,2,Aggressive WK-Bat,150,140,145,32,48,21,7,8,29,Chasing,High pressure finals
+P016,Sadeera Samarawickrama,Colombo Kaps,4,Anchor,120,130,138,30,38,28,8,7,28,Setting,Slow in middle overs
+P021,Litton Kumar Das,Galle Gallants,1,Elegant Opener,148,132,140,30,46,22,6,8,27,Chasing,Left-arm spin
+P023,Rassie van der Dussen,Galle Gallants,3,Solid Anchor,115,138,142,38,35,25,8,7,36,Setting,T20 SR constraint
+P024,Dasun Shanaka,Galle Gallants,6,Lower Order Hitter,110,118,162,22,55,28,6,7,19,Chasing,Inconsistent
+P040,Charith Asalanka,Galle Gallants,4,Anchor/Finisher,125,148,145,36,42,22,9,7,34,Both,Powerplay pace
+P039,Muhammad Nawaz,Galle Gallants,5,Lower Middle,112,120,150,20,48,26,7,6,18,Chasing,Hard pace
+P044,Bhanuka Rajapaksa,Jaffna Kings,1,Aggressive Opener,165,135,140,27,55,20,6,8,24,Chasing,Consistency
+P043,Shakib Al Hasan,Jaffna Kings,4,Middle Order,120,138,142,28,40,24,8,7,26,Both,Fitness/form
+P059,Avishka Fernando,Jaffna Kings,2,Aggressive Bat,160,130,135,26,50,22,6,8,23,Setting,Spin/Inconsistency
+P054,Ibrahim Zadran,Jaffna Kings,3,Composed Opener,130,135,132,32,38,26,7,8,30,Setting,Away conditions
+P062,Sahibzada Farhan,Dambulla Sixers,1,Stylish Opener,158,140,138,31,48,21,7,8,28,Both,Away pitches
+P060,Reeza Hendricks,Dambulla Sixers,2,Power Opener,150,128,135,28,50,22,7,8,25,Setting,Spin middle overs
+P061,Dinesh Chandimal,Dambulla Sixers,3,Anchor,108,132,138,38,32,28,9,7,36,Setting,T20 SR slow
+P073,Niroshan Dickwella,Dambulla Sixers,1,Aggressive WK,160,128,132,24,52,22,6,7,21,Chasing,Inconsistency
+P096,Rahmanullah Gurbaz,Kandy Royals,1,Explosive Opener,175,145,148,33,58,18,6,9,30,Both,Spin at Galle
+P080,Moeen Ali,Kandy Royals,3,Middle Order Bat,128,145,150,30,42,22,9,8,28,Both,Hard pace
+P079,Angelo Mathews,Kandy Royals,4,Senior Anchor,110,132,138,34,34,26,8,7,32,Setting,Field mobility
+P093,Kusal Perera,Kandy Royals,2,Explosive WK,162,138,140,27,54,20,6,8,24,Chasing,Inconsistency

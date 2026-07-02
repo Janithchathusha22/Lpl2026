@@ -1,0 +1,98 @@
+player_id,player_name,team,category,batting_power_play_rating,batting_middle_over_rating,batting_death_over_rating,bowling_power_play_rating,bowling_middle_over_rating,bowling_death_over_rating,fielding_rating,pressure_handling,consistency_score,match_winner_potential
+P001,Ben McDermott,Colombo Kaps,Star,9,7,7,0,0,0,7,8,7,8
+P002,Kamindu Mendis,Colombo Kaps,Star,7,9,8,5,7,4,8,8,7,9
+P003,Jimmy Neesham,Colombo Kaps,Icon,6,7,9,5,6,7,8,8,7,8
+P004,Kusal Mendis,Colombo Kaps,Icon,9,8,8,0,0,0,7,8,7,9
+P005,Anthony Arul Pragasam,Colombo Kaps,Classic,5,6,5,0,0,0,6,5,5,4
+P006,Wanuja Sahan,Colombo Kaps,Gold,6,7,6,0,0,0,7,6,6,5
+P007,Malsha Tharupathi,Colombo Kaps,Emerging U23,5,5,6,4,5,5,6,4,4,4
+P008,Sharujan Shanmuganathan,Colombo Kaps,Emerging U23,5,5,5,0,0,0,6,4,4,3
+P009,Kushal Bhurtel,Colombo Kaps,Associate Stars,7,6,6,4,4,4,6,6,5,5
+P010,Mohammad Haris,Colombo Kaps,Classic,8,7,8,0,0,0,6,6,5,6
+P011,Hasan Mahmud,Colombo Kaps,Classic,2,2,2,8,7,7,6,7,7,7
+P012,Jeffrey Vandersay,Colombo Kaps,Classic,2,2,2,5,8,6,6,6,6,6
+P013,Thanuka Dabare,Colombo Kaps,Classic,4,5,5,0,0,0,6,5,5,4
+P014,Movin Subasingha,Colombo Kaps,Classic,4,5,6,4,5,5,6,5,5,4
+P015,Shahnawaz Ali Dahani,Colombo Kaps,Gold,2,2,2,8,6,7,6,6,6,7
+P016,Sadeera Samarawickrama,Colombo Kaps,Gold,7,7,7,0,0,0,7,7,7,7
+P017,Milan Rathnayake,Colombo Kaps,Gold,2,2,2,6,7,7,6,6,6,5
+P018,Janith Liyanage,Colombo Kaps,Gold,4,5,7,3,4,5,6,6,6,5
+P019,Mujeeb Ur Rahman,Colombo Kaps,Platinum,1,1,1,7,9,8,6,9,8,9
+P020,Binura Fernando,Colombo Kaps,Platinum,2,2,2,8,7,8,6,7,6,7
+P021,Litton Kumar Das,Galle Gallants,Star,9,8,7,0,0,0,7,7,7,8
+P022,Eshan Malinga,Galle Gallants,Star,2,2,2,8,7,7,6,6,6,7
+P023,Rassie van der Dussen,Galle Gallants,Icon,6,8,7,3,3,3,8,8,8,7
+P024,Dasun Shanaka,Galle Gallants,Icon,5,6,8,4,5,6,8,8,7,7
+P025,Sachindu Colombage,Galle Gallants,Classic,5,5,5,0,0,0,6,5,5,4
+P026,Kasun Rajitha,Galle Gallants,Gold,2,2,2,8,6,6,6,6,6,6
+P027,Dinura Kalupahana,Galle Gallants,Emerging U23,2,2,2,6,5,5,6,4,4,4
+P028,Uri Koththigoda,Galle Gallants,Emerging U23,5,5,5,0,0,0,6,4,4,3
+P029,Haider Ali,Galle Gallants,Associate Stars,7,6,7,3,3,3,6,5,5,5
+P030,Sam Harper,Galle Gallants,Classic,8,7,8,0,0,0,7,6,6,6
+P031,Mehidy Hassan Miraz,Galle Gallants,Classic,5,7,6,4,7,5,7,8,8,7
+P032,Sahan Arachchige,Galle Gallants,Classic,5,5,5,0,0,0,6,5,5,4
+P033,Chamika Karunarathna,Galle Gallants,Classic,4,5,7,5,6,6,7,6,6,6
+P034,Tharindu Rathnayake,Galle Gallants,Classic,2,2,2,5,6,5,6,5,5,4
+P035,Akif Javed,Galle Gallants,Gold,2,2,2,8,6,7,6,6,6,7
+P036,Pramod Madushan,Galle Gallants,Gold,2,2,2,7,7,7,6,7,6,7
+P037,Lasith Croospulle,Galle Gallants,Gold,5,6,7,0,0,0,6,5,5,5
+P038,Vijayakanth Viyaskanth,Galle Gallants,Gold,5,5,6,4,5,5,6,5,5,5
+P039,Muhammad Nawaz,Galle Gallants,Platinum,6,7,8,6,8,7,7,8,8,8
+P040,Charith Asalanka,Galle Gallants,Platinum,6,9,8,3,4,3,7,9,8,9
+P041,Taskin Ahmed,Jaffna Kings,Star,2,2,2,9,7,8,7,8,7,8
+P042,Dunith Wellalage,Jaffna Kings,Star,5,7,6,5,8,6,7,8,7,8
+P043,Shakib Al Hasan,Jaffna Kings,Icon,6,8,7,5,8,6,7,9,7,9
+P044,Bhanuka Rajapaksa,Jaffna Kings,Icon,9,8,8,3,3,3,7,7,6,8
+P045,Nishan Madushka,Jaffna Kings,Gold,7,6,6,0,0,0,7,6,6,6
+P046,Kugathas Mathulan,Jaffna Kings,Emerging U23,5,5,5,0,0,0,6,4,4,3
+P047,Praveen Manisha,Jaffna Kings,Emerging U23,2,2,2,5,5,5,6,4,4,3
+P048,Dipendra Singh Airee,Jaffna Kings,Associate Stars,7,6,7,4,5,4,6,6,6,5
+P049,Sandeep Lamichhane,Jaffna Kings,Classic,2,2,2,6,8,7,7,7,6,7
+P050,Lizaad Williams,Jaffna Kings,Classic,2,2,2,6,6,7,6,6,6,5
+P051,Mohommed Shiraz,Jaffna Kings,Classic,2,2,2,5,5,5,6,5,5,4
+P052,Chamindu Wickramasinghe,Jaffna Kings,Classic,5,5,5,0,0,0,6,5,5,4
+P053,Nuwanindu Fernando,Jaffna Kings,Classic,5,6,5,0,0,0,6,6,6,5
+P054,Ibrahim Zadran,Jaffna Kings,Gold,7,8,6,0,0,0,7,7,7,7
+P055,Dilshan Madushanka,Jaffna Kings,Gold,2,2,2,7,7,7,6,6,6,7
+P056,Kamil Mishara,Jaffna Kings,Gold,5,6,6,0,0,0,6,5,5,5
+P057,Traveen Mathews,Jaffna Kings,Gold,4,5,6,4,5,5,6,5,5,5
+P058,David Wiese,Jaffna Kings,Platinum,5,6,9,5,6,7,7,7,6,7
+P059,Avishka Fernando,Jaffna Kings,Platinum,9,7,7,2,2,2,7,6,5,8
+P060,Reeza Hendricks,Dambulla Sixers,Star,8,7,7,2,2,2,7,7,7,7
+P061,Dinesh Chandimal,Dambulla Sixers,Star,5,8,7,2,2,2,7,9,8,7
+P062,Sahibzada Farhan,Dambulla Sixers,Icon,9,8,7,0,0,0,7,7,7,8
+P063,Dushmantha Chameera,Dambulla Sixers,Icon,2,2,2,9,7,8,7,8,6,9
+P064,Vishva Lahiru Kumara,Dambulla Sixers,Emerging U23,2,2,2,6,5,5,6,4,4,4
+P065,Gayana Weerasinghe,Dambulla Sixers,Emerging U23,4,4,5,4,4,4,6,4,4,3
+P066,Shadley van Schalkwyk,Dambulla Sixers,Associate Stars,6,6,6,5,5,5,6,5,5,5
+P067,Gulbadin Naib,Dambulla Sixers,Classic,5,6,6,5,6,5,6,6,6,5
+P068,Dian Forrester,Dambulla Sixers,Classic,5,5,6,4,5,5,6,5,5,5
+P069,Dhananjaya Lakshan,Dambulla Sixers,Classic,5,5,5,0,0,0,6,5,5,4
+P070,Ramesh Mendis,Dambulla Sixers,Classic,4,5,5,4,7,5,6,6,6,5
+P071,Sachitha Jayathilake,Dambulla Sixers,Classic,5,5,5,0,0,0,6,5,5,4
+P072,Mohammad Wasim Jr.,Dambulla Sixers,Gold,2,2,2,8,7,8,6,7,6,8
+P073,Niroshan Dickwella,Dambulla Sixers,Gold,9,7,7,0,0,0,6,6,5,7
+P074,Pavan Rathanayaka,Dambulla Sixers,Gold,5,6,5,0,0,0,6,5,5,4
+P075,Akila Dananjaya,Dambulla Sixers,Gold,2,2,2,5,8,6,6,6,5,6
+P076,Fazalhaq Farooqi,Dambulla Sixers,Platinum,2,2,2,9,7,8,7,8,7,9
+P077,Maheesh Theekshana,Dambulla Sixers,Platinum,2,2,2,7,9,8,7,9,8,9
+P078,Vijay Shankar,Kandy Royals,Star,6,7,7,5,6,5,8,7,7,7
+P079,Angelo Mathews,Kandy Royals,Star,4,7,7,4,5,4,7,9,8,7
+P080,Moeen Ali,Kandy Royals,Icon,6,8,8,5,8,6,7,9,8,9
+P081,Wanindu Hasaranga,Kandy Royals,Icon,5,7,7,7,9,8,8,9,8,10
+P082,Isitha Wijesundara,Kandy Royals,Classic,5,5,5,0,0,0,6,5,5,4
+P083,Dushan Hemantha,Kandy Royals,Gold,5,6,7,4,5,5,6,6,6,5
+P084,Sahan Mihira,Kandy Royals,Emerging U23,5,5,5,0,0,0,6,4,4,3
+P085,Deva Pavan Sandesh De Silva,Kandy Royals,Emerging U23,4,5,5,0,0,0,6,4,4,3
+P086,Brandon McMullen,Kandy Royals,Associate Stars,6,6,6,4,5,4,6,5,5,5
+P087,Dale Phillips,Kandy Royals,Classic,5,6,6,5,6,5,6,6,6,5
+P088,Zahir Khan,Kandy Royals,Classic,2,2,2,5,8,6,6,7,6,7
+P089,Vishen Halambage,Kandy Royals,Classic,5,5,5,0,0,0,6,5,5,4
+P090,Muditha Lakshan,Kandy Royals,Classic,4,5,5,0,0,0,6,5,5,4
+P091,Lahiru Udara,Kandy Royals,Classic,5,6,5,0,0,0,6,6,6,5
+P092,Daniel Sams,Kandy Royals,Gold,5,6,8,5,6,7,7,7,6,7
+P093,Kusal Perera,Kandy Royals,Gold,9,8,7,0,0,0,6,7,6,8
+P094,Asitha Fernando,Kandy Royals,Gold,2,2,2,7,7,7,7,7,6,7
+P095,Garuka Sanketh,Kandy Royals,Gold,4,5,6,4,5,5,6,5,5,5
+P096,Rahmanullah Gurbaz,Kandy Royals,Platinum,10,8,8,0,0,0,7,8,7,10
+P097,Nuwan Thushara,Kandy Royals,Platinum,2,2,2,8,7,8,7,8,7,9

@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LPL 2026 — AI Tournament Forecast</title>
+<style>
+:root{--bg:#05070d;--panel:#0b101b;--border:#24314a;--gold:#f5a623;--mint:#47d18c;--cyan:#65d7ff;--coral:#ff6f61;--violet:#9d7bff;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:
+radial-gradient(circle at 10% 6%,rgba(71,209,140,.15),transparent 28%),
+radial-gradient(circle at 86% 12%,rgba(101,215,255,.13),transparent 30%),
+linear-gradient(135deg,#06090f 0%,#101117 48%,#07110d 100%);
+color:#e8eaf0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.032) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.024) 1px,transparent 1px);background-size:44px 44px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.72),transparent 78%);}
+header{background:linear-gradient(135deg,rgba(12,18,30,.98),rgba(7,14,15,.94));border-bottom:1px solid rgba(245,166,35,.52);padding:16px 24px;display:flex;align-items:center;gap:14px;position:relative;}
+header::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,var(--mint),var(--gold),var(--cyan),transparent);}
+header .logo{width:46px;height:46px;border-radius:8px;display:grid;place-items:center;background:radial-gradient(circle at 50% 38%,rgba(245,166,35,.42),transparent 54%),linear-gradient(145deg,rgba(71,209,140,.22),rgba(101,215,255,.1));border:1px solid rgba(245,166,35,.42);font-size:1.65rem;flex-shrink:0;}
+header h1{font-size:1.2rem;color:#ffd37a;line-height:1.2;}
+header p{font-size:0.72rem;color:#8c99b5;margin-top:3px;}
+header .home-link{margin-left:auto;font-size:0.78rem;color:#9fb0d0;text-decoration:none;padding:8px 14px;border:1px solid rgba(255,255,255,.14);border-radius:8px;font-weight:700;}
+header .home-link:hover{border-color:rgba(245,166,35,.6);color:#ffd37a;}
+.status-pill{font-size:0.68rem;padding:4px 10px;border-radius:20px;font-weight:700;}
+.status-live{background:rgba(71,209,140,.16);color:#5fe0a0;border:1px solid rgba(71,209,140,.4);}
+.status-off{background:rgba(255,111,97,.14);color:#ff9d92;border:1px solid rgba(255,111,97,.4);}
+.tabs{display:flex;background:rgba(7,11,18,.9);border-bottom:1px solid rgba(36,49,74,.86);padding:0 16px;gap:5px;overflow-x:auto;position:sticky;top:0;z-index:5;backdrop-filter:blur(18px);}
+.tab{padding:12px 18px;border:none;background:transparent;color:#77849f;font-size:0.85rem;font-weight:800;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap;}
+.tab:hover{color:#c7d4ea;background:rgba(255,255,255,.035);}
+.tab.active{color:#ffd37a;border-bottom-color:var(--gold);background:linear-gradient(180deg,rgba(245,166,35,.08),transparent);}
+.page{display:none;padding:22px;animation:fadeIn .25s;max-width:1240px;margin:0 auto;position:relative;z-index:1;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.section-title{font-size:1.05rem;font-weight:800;color:var(--gold);margin:6px 0 14px;display:flex;align-items:center;gap:8px;}
+.subtitle{font-size:0.82rem;color:#8c99b5;margin-bottom:16px;line-height:1.5;}
+.card{background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.025));border:1px solid rgba(255,255,255,.085);border-radius:10px;padding:18px;box-shadow:0 18px 42px rgba(0,0,0,.18);backdrop-filter:blur(14px);margin-bottom:16px;}
+.card h2{font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;color:#8190ad;margin-bottom:14px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.hero{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:18px;}
+.champ-card{background:linear-gradient(135deg,rgba(40,32,8,.92),rgba(14,12,6,.95));border:2px solid var(--gold);border-radius:14px;padding:22px;text-align:center;position:relative;overflow:hidden;}
+.champ-card .trophy{font-size:3rem;}
+.champ-card .lbl{font-size:0.68rem;text-transform:uppercase;letter-spacing:1.5px;color:#f5a623aa;margin:6px 0;}
+.champ-card .nm{font-size:1.7rem;font-weight:900;color:var(--gold);}
+.champ-card .pct{font-size:0.9rem;color:#cdb98a;margin-top:6px;}
+.runner-card{background:rgba(0,0,0,.26);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:22px;text-align:center;display:flex;flex-direction:column;justify-content:center;}
+.runner-card .lbl{font-size:0.66rem;text-transform:uppercase;letter-spacing:1px;color:#8190ad;}
+.runner-card .nm{font-size:1.25rem;font-weight:800;color:#cfe3ff;margin-top:6px;}
+.forecast-art-hero{position:relative;min-height:480px;margin:0 0 20px;overflow:hidden;border:1px solid rgba(100,205,255,.3);border-radius:20px;background:#020918;box-shadow:0 30px 76px rgba(0,0,0,.42);}
+.forecast-art-hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;filter:saturate(1.06) contrast(1.04);}
+.forecast-art-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(2,8,22,.98),rgba(2,9,24,.86) 37%,rgba(2,8,20,.12) 76%),linear-gradient(0deg,rgba(2,7,19,.94),transparent 50%);}
+.forecast-art-copy{position:relative;z-index:2;max-width:610px;padding:48px 42px 150px;}
+.forecast-art-copy small{color:#ffc36d;font-size:.64rem;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;}
+.forecast-art-copy h1{margin:11px 0 12px;color:#fff;font-size:clamp(2.2rem,4vw,3.7rem);line-height:.98;letter-spacing:-2px;}
+.forecast-art-copy p{max-width:540px;color:#a9b6cd;font-size:.84rem;line-height:1.68;}
+.forecast-art-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:17px;}
+.forecast-art-chips span{padding:6px 10px;border:1px solid rgba(255,187,94,.23);border-radius:20px;background:rgba(38,24,7,.44);color:#ffddb0;font-size:.62rem;font-weight:800;backdrop-filter:blur(10px);}
+.forecast-art-stats{position:absolute;z-index:3;left:17px;right:17px;bottom:17px;display:grid;grid-template-columns:repeat(4,1fr);gap:7px;padding:8px;border:1px solid rgba(255,192,105,.18);border-radius:14px;background:rgba(2,7,19,.8);backdrop-filter:blur(17px);}
+.forecast-art-stat{padding:10px 13px;border-right:1px solid rgba(255,255,255,.08);}
+.forecast-art-stat:last-child{border-right:0;}
+.forecast-art-stat b{display:block;color:#fff;font-size:1rem;}
+.forecast-art-stat span{display:block;margin-top:3px;color:#7e8ca7;font-size:.54rem;font-weight:900;letter-spacing:.7px;text-transform:uppercase;}
+.final-result{position:relative;overflow:hidden;margin-bottom:18px;padding:20px 24px;border-radius:16px;border:2px solid rgba(245,166,35,.55);background:linear-gradient(120deg,rgba(40,32,8,.8),rgba(12,20,26,.9) 60%,rgba(18,13,26,.9));box-shadow:0 22px 54px rgba(0,0,0,.3);}
+.final-result::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(var(--gold),var(--mint),var(--cyan));}
+.fr-kicker{display:flex;align-items:center;gap:8px;color:#ffce7a;font-size:.66rem;font-weight:900;letter-spacing:1.4px;text-transform:uppercase;margin-bottom:14px;}
+.fr-teams{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;}
+.fr-team{display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;font-size:1.15rem;font-weight:900;color:#cfe3ff;}
+.fr-team.winner{color:#ffd37a;}
+.fr-badge{font-size:.58rem;font-weight:900;letter-spacing:.5px;padding:3px 10px;border-radius:20px;background:rgba(245,166,35,.18);color:#ffce7a;border:1px solid rgba(245,166,35,.4);}
+.fr-vs{color:#8190ad;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;}
+.fr-bar{display:flex;height:26px;border-radius:8px;overflow:hidden;margin-top:16px;border:1px solid rgba(255,255,255,.1);}
+.fr-bar .a{background:linear-gradient(135deg,#f5a623,#ffce7a);color:#1a1204;display:grid;place-items:center;font-size:.74rem;font-weight:900;}
+.fr-bar .b{background:linear-gradient(135deg,#2a4a70,#3a6da0);color:#fff;display:grid;place-items:center;font-size:.74rem;font-weight:900;}
+.fr-line{margin-top:14px;font-size:.86rem;line-height:1.6;color:#e2e9f5;background:rgba(71,209,140,.06);border:1px solid rgba(71,209,140,.25);border-radius:10px;padding:12px 14px;}
+.fr-line b{color:#ffd37a;}
+@media(max-width:560px){.fr-teams{grid-template-columns:1fr;gap:10px}.fr-vs{transform:none}}
+.prog-row{display:grid;grid-template-columns:150px 1fr;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+.prog-team{display:flex;align-items:center;gap:8px;font-weight:800;font-size:0.86rem;}
+.team-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
+.prog-bars{display:flex;flex-direction:column;gap:5px;}
+.mini-bar{display:flex;align-items:center;gap:8px;}
+.mini-lbl{width:54px;font-size:0.64rem;color:#8190ad;text-transform:uppercase;flex-shrink:0;}
+.mini-track{flex:1;height:14px;background:#141b2c;border-radius:5px;overflow:hidden;}
+.mini-fill{height:100%;border-radius:5px;transition:width .8s cubic-bezier(.2,.8,.2,1);}
+.mini-val{width:46px;text-align:right;font-size:0.7rem;font-weight:800;font-variant-numeric:tabular-nums;flex-shrink:0;}
+.data-table{width:100%;border-collapse:collapse;font-size:0.82rem;}
+.data-table th{padding:9px 10px;text-align:left;color:#8190ad;font-size:0.66rem;text-transform:uppercase;border-bottom:1px solid var(--border);}
+.data-table td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.04);color:#d6def0;}
+.data-table tr:hover td{background:rgba(101,215,255,.045);}
+.data-table .num{text-align:right;font-variant-numeric:tabular-nums;}
+.qual-yes{color:#5fe0a0;font-weight:800;}
+.pos-badge{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:800;background:rgba(255,255,255,.08);}
+.pos-badge.q{background:rgba(71,209,140,.2);color:#5fe0a0;}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
+.filters select{background:#0d1422;border:1px solid rgba(255,255,255,.14);color:#e8eaf0;padding:8px 12px;border-radius:8px;font-size:0.82rem;cursor:pointer;}
+.filters .lbl{font-size:0.72rem;color:#8190ad;text-transform:uppercase;letter-spacing:.5px;}
+.match{background:rgba(0,0,0,.24);border:1px solid rgba(255,255,255,.09);border-radius:10px;margin-bottom:10px;overflow:hidden;}
+.match-top{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;flex-wrap:wrap;}
+.match-no{font-size:0.64rem;color:#8190ad;background:rgba(255,255,255,.06);padding:3px 8px;border-radius:6px;font-weight:700;white-space:nowrap;}
+.match-date{font-size:0.7rem;color:#9fb0d0;white-space:nowrap;}
+.match-meta{font-size:0.66rem;color:#778;white-space:nowrap;}
+.stage-pill{font-size:0.6rem;padding:2px 8px;border-radius:10px;font-weight:800;}
+.stage-group{background:rgba(101,215,255,.12);color:#8fd7ff;}
+.stage-playoff{background:rgba(157,123,255,.16);color:#c2adff;}
+.stage-final{background:rgba(245,166,35,.18);color:#ffce7a;}
+.match-teams{flex:1;min-width:260px;display:flex;align-items:center;gap:10px;}
+.mt-side{flex:1;display:flex;align-items:center;gap:7px;font-weight:700;font-size:0.9rem;}
+.mt-side.t2{justify-content:flex-end;text-align:right;}
+.mt-side.win{color:#fff;}
+.mt-side.lose{color:#8190ad;}
+.vs{font-size:0.7rem;color:#667;font-weight:700;}
+.prob-bar{display:flex;height:26px;border-radius:7px;overflow:hidden;min-width:200px;flex:1.2;border:1px solid rgba(255,255,255,.1);}
+.prob-a{background:linear-gradient(135deg,#1a6ec7,#2a8de0);display:grid;place-items:center;color:#fff;font-size:0.72rem;font-weight:800;}
+.prob-b{background:linear-gradient(135deg,#c74a1a,#e0682a);display:grid;place-items:center;color:#fff;font-size:0.72rem;font-weight:800;}
+.tbd{font-size:0.8rem;color:#778;font-style:italic;}
+.expand-ico{color:#667;font-size:0.9rem;margin-left:auto;}
+.plan{display:none;padding:0 14px 14px;border-top:1px dashed rgba(255,255,255,.1);}
+.plan.open{display:block;}
+.plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:12px;}
+.plan-box{background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:12px;}
+.plan-box .pb-lbl{font-size:0.62rem;text-transform:uppercase;letter-spacing:.5px;color:#8190ad;margin-bottom:5px;}
+.plan-box .pb-val{font-size:0.84rem;font-weight:700;color:#e8eaf0;line-height:1.4;}
+.plan-summary{margin-top:12px;font-size:0.82rem;color:#cfe0d6;background:rgba(71,209,140,.06);border:1px solid rgba(71,209,140,.28);border-radius:8px;padding:12px;line-height:1.55;}
+.badge-spin{color:#c2adff;}.badge-pace{color:#8fd7ff;}
+.tactics-hero{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.45fr) minmax(300px,.8fr);gap:24px;padding:28px;margin:2px 0 18px;border:1px solid rgba(245,166,35,.2);border-radius:18px;background:linear-gradient(125deg,rgba(24,34,28,.94),rgba(10,22,29,.92) 58%,rgba(18,13,26,.94));box-shadow:0 28px 70px rgba(0,0,0,.25);}
+.tactics-hero::before{content:"";position:absolute;width:360px;height:360px;right:-110px;top:-180px;border:1px solid rgba(245,166,35,.15);border-radius:50%;box-shadow:0 0 0 40px rgba(101,215,255,.025),0 0 0 80px rgba(71,209,140,.02);}
+.tactics-hero::after{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(var(--gold),var(--mint),var(--cyan));}
+.tactics-kicker{display:flex;align-items:center;gap:8px;margin-bottom:10px;color:#74e0ae;font-size:.68rem;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;}
+.tactics-kicker::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 15px var(--mint);}
+.tactics-hero h1{max-width:680px;font-size:clamp(1.75rem,3vw,2.65rem);line-height:1.05;color:#fff;letter-spacing:-1.2px;}
+.tactics-hero h1 span{color:#ffd37a;}
+.tactics-hero p{max-width:690px;margin-top:12px;color:#9eabc1;font-size:.86rem;line-height:1.65;}
+.hero-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;}
+.hero-chip{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid rgba(255,255,255,.09);border-radius:20px;background:rgba(0,0,0,.2);color:#cbd5e7;font-size:.7rem;font-weight:700;}
+.tactics-pulse{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:center;}
+.pulse-stat{min-height:94px;padding:15px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:rgba(3,8,14,.42);box-shadow:inset 0 1px 0 rgba(255,255,255,.04);}
+.pulse-stat b{display:block;color:#fff;font-size:1.45rem;line-height:1.1;font-variant-numeric:tabular-nums;}
+.pulse-stat span{display:block;margin-top:6px;color:#7f8da7;font-size:.62rem;font-weight:800;letter-spacing:.8px;text-transform:uppercase;}
+.tactical-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;padding:11px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(8,13,21,.74);backdrop-filter:blur(14px);}
+.toolbar-title{display:flex;align-items:center;gap:8px;margin-right:auto;padding:0 6px;color:#dbe5f4;font-size:.78rem;font-weight:800;}
+.toolbar-title small{color:#77849f;font-size:.66rem;font-weight:600;}
+.tactical-toolbar select{min-width:145px;padding:9px 34px 9px 11px;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:#0d1422;color:#e8eaf0;font-size:.74rem;cursor:pointer;}
+.tactical-count{padding:7px 10px;border-radius:8px;background:rgba(71,209,140,.1);color:#6be3aa;font-size:.68rem;font-weight:800;}
+.tactical-stack{display:grid;gap:14px;}
+.tactical-card{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.095);border-radius:14px;background:linear-gradient(145deg,rgba(18,30,34,.94),rgba(11,20,29,.96));box-shadow:0 20px 45px rgba(0,0,0,.18);transition:border-color .2s,transform .2s;}
+.tactical-card:hover{border-color:rgba(101,215,255,.22);transform:translateY(-1px);}
+.tactical-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--card-accent,var(--cyan));opacity:.85;}
+.tc-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;padding:18px 20px 15px;}
+.tc-labels{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:10px;}
+.tc-match-id{color:#8190ad;font-size:.62rem;font-weight:900;letter-spacing:.8px;text-transform:uppercase;}
+.tc-teams{display:flex;align-items:center;gap:10px;font-size:1.05rem;font-weight:900;color:#f2f5fa;}
+.tc-teams .versus{display:grid;place-items:center;width:26px;height:26px;border:1px solid rgba(255,255,255,.09);border-radius:50%;color:#6f7c92;font-size:.55rem;}
+.tc-meta{display:flex;justify-content:flex-end;align-items:center;gap:12px;flex-wrap:wrap;color:#8997af;font-size:.68rem;}
+.tc-meta span{display:flex;align-items:center;gap:5px;}
+.tc-signal{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid rgba(255,255,255,.055);border-bottom:1px solid rgba(255,255,255,.055);background:rgba(0,0,0,.13);}
+.signal-item{position:relative;padding:14px 18px;border-right:1px solid rgba(255,255,255,.055);}
+.signal-item:last-child{border-right:none;}
+.signal-label{display:flex;align-items:center;gap:6px;margin-bottom:7px;color:#738199;font-size:.58rem;font-weight:800;letter-spacing:.8px;text-transform:uppercase;}
+.signal-value{color:#edf2f8;font-size:.86rem;font-weight:800;line-height:1.35;}
+.signal-value em{color:#bca7ff;font-style:normal;}
+.signal-note{margin-top:3px;color:#748299;font-size:.63rem;}
+.condition-brief{display:flex;gap:10px;align-items:flex-start;margin:14px 18px;padding:12px 13px;border:1px solid rgba(71,209,140,.18);border-radius:10px;background:linear-gradient(90deg,rgba(71,209,140,.07),rgba(101,215,255,.035));color:#becfc8;font-size:.76rem;line-height:1.55;}
+.condition-brief b{color:#74e0ae;white-space:nowrap;}
+.win-read{display:grid;grid-template-columns:auto minmax(120px,220px) auto;gap:9px;align-items:center;margin-top:10px;}
+.win-read span{color:#8b98ae;font-size:.62rem;font-weight:800;}
+.win-track{height:5px;border-radius:10px;overflow:hidden;background:rgba(255,255,255,.08);}
+.win-fill{height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--cyan),var(--mint));}
+.tc-details{display:none;padding:0 18px 18px;}
+.tactical-card.is-open .tc-details{display:block;animation:fadeIn .2s;}
+.playbook-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:4px;}
+.phase-card{padding:14px;border:1px solid rgba(255,255,255,.075);border-radius:10px;background:rgba(3,8,14,.3);}
+.phase-top{display:flex;justify-content:space-between;gap:8px;margin-bottom:8px;}
+.phase-name{color:#f1f4f9;font-size:.75rem;font-weight:900;}
+.phase-overs{color:#718099;font-size:.58rem;font-weight:800;text-transform:uppercase;}
+.phase-card p{color:#96a4b9;font-size:.69rem;line-height:1.55;}
+.phase-card strong{color:#dce5f1;}
+.intel-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:10px;margin-top:10px;}
+.intel-panel{padding:14px;border:1px solid rgba(255,255,255,.075);border-radius:10px;background:rgba(0,0,0,.18);}
+.intel-panel h3{margin-bottom:9px;color:#8290a8;font-size:.6rem;letter-spacing:.9px;text-transform:uppercase;}
+.intel-row{display:grid;grid-template-columns:110px 1fr;gap:10px;padding:7px 0;border-top:1px solid rgba(255,255,255,.045);font-size:.7rem;line-height:1.45;}
+.intel-row:first-of-type{border-top:0;padding-top:0;}
+.intel-row span{color:#748299;}
+.intel-row b{color:#dce4ef;font-weight:700;}
+.target-panel{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;}
+.target-ring{display:grid;place-items:center;width:78px;height:78px;border-radius:50%;background:radial-gradient(circle at center,#0d1921 56%,transparent 57%),conic-gradient(var(--gold) 0 72%,rgba(255,255,255,.07) 72%);box-shadow:0 0 28px rgba(245,166,35,.08);}
+.target-ring b{color:#ffd37a;font-size:1.18rem;}
+.target-copy strong{display:block;color:#eef2f8;font-size:.78rem;}
+.target-copy p{margin-top:5px;color:#7e8ca4;font-size:.67rem;line-height:1.5;}
+.risk-callout{margin-top:10px;padding:10px 12px;border-left:2px solid var(--coral);background:rgba(255,111,97,.055);color:#aeb9ca;font-size:.68rem;line-height:1.5;}
+.tc-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 18px 15px;}
+.ai-tag{display:flex;align-items:center;gap:7px;color:#6f7e96;font-size:.62rem;}
+.ai-tag::before{content:"AI";display:grid;place-items:center;width:24px;height:24px;border:1px solid rgba(157,123,255,.26);border-radius:7px;background:rgba(157,123,255,.09);color:#c4b2ff;font-size:.55rem;font-weight:900;}
+.playbook-btn{display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border:1px solid rgba(255,255,255,.11);border-radius:8px;background:rgba(255,255,255,.035);color:#d8e0ec;font-size:.68rem;font-weight:800;cursor:pointer;}
+.playbook-btn:hover{border-color:rgba(245,166,35,.4);color:#ffd37a;}
+.playbook-btn .arrow{transition:transform .2s;}
+.tactical-card.is-open .playbook-btn .arrow{transform:rotate(180deg);}
+.empty-tactics{padding:36px;border:1px dashed rgba(255,255,255,.12);border-radius:12px;text-align:center;color:#7f8da5;font-size:.8rem;}
+.team-summary{background:rgba(0,0,0,.24);border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:16px;margin-bottom:12px;}
+.ts-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.ts-name{font-size:1.05rem;font-weight:800;}
+.ts-rank{font-size:0.66rem;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,.08);margin-left:auto;}
+.ts-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;}
+.ts-stat{background:rgba(0,0,0,.26);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:10px;text-align:center;}
+.ts-val{font-size:1.3rem;font-weight:900;line-height:1;}
+.ts-lbl{font-size:0.6rem;color:#8190ad;text-transform:uppercase;margin-top:5px;}
+.loader{text-align:center;padding:50px;color:#8190ad;}
+.error-box{margin:16px 0;padding:14px;border:1px solid #8f3030;border-radius:12px;background:#201016;color:#ffb4b4;font-size:0.84rem;}
+.offline-notice{max-width:520px;margin:60px auto;padding:34px 30px;text-align:center;border:1px solid rgba(101,215,255,.22);border-radius:16px;background:linear-gradient(145deg,rgba(14,22,34,.9),rgba(9,15,24,.9));box-shadow:0 24px 60px rgba(0,0,0,.3);}
+.offline-notice .on-ico{font-size:2.4rem;margin-bottom:12px;}
+.offline-notice .on-title{font-size:1.1rem;font-weight:800;color:#e8eaf0;}
+.offline-notice .on-sub{margin-top:10px;font-size:.82rem;color:#93a2bd;line-height:1.6;}
+.offline-notice .on-retry{margin-top:18px;padding:10px 20px;border:1px solid rgba(101,215,255,.35);border-radius:9px;background:rgba(101,215,255,.1);color:#8fd7ff;font-size:.8rem;font-weight:800;cursor:pointer;transition:all .15s;}
+.offline-notice .on-retry:hover{background:rgba(101,215,255,.2);border-color:rgba(101,215,255,.6);}
+@media(max-width:900px){.tactics-hero{grid-template-columns:1fr}.tactics-pulse{grid-template-columns:repeat(4,1fr)}.pulse-stat{min-height:auto}.tc-head{grid-template-columns:1fr}.tc-meta{justify-content:flex-start}.tc-signal{grid-template-columns:1fr 1fr}.signal-item:nth-child(2){border-right:0}.playbook-grid,.intel-grid{grid-template-columns:1fr}}
+@media(max-width:820px){.hero,.grid2{grid-template-columns:1fr;}.prog-row{grid-template-columns:110px 1fr;}.match-teams{min-width:100%;}.prob-bar{min-width:100%;}.tactics-pulse{grid-template-columns:1fr 1fr}.tactical-toolbar select{flex:1;min-width:130px}.forecast-art-hero{min-height:570px}.forecast-art-copy{padding:38px 26px 195px}}
+@media(max-width:560px){header{padding:13px 14px;flex-wrap:wrap}header .home-link{margin-left:60px}.page{padding:14px}.tactics-hero{padding:22px 18px}.tc-head{padding:16px}.tc-teams{font-size:.88rem;gap:6px}.tc-signal{grid-template-columns:1fr}.signal-item{border-right:0;border-bottom:1px solid rgba(255,255,255,.055)}.signal-item:last-child{border-bottom:0}.condition-brief{margin:12px 14px;flex-direction:column}.tc-details{padding:0 14px 14px}.intel-row{grid-template-columns:1fr;gap:3px}.tc-footer{padding:0 14px 14px}.ai-tag{display:none}}
+@media(max-width:560px){.forecast-art-hero{min-height:660px}.forecast-art-copy{padding:30px 20px 270px}.forecast-art-stats{grid-template-columns:1fr 1fr}.forecast-art-stat{border-right:0}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">🔮</div>
+  <div>
+    <h1>LPL 2026 — AI Tournament Forecast</h1>
+    <p>Match Predictions &nbsp;•&nbsp; Play-off / Final Progression (Monte-Carlo) &nbsp;•&nbsp; AI Tactical Game Plans</p>
+  </div>
+  <span id="status" class="status-pill status-off">● connecting…</span>
+  <a class="home-link" id="homeLink" href="http://localhost:8501" title="Back to the home dashboard">🏠 Home</a>
+</header>
+<div class="tabs">
+  <button class="tab active" data-tab="progression" onclick="showTab('progression',this)">🏆 Predictions &amp; Progression</button>
+  <button class="tab" data-tab="fixtures" onclick="showTab('fixtures',this)">📅 Fixtures &amp; Win Probability</button>
+  <button class="tab" data-tab="tactics" onclick="showTab('tactics',this)">🎯 AI Tactical Game Plans</button>
+  <button class="tab" data-tab="teams" onclick="showTab('teams',this)">🛡️ Per-Team Outlook</button>
+</div>
+
+<div id="progression" class="page active"><div class="loader">Running Monte-Carlo simulation…</div></div>
+<div id="fixtures" class="page"><div class="loader">Loading fixtures…</div></div>
+<div id="tactics" class="page"><div class="loader">Loading game plans…</div></div>
+<div id="teams" class="page"><div class="loader">Loading team outlook…</div></div>
+
+<script>
+const API_CANDIDATES = location.protocol === 'file:' ? ['http://127.0.0.1:8001','http://127.0.0.1:8000'] : [''];
+const TEAM_ICONS={'Colombo Kaps':'🦁','Galle Gallants':'⚔️','Jaffna Kings':'👑','Dambulla Sixers':'💥','Kandy Royals':'🔥'};
+const TEAM_COLORS={'Colombo Kaps':'#2a8de0','Galle Gallants':'#3dcf7a','Jaffna Kings':'#d4bc60','Dambulla Sixers':'#7a9de8','Kandy Royals':'#e0682a'};
+const FORECAST_ART=location.protocol==='file:'?'assets/ai-tournament-forecast.png':'/frontend/assets/ai-tournament-forecast.png';
+let FC=null;
+
+function esc(v){return String(v ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
+function color(t){return TEAM_COLORS[t]||'#667';}
+function icon(t){return TEAM_ICONS[t]||'🏏';}
+function dot(t){return `<span class="team-dot" style="background:${color(t)}"></span>`;}
+
+async function api(path){
+  let lastErr=null;
+  for(const base of API_CANDIDATES){
+    try{const r=await fetch(base+path);if(!r.ok)throw new Error(r.status);return await r.json();}
+    catch(e){lastErr=e;}
+  }
+  throw lastErr;
+}
+function showTab(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(history.replaceState)history.replaceState(null,'','#'+id);
+}
+function stagePill(stage){
+  const s=(stage||'').toLowerCase();
+  if(s.includes('final'))return '<span class="stage-pill stage-final">FINAL</span>';
+  if(s.includes('play'))return '<span class="stage-pill stage-playoff">PLAY-OFF</span>';
+  return '<span class="stage-pill stage-group">GROUP</span>';
+}
+
+// ─── TAB 1: PROGRESSION ───────────────────────────────────────────────────────
+function renderProgression(){
+  const prog=FC.progression||[];
+  const stand=FC.standings_projection||[];
+  let html=`<h1 class="section-title">🏆 Predictions &amp; Tournament Progression</h1>
+  <p class="subtitle">${FC.n_simulations.toLocaleString()} Monte-Carlo simulations over the full fixture list · model: <b>${FC.model_loaded?'PyTorch MT-DNN':'fallback'}</b> · source: ${esc(FC.schedule_file)}</p>`;
+
+  // hero
+  const champ=prog[0],runner=prog[1];
+  html+=`<section class="forecast-art-hero">
+    <img src="${FORECAST_ART}" alt="AI tournament scenario and shot-path forecast table">
+    <div class="forecast-art-copy">
+      <small>Scenario engine · tournament decision tree</small>
+      <h1>Forecast every route<br>to the final.</h1>
+      <p>Thousands of simulated seasons reveal the most likely champion, the danger fixtures and the tactical decisions that change the tournament.</p>
+      <div class="forecast-art-chips"><span>Monte-Carlo progression</span><span>Fixture probability</span><span>AI game plans</span><span>Team outlook</span></div>
+    </div>
+    <div class="forecast-art-stats">
+      <div class="forecast-art-stat"><b>${FC.n_simulations.toLocaleString()}</b><span>Season simulations</span></div>
+      <div class="forecast-art-stat"><b>${champ?icon(champ.team)+' '+esc(champ.team):'Calculating'}</b><span>Projected champion</span></div>
+      <div class="forecast-art-stat"><b>${(FC.fixtures||[]).length}</b><span>Fixtures modeled</span></div>
+      <div class="forecast-art-stat"><b>${FC.model_loaded?'MT-DNN':'Fallback'}</b><span>Prediction engine</span></div>
+    </div>
+  </section>`;
+  if(champ){
+    html+=`<div class="hero">
+      <div class="champ-card"><div class="trophy">🏆</div><div class="lbl">Projected Champion</div>
+        <div class="nm">${icon(champ.team)} ${esc(champ.team)}</div>
+        <div class="pct">${champ.champion_pct}% chance of lifting the cup</div></div>
+      <div class="runner-card"><div class="lbl">Most likely runner-up</div>
+        <div class="nm">${runner?icon(runner.team)+' '+esc(runner.team):'—'}</div>
+        <div class="pct" style="color:#8190ad;margin-top:6px;font-size:.8rem">${runner?runner.champion_pct+'% title chance':''}</div></div>
+    </div>`;
+
+    // clear final result — who beats whom to win the cup
+    if(runner){
+      const cp=Number(champ.champion_pct)||0, rp=Number(runner.champion_pct)||0;
+      const tot=Math.max(cp+rp,1);
+      const cShare=Math.round(cp/tot*100), rShare=100-cShare;
+      html+=`<div class="final-result">
+        <div class="fr-kicker">🏆 Predicted Grand Final · R. Premadasa Stadium</div>
+        <div class="fr-teams">
+          <div class="fr-team winner">${icon(champ.team)} ${esc(champ.team)}<span class="fr-badge">WINS THE CUP 🏆</span></div>
+          <div class="fr-vs">beat</div>
+          <div class="fr-team">${icon(runner.team)} ${esc(runner.team)}<span style="font-size:.58rem;color:#8190ad;font-weight:800">RUNNER-UP</span></div>
+        </div>
+        <div class="fr-bar"><div class="a" style="flex:${cShare}">${esc(champ.team.split(' ')[0])} ${cShare}%</div><div class="b" style="flex:${rShare}">${rShare}% ${esc(runner.team.split(' ')[0])}</div></div>
+        <div class="fr-line">🏆 In the final, <b>${esc(champ.team)}</b> are projected to beat <b>${esc(runner.team)}</b> and lift the LPL 2026 trophy — winning the title in <b>${champ.champion_pct}%</b> of ${FC.n_simulations.toLocaleString()} simulations.</div>
+      </div>`;
+    }
+  }
+
+  // progression bars
+  html+=`<div class="card"><h2>Play-off / Final / Champion probability per team</h2>`;
+  prog.forEach(p=>{
+    html+=`<div class="prog-row">
+      <div class="prog-team">${dot(p.team)}${icon(p.team)} ${esc(p.team)}</div>
+      <div class="prog-bars">
+        <div class="mini-bar"><span class="mini-lbl">Play-off</span><div class="mini-track"><div class="mini-fill" style="width:${p.semi_pct}%;background:linear-gradient(90deg,#65d7ff,#47d18c)"></div></div><span class="mini-val" style="color:#8fd7ff">${p.semi_pct}%</span></div>
+        <div class="mini-bar"><span class="mini-lbl">Final</span><div class="mini-track"><div class="mini-fill" style="width:${p.final_pct}%;background:linear-gradient(90deg,#9d7bff,#65d7ff)"></div></div><span class="mini-val" style="color:#c2adff">${p.final_pct}%</span></div>
+        <div class="mini-bar"><span class="mini-lbl">Champion</span><div class="mini-track"><div class="mini-fill" style="width:${p.champion_pct}%;background:linear-gradient(90deg,#f5a623,#ffce7a)"></div></div><span class="mini-val" style="color:#ffce7a">${p.champion_pct}%</span></div>
+      </div></div>`;
+  });
+  html+=`</div>`;
+
+  // projected standings table
+  html+=`<div class="card"><h2>Projected Group Table (expected points)</h2>
+    <table class="data-table"><thead><tr><th>#</th><th>Team</th><th class="num">M</th><th class="num">Exp. Wins</th><th class="num">Exp. Pts</th><th>Status</th></tr></thead><tbody>`;
+  stand.forEach(r=>{
+    html+=`<tr><td><span class="pos-badge ${r.qualifies?'q':''}">${r.projected_position}</span></td>
+      <td>${dot(r.team)}${icon(r.team)} ${esc(r.team)}</td>
+      <td class="num">${r.matches}</td><td class="num">${r.expected_wins}</td>
+      <td class="num"><b>${r.expected_points}</b></td>
+      <td>${r.qualifies?'<span class="qual-yes">✓ Play-off</span>':'<span style="color:#8190ad">Eliminated</span>'}</td></tr>`;
+  });
+  html+=`</tbody></table></div>`;
+  document.getElementById('progression').innerHTML=html;
+}
+
+// ─── TAB 2: FIXTURES ──────────────────────────────────────────────────────────
+function matchRowHTML(m,idx){
+  const decided=m.is_decided && m.win_prob_team1!=null;
+  let teamsHTML;
+  if(m.team1 && m.team2){
+    const w1=m.predicted_winner===m.team1;
+    teamsHTML=`<div class="mt-side ${decided?(w1?'win':'lose'):''}">${dot(m.team1)}${icon(m.team1)} ${esc(m.team1)}</div>
+      <span class="vs">vs</span>
+      <div class="mt-side t2 ${decided?(!w1?'win':'lose'):''}">${esc(m.team2)} ${icon(m.team2)}${dot(m.team2)}</div>`;
+  }else{
+    teamsHTML=`<div class="tbd">TBD — decided by play-offs</div>`;
+  }
+  const probHTML=decided
+    ? `<div class="prob-bar"><div class="prob-a" style="flex:${m.win_prob_team1}">${m.win_prob_team1}%</div><div class="prob-b" style="flex:${m.win_prob_team2}">${m.win_prob_team2}%</div></div>`
+    : `<div class="prob-bar" style="border-style:dashed"><div style="flex:1;display:grid;place-items:center;color:#667;font-size:.7rem">awaiting seeding</div></div>`;
+  return `<div class="match">
+    <div class="match-top" onclick="togglePlan(${idx})">
+      <span class="match-no">${esc(m.match_no)}</span>
+      <span class="match-date">📅 ${esc(m.date)} ${m.day_of_week?'('+esc(m.day_of_week.slice(0,3))+')':''}</span>
+      <span class="match-meta">🕒 ${esc(m.time)} · 📍 ${esc(m.city)}</span>
+      ${stagePill(m.stage)}
+      <div class="match-teams">${teamsHTML}</div>
+      ${probHTML}
+      <span class="expand-ico">▾</span>
+    </div>
+    <div class="plan" id="plan${idx}">${planHTML(m)}</div>
+  </div>`;
+}
+function renderFixtures(){
+  const matches=FC.matches||[];
+  let html=`<h1 class="section-title">📅 Fixtures &amp; Win Probability</h1>
+  <p class="subtitle">Every fixture with the model's win probability. Click a match to reveal its AI tactical game plan.</p>
+  <div class="filters"><span class="lbl">Filter team</span>
+    <select id="teamFilter" onchange="applyFixtureFilter()">
+      <option value="">All teams</option>
+      ${(FC.teams||[]).map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('')}
+    </select>
+    <span class="lbl">Stage</span>
+    <select id="stageFilter" onchange="applyFixtureFilter()">
+      <option value="">All stages</option><option value="group">Group</option>
+      <option value="play">Play-off</option><option value="final">Final</option>
+    </select>
+  </div><div id="fixtureList"></div>`;
+  document.getElementById('fixtures').innerHTML=html;
+  applyFixtureFilter();
+}
+function applyFixtureFilter(){
+  const tf=document.getElementById('teamFilter').value;
+  const sf=document.getElementById('stageFilter').value.toLowerCase();
+  const list=(FC.matches||[]).map((m,i)=>({m,i}))
+    .filter(({m})=>(!tf||m.team1===tf||m.team2===tf) && (!sf||(m.stage||'').toLowerCase().includes(sf)));
+  document.getElementById('fixtureList').innerHTML=list.length
+    ? list.map(({m,i})=>matchRowHTML(m,i)).join('')
+    : '<p class="subtitle">No matches for this filter.</p>';
+}
+
+// ─── tactical plan HTML (shared by fixtures + tactics tab) ────────────────────
+function planHTML(m){
+  const p=m.tactical_plan||{};
+  const heavy=p.spin_heavy?`<span class="badge-spin">Spin-heavy</span>`:`<span class="badge-pace">Pace-led</span>`;
+  return `<div class="plan-grid">
+    <div class="plan-box"><div class="pb-lbl">Toss Decision</div><div class="pb-val">${esc(p.toss_decision||'—')}</div></div>
+    <div class="plan-box"><div class="pb-lbl">Strategy</div><div class="pb-val">${esc(p.bat_or_bowl||'—')} · ${heavy}</div></div>
+    <div class="plan-box"><div class="pb-lbl">Pitch</div><div class="pb-val">${esc(p.pitch_type||'—')}<br><span style="font-size:.7rem;color:#8190ad">Spin ${p.spin_advantage_pct}% · Pace ${p.pace_advantage_pct}% · Dew ${esc(p.dew_factor||'')}</span></div></div>
+    <div class="plan-box"><div class="pb-lbl">Key Bowlers</div><div class="pb-val">${esc(p.key_bowler_type||'—')}</div></div>
+  </div>
+  <div class="plan-summary">🧠 ${esc(p.summary||'')}</div>`;
+}
+function togglePlan(i){const el=document.getElementById('plan'+i);if(el)el.classList.toggle('open');}
+
+// ─── TAB 3: TACTICS — MATCH COMMAND CENTRE ───────────────────────────────────
+function tacticalPhasePlan(p,m){
+  const spin=!!p.spin_heavy,dew=String(p.dew_factor||'').toLowerCase();
+  const wet=dew.includes('high')||dew.includes('heavy')||m.dew;
+  return [
+    {
+      name:'Powerplay',overs:'Overs 1–6',
+      copy:spin
+        ? '<strong>Attack with the new ball.</strong> Two seamers on a full off-stump channel; introduce the best spinner before over six if grip appears.'
+        : '<strong>Use pace while the ball is hard.</strong> Hit the top of off, keep a catching cover and protect the short square boundary.'
+    },
+    {
+      name:'Control window',overs:'Overs 7–15',
+      copy:spin
+        ? '<strong>Build the spin squeeze.</strong> Bowl at least six overs of spin in this phase, deny easy singles and make the batter hit against the turn.'
+        : '<strong>Change pace, not length.</strong> Use cutters into the pitch, one boundary rider square and a straight long-on catching option.'
+    },
+    {
+      name:'Death plan',overs:'Overs 16–20',
+      copy:wet
+        ? '<strong>Plan for a wet ball.</strong> Favour wide yorkers and hard length; avoid relying on big-turn variations once dew settles.'
+        : '<strong>Protect the scoring arc.</strong> Mix yorkers with slower balls into the surface and keep the long straight boundary in play.'
+    }
+  ];
+}
+function tacticalTarget(p){
+  const value=Number(p.safe_score_target);
+  if(Number.isFinite(value)&&value>0)return Math.round(value);
+  const pitch=String(p.pitch_type||'').toLowerCase();
+  if(pitch.includes('slow')||pitch.includes('dust'))return 165;
+  if(pitch.includes('bounc'))return 185;
+  return 175;
+}
+function tacticalCardHTML(m,idx,open=false){
+  const p=m.tactical_plan||{};
+  const spin=!!p.spin_heavy;
+  const target=tacticalTarget(p);
+  const phases=tacticalPhasePlan(p,m);
+  const wp1=Number(m.win_prob_team1)||50;
+  const wp2=Number(m.win_prob_team2)||50;
+  const winner=m.predicted_winner||((wp1>=wp2)?m.team1:m.team2);
+  const winnerProb=winner===m.team1?wp1:wp2;
+  const signal=Math.abs((Number(p.spin_advantage_pct)||50)-(Number(p.pace_advantage_pct)||50))>=18?'Strong':'Balanced';
+  const fieldPlan=spin
+    ? 'Ring field on the off side; long-on and deep mid-wicket protect the release shot.'
+    : 'One slip early, catching cover in the powerplay, then protect square and straight boundaries.';
+  const pivot=m.dew
+    ? 'If the ball becomes difficult to grip, shorten the spin spell and switch to pace-off hard lengths.'
+    : 'If the pitch stays true after 10 overs, keep one extra seamer for the final five instead of forcing spin.';
+  const risk=m.dew
+    ? 'Primary risk: wet-ball execution at the death and a faster outfield during the chase.'
+    : 'Primary risk: losing early wickets while setting a total on a surface expected to slow later.';
+  const accent=spin?'#9d7bff':'#65d7ff';
+  return `<article class="tactical-card ${open?'is-open':''}" id="tacticalCard${idx}" style="--card-accent:${accent}">
+    <div class="tc-head">
+      <div>
+        <div class="tc-labels"><span class="tc-match-id">${esc(m.match_no)}</span>${stagePill(m.stage)}<span class="match-no">${m.match_timing==='Night'?'NIGHT MATCH':'DAY MATCH'}</span></div>
+        <div class="tc-teams"><span>${icon(m.team1)} ${esc(m.team1)}</span><span class="versus">VS</span><span>${esc(m.team2)} ${icon(m.team2)}</span></div>
+        <div class="win-read"><span>${esc(winner)} edge</span><div class="win-track"><div class="win-fill" style="width:${winnerProb}%"></div></div><span>${winnerProb.toFixed(1)}%</span></div>
+      </div>
+      <div class="tc-meta">
+        <span>📅 ${esc(m.date)}</span><span>🕒 ${esc(m.time)}</span><span>📍 ${esc(m.city)}</span>
+      </div>
+    </div>
+    <div class="tc-signal">
+      <div class="signal-item"><div class="signal-label">🪙 Toss call</div><div class="signal-value">${esc(p.bowl_first?'Bowl first':'Bat first')}</div><div class="signal-note">${esc(p.bat_or_bowl||'Match conditions')}</div></div>
+      <div class="signal-item"><div class="signal-label">🧭 Core identity</div><div class="signal-value"><em>${spin?'Spin squeeze':'Pace pressure'}</em></div><div class="signal-note">${esc(p.key_bowler_type||'Bowling unit')} lead</div></div>
+      <div class="signal-item"><div class="signal-label">🏟 Surface read</div><div class="signal-value">${esc(p.pitch_type||'Balanced')}</div><div class="signal-note">Spin ${Number(p.spin_advantage_pct)||50}% · Pace ${Number(p.pace_advantage_pct)||50}%</div></div>
+      <div class="signal-item"><div class="signal-label">💧 Conditions</div><div class="signal-value">Dew ${esc(p.dew_factor||'Low')}</div><div class="signal-note">${signal} tactical signal</div></div>
+    </div>
+    <div class="condition-brief"><b>AI condition read</b><span>${esc(p.condition_note||p.summary||'Plan generated from venue and match conditions.')}</span></div>
+    <div class="tc-details">
+      <div class="playbook-grid">
+        ${phases.map(x=>`<div class="phase-card"><div class="phase-top"><span class="phase-name">${x.name}</span><span class="phase-overs">${x.overs}</span></div><p>${x.copy}</p></div>`).join('')}
+      </div>
+      <div class="intel-grid">
+        <div class="intel-panel">
+          <h3>Captain's decision board</h3>
+          <div class="intel-row"><span>Bowling blueprint</span><b>${esc(p.bowling_strategy||'Adapt bowling resources to the pitch profile.')}</b></div>
+          <div class="intel-row"><span>Field shape</span><b>${fieldPlan}</b></div>
+          <div class="intel-row"><span>Pivot trigger</span><b>${pivot}</b></div>
+        </div>
+        <div class="intel-panel">
+          <h3>Score &amp; risk brief</h3>
+          <div class="target-panel"><div class="target-ring"><b>${target}+</b></div><div class="target-copy"><strong>Safe first-innings target</strong><p>Aim to be around ${Math.round(target*.3)} after 6 overs and preserve six wickets for the final acceleration.</p></div></div>
+          <div class="risk-callout"><strong>Watch-out:</strong> ${risk}</div>
+        </div>
+      </div>
+    </div>
+    <div class="tc-footer">
+      <div class="ai-tag">Generated from venue, timing, pitch bias and dew</div>
+      <button class="playbook-btn" type="button" onclick="toggleTacticalCard(${idx},this)"><span>${open?'Hide full playbook':'View full playbook'}</span><span class="arrow">⌄</span></button>
+    </div>
+  </article>`;
+}
+function toggleTacticalCard(i,button){
+  const card=document.getElementById('tacticalCard'+i);
+  if(!card)return;
+  const open=card.classList.toggle('is-open');
+  const label=button&&button.querySelector('span');
+  if(label)label.textContent=open?'Hide full playbook':'View full playbook';
+}
+function applyTacticalFilter(){
+  const team=document.getElementById('tacticalTeam')?.value||'';
+  const venue=document.getElementById('tacticalVenue')?.value||'';
+  const timing=document.getElementById('tacticalTiming')?.value||'';
+  const matches=(FC.matches||[]).map((m,i)=>({m,i})).filter(({m})=>
+    m.is_decided&&(!team||(m.team1===team||m.team2===team))&&(!venue||m.city===venue)&&(!timing||m.match_timing===timing)
+  );
+  const count=document.getElementById('tacticalResultCount');
+  if(count)count.textContent=`${matches.length} plan${matches.length===1?'':'s'} shown`;
+  const list=document.getElementById('tacticalList');
+  if(list)list.innerHTML=matches.length
+    ?matches.map(({m,i},pos)=>tacticalCardHTML(m,i,pos===0)).join('')
+    :'<div class="empty-tactics">No tactical plans match these filters. Try another team, venue or match time.</div>';
+}
+function renderTactics(){
+  const matches=(FC.matches||[]).filter(m=>m.is_decided);
+  const venues=[...new Set(matches.map(m=>m.city).filter(Boolean))].sort();
+  const night=matches.filter(m=>m.match_timing==='Night').length;
+  const spin=matches.filter(m=>m.tactical_plan?.spin_heavy).length;
+  const html=`<section class="tactics-hero">
+    <div>
+      <div class="tactics-kicker">Live strategy intelligence</div>
+      <h1>AI Match <span>Command Centre</span></h1>
+      <p>Turn venue conditions into a match-day plan. Every fixture now has a toss call, bowling identity, phase-by-phase execution map, safe score target and an in-game pivot trigger.</p>
+      <div class="hero-chips"><span class="hero-chip">⚡ Pre-match decisions</span><span class="hero-chip">🧠 Phase-by-phase playbook</span><span class="hero-chip">🌦 Condition-aware pivots</span></div>
+    </div>
+    <div class="tactics-pulse">
+      <div class="pulse-stat"><b>${matches.length}</b><span>Match plans</span></div>
+      <div class="pulse-stat"><b>${venues.length}</b><span>Venues mapped</span></div>
+      <div class="pulse-stat"><b>${night}</b><span>Dew-led games</span></div>
+      <div class="pulse-stat"><b>${spin}</b><span>Spin plans</span></div>
+    </div>
+  </section>
+  <div class="tactical-toolbar">
+    <div class="toolbar-title">🎛 Plan finder <small>Filter the command board</small></div>
+    <select id="tacticalTeam" onchange="applyTacticalFilter()"><option value="">All teams</option>${(FC.teams||[]).map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('')}</select>
+    <select id="tacticalVenue" onchange="applyTacticalFilter()"><option value="">All venues</option>${venues.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('')}</select>
+    <select id="tacticalTiming" onchange="applyTacticalFilter()"><option value="">Day &amp; night</option><option value="Day">Day matches</option><option value="Night">Night matches</option></select>
+    <span class="tactical-count" id="tacticalResultCount">${matches.length} plans shown</span>
+  </div>
+  <div class="tactical-stack" id="tacticalList"></div>`;
+  document.getElementById('tactics').innerHTML=html;
+  applyTacticalFilter();
+}
+
+// ─── TAB 4: PER-TEAM OUTLOOK ──────────────────────────────────────────────────
+function renderTeams(){
+  const prog=FC.progression||[];
+  const stand=FC.standings_projection||[];
+  const standMap={};stand.forEach(s=>standMap[s.team]=s);
+  let html=`<h1 class="section-title">🛡️ Per-Team Outlook</h1>
+  <p class="subtitle">Each team's projected fixtures, expected wins, and route to the cup.</p>`;
+  prog.forEach(p=>{
+    const s=standMap[p.team]||{};
+    const fixtures=(FC.matches||[]).filter(m=>m.is_decided&&(m.team1===p.team||m.team2===p.team));
+    const wins=fixtures.filter(m=>m.predicted_winner===p.team).length;
+    html+=`<div class="team-summary">
+      <div class="ts-head">${dot(p.team)}<span class="ts-name">${icon(p.team)} ${esc(p.team)}</span>
+        <span class="ts-rank">Projected #${s.projected_position||'—'} ${s.qualifies?'· ✓ Play-off':''}</span></div>
+      <div class="ts-stats">
+        <div class="ts-stat"><div class="ts-val" style="color:#8fd7ff">${p.semi_pct}%</div><div class="ts-lbl">Play-off</div></div>
+        <div class="ts-stat"><div class="ts-val" style="color:#c2adff">${p.final_pct}%</div><div class="ts-lbl">Final</div></div>
+        <div class="ts-stat"><div class="ts-val" style="color:#ffce7a">${p.champion_pct}%</div><div class="ts-lbl">Champion</div></div>
+        <div class="ts-stat"><div class="ts-val">${s.expected_points??'—'}</div><div class="ts-lbl">Exp. Pts</div></div>
+        <div class="ts-stat"><div class="ts-val" style="color:#5fe0a0">${wins}/${fixtures.length}</div><div class="ts-lbl">Pred. Wins</div></div>
+      </div>
+      <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px">
+        ${fixtures.map(m=>{const opp=m.team1===p.team?m.team2:m.team1;const win=m.predicted_winner===p.team;
+          return `<span style="font-size:.68rem;padding:4px 9px;border-radius:8px;background:${win?'rgba(71,209,140,.14)':'rgba(255,111,97,.12)'};color:${win?'#5fe0a0':'#ff9d92'}">${win?'W':'L'} vs ${icon(opp)} ${esc(opp.split(' ')[0])}</span>`;
+        }).join('')}
+      </div></div>`;
+  });
+  document.getElementById('teams').innerHTML=html;
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+function renderAll(){renderProgression();renderFixtures();renderTactics();renderTeams();}
+async function init(){
+  if(location.protocol==='file:')document.getElementById('homeLink').setAttribute('href','index.html');
+  const initialTab=location.hash.slice(1);
+  if(['progression','fixtures','tactics','teams'].includes(initialTab)){
+    showTab(initialTab,document.querySelector(`[data-tab="${initialTab}"]`));
+  }
+  try{
+    FC=await api('/api/tournament-forecast');
+    const st=document.getElementById('status');st.textContent='● LIVE';st.className='status-pill status-live';
+    renderAll();
+  }catch(e){
+    const st=document.getElementById('status');st.textContent='● connecting…';st.className='status-pill status-off';
+    const msg=`<div class="offline-notice">
+      <div class="on-ico">📡</div>
+      <div class="on-title">Live forecast is connecting…</div>
+      <div class="on-sub">We're spinning up the prediction model and Monte-Carlo engine. This page will load automatically once the connection is ready.</div>
+      <button class="on-retry" onclick="init()">↻ Retry now</button>
+    </div>`;
+    document.querySelectorAll('.page').forEach(p=>p.innerHTML=msg);
+  }
+}
+init();
+</script>
+</body>
+</html>

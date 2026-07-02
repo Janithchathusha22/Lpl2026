@@ -1,0 +1,25 @@
+bowler_id,bowler_name,team,bowling_type,vs_RHB_powerplay,vs_LHB_powerplay,vs_RHB_middle,vs_LHB_middle,vs_RHB_death,vs_LHB_death,economy_powerplay,economy_middle,economy_death,wickets_per_match_estimate,best_phase,weakness_phase,vulnerability
+P019,Mujeeb Ur Rahman,Colombo Kaps,Mystery Spin,7,8,9,9,8,8,6.5,6.0,7.5,2.2,Middle Overs,Powerplay,Flat batting tracks
+P020,Binura Fernando,Colombo Kaps,Left-Arm Fast,8,7,7,8,7,7,7.0,7.5,8.5,1.8,Powerplay,Death,Dew conditions
+P011,Hasan Mahmud,Colombo Kaps,Right-Arm FM,8,7,7,7,8,7,7.5,7.0,8.0,1.5,Death/PP,Middle,Gets hit in middle
+P015,Shahnawaz Dahani,Colombo Kaps,Right-Arm Fast,8,7,6,6,7,7,8.0,7.5,8.5,1.5,Powerplay,Death,Inconsistent lines
+P012,Jeffrey Vandersay,Colombo Kaps,Leg-Spin,5,6,7,8,6,7,7.0,7.5,8.0,1.3,Middle,Powerplay,Flat pitches
+P026,Kasun Rajitha,Galle Gallants,Right-Arm FM,8,7,6,7,6,6,7.5,7.5,9.0,1.4,Powerplay,Death,Death bowling leak
+P035,Akif Javed,Galle Gallants,Left-Arm FM,8,7,7,8,7,7,7.0,7.5,8.5,1.6,Powerplay,Middle,Middle over economy
+P036,Pramod Madushan,Galle Gallants,Right-Arm FM,7,7,7,7,7,7,7.5,7.5,8.0,1.5,Middle,Death,Injury concerns
+P039,Muhammad Nawaz,Galle Gallants,Left-Arm Spin,6,7,8,9,7,8,7.0,6.5,7.5,1.8,Middle,Powerplay,Pace hitters
+P041,Taskin Ahmed,Jaffna Kings,Right-Arm Fast,9,8,7,7,8,8,8.0,7.5,8.5,2.0,Powerplay,Middle,Expensive middle overs
+P042,Dunith Wellalage,Jaffna Kings,Left-Arm Spin,6,5,8,7,7,6,6.5,6.5,7.5,1.8,Middle,Death,Flat pitches
+P043,Shakib Al Hasan,Jaffna Kings,Left-Arm Spin,5,6,7,8,6,7,7.0,7.0,8.0,1.5,Middle,Powerplay,Age/fatigue
+P049,Sandeep Lamichhane,Jaffna Kings,Leg-Spin,6,7,8,8,7,7,7.0,6.5,8.0,1.6,Middle,Flat Pitches,Batters reading googly
+P055,Dilshan Madushanka,Jaffna Kings,Left-Arm Fast,8,7,7,7,7,7,7.5,7.5,8.5,1.5,Powerplay,Death,Inconsistency
+P063,Dushmantha Chameera,Dambulla Sixers,Right-Arm Fast,9,8,7,7,8,8,7.5,7.5,9.0,2.0,Powerplay,Death,Injury risk
+P072,Mohammad Wasim Jr.,Dambulla Sixers,Right-Arm Fast,8,7,7,7,8,7,7.5,7.5,8.5,1.8,Powerplay/Death,Middle,Middle over economy
+P075,Akila Dananjaya,Dambulla Sixers,Off-Spin Mystery,5,6,8,8,6,6,7.5,7.0,8.5,1.4,Middle,Flat Pitches,Pace hitters on flat tracks
+P076,Fazalhaq Farooqi,Dambulla Sixers,Left-Arm Fast,9,8,8,9,8,8,7.0,7.5,8.5,2.2,Powerplay,Death,Death over leaks
+P077,Maheesh Theekshana,Dambulla Sixers,Carrom Ball,6,7,9,9,8,8,6.5,5.5,7.0,2.5,Middle,Galle Conditions,Good pitch readers
+P081,Wanindu Hasaranga,Kandy Royals,Leg-Spin,6,7,9,9,8,8,7.0,6.0,7.5,2.5,Middle/Death,Powerplay,Batsmen who read wrist-spin
+P094,Asitha Fernando,Kandy Royals,Right-Arm Fast,8,7,7,7,7,7,7.5,7.5,8.5,1.6,Powerplay,Death,Consistency
+P097,Nuwan Thushara,Kandy Royals,Right-Arm FM,8,8,7,7,8,7,7.0,7.5,8.0,1.8,Powerplay,Middle,Middle over form
+P088,Zahir Khan,Kandy Royals,Left-Wrist Spin,5,6,8,8,6,7,7.5,7.0,8.5,1.4,Middle,Powerplay,Flat pitches
+P092,Daniel Sams,Kandy Royals,Left-Arm FM,5,6,6,7,7,8,8.0,7.5,8.5,1.3,Death,Powerplay,Economy early on

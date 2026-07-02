@@ -1,0 +1,98 @@
+player_id,player_name,team,nationality,category,role,batting_style,bowling_style,age_group,intl_experience,t20_specialist
+P001,Ben McDermott,Colombo Kaps,Australia,Star,WK-Batsman,Right-hand bat,None,Senior,High,Yes
+P002,Kamindu Mendis,Colombo Kaps,Sri Lanka,Star,Batsman/Spinner,Left-hand bat,Right-arm off-spin,Senior,High,Yes
+P003,Jimmy Neesham,Colombo Kaps,New Zealand,Icon,All-Rounder,Left-hand bat,Right-arm medium,Senior,High,Yes
+P004,Kusal Mendis,Colombo Kaps,Sri Lanka,Icon,WK-Batsman,Right-hand bat,None,Senior,High,Yes
+P005,Anthony Arul Pragasam,Colombo Kaps,Sri Lanka,Classic,Batsman,Right-hand bat,None,Senior,Medium,No
+P006,Wanuja Sahan,Colombo Kaps,Sri Lanka,Gold,Batsman/WK,Right-hand bat,None,Senior,Medium,Yes
+P007,Malsha Tharupathi,Colombo Kaps,Sri Lanka,Emerging U23,All-Rounder,Left-hand bat,Left-arm medium,U23,Low,No
+P008,Sharujan Shanmuganathan,Colombo Kaps,Sri Lanka,Emerging U23,Batsman,Right-hand bat,None,U23,Low,No
+P009,Kushal Bhurtel,Colombo Kaps,Nepal,Associate Stars,Batsman,Left-hand bat,Right-arm medium,Senior,Medium,Yes
+P010,Mohammad Haris,Colombo Kaps,Pakistan,Classic,WK-Batsman,Right-hand bat,None,Senior,Medium,Yes
+P011,Hasan Mahmud,Colombo Kaps,Bangladesh,Classic,Bowler,Right-hand bat,Right-arm fast-medium,Senior,High,Yes
+P012,Jeffrey Vandersay,Colombo Kaps,Sri Lanka,Classic,Bowler,Right-hand bat,Right-arm leg-spin,Senior,Medium,Yes
+P013,Thanuka Dabare,Colombo Kaps,Sri Lanka,Classic,Batsman,Right-hand bat,None,Senior,Low,No
+P014,Movin Subasingha,Colombo Kaps,Sri Lanka,Classic,All-Rounder,Right-hand bat,Right-arm medium,Senior,Low,No
+P015,Shahnawaz Ali Dahani,Colombo Kaps,Pakistan,Gold,Bowler,Right-hand bat,Right-arm fast,Senior,High,Yes
+P016,Sadeera Samarawickrama,Colombo Kaps,Sri Lanka,Gold,WK-Batsman,Right-hand bat,None,Senior,High,Yes
+P017,Milan Rathnayake,Colombo Kaps,Sri Lanka,Gold,Bowler,Right-hand bat,Right-arm fast-medium,Senior,Medium,Yes
+P018,Janith Liyanage,Colombo Kaps,Sri Lanka,Gold,All-Rounder,Right-hand bat,Right-arm medium,Senior,Medium,Yes
+P019,Mujeeb Ur Rahman,Colombo Kaps,Afghanistan,Platinum,Bowler,Right-hand bat,Right-arm off-break/mystery,Senior,High,Yes
+P020,Binura Fernando,Colombo Kaps,Sri Lanka,Platinum,Bowler,Left-hand bat,Left-arm fast-medium,Senior,High,Yes
+P021,Litton Kumar Das,Galle Gallants,Bangladesh,Star,WK-Batsman,Right-hand bat,None,Senior,High,Yes
+P022,Eshan Malinga,Galle Gallants,Sri Lanka,Star,Bowler,Right-hand bat,Right-arm fast,Senior,Medium,Yes
+P023,Rassie van der Dussen,Galle Gallants,South Africa,Icon,Batsman,Right-hand bat,Right-arm off-break,Senior,High,Yes
+P024,Dasun Shanaka,Galle Gallants,Sri Lanka,Icon,All-Rounder/Captain,Right-hand bat,Right-arm medium,Senior,High,Yes
+P025,Sachindu Colombage,Galle Gallants,Sri Lanka,Classic,Batsman,Right-hand bat,None,Senior,Low,No
+P026,Kasun Rajitha,Galle Gallants,Sri Lanka,Gold,Bowler,Right-hand bat,Right-arm fast-medium,Senior,High,Yes
+P027,Dinura Kalupahana,Galle Gallants,Sri Lanka,Emerging U23,Bowler,Right-hand bat,Right-arm fast,U23,Low,No
+P028,Uri Koththigoda,Galle Gallants,Sri Lanka,Emerging U23,Batsman,Left-hand bat,None,U23,Low,No
+P029,Haider Ali,Galle Gallants,UAE,Associate Stars,Batsman,Right-hand bat,Right-arm medium,Senior,Medium,Yes
+P030,Sam Harper,Galle Gallants,Australia,Classic,WK-Batsman,Right-hand bat,None,Senior,Medium,Yes
+P031,Mehidy Hassan Miraz,Galle Gallants,Bangladesh,Classic,All-Rounder,Right-hand bat,Right-arm off-spin,Senior,High,Yes
+P032,Sahan Arachchige,Galle Gallants,Sri Lanka,Classic,Batsman,Right-hand bat,None,Senior,Low,No
+P033,Chamika Karunarathna,Galle Gallants,Sri Lanka,Classic,All-Rounder,Right-hand bat,Right-arm fast-medium,Senior,Medium,Yes
+P034,Tharindu Rathnayake,Galle Gallants,Sri Lanka,Classic,Bowler,Right-hand bat,Right-arm medium,Senior,Low,No
+P035,Akif Javed,Galle Gallants,Pakistan,Gold,Bowler,Right-hand bat,Left-arm fast-medium,Senior,Medium,Yes
+P036,Pramod Madushan,Galle Gallants,Sri Lanka,Gold,Bowler,Right-hand bat,Right-arm fast-medium,Senior,Medium,Yes
+P037,Lasith Croospulle,Galle Gallants,Sri Lanka,Gold,Batsman,Right-hand bat,None,Senior,Low,No
+P038,Vijayakanth Viyaskanth,Galle Gallants,Sri Lanka,Gold,All-Rounder,Left-hand bat,Left-arm medium,Senior,Low,No
+P039,Muhammad Nawaz,Galle Gallants,Pakistan,Platinum,All-Rounder,Left-hand bat,Left-arm spin,Senior,High,Yes
+P040,Charith Asalanka,Galle Gallants,Sri Lanka,Platinum,Batsman,Left-hand bat,Right-arm off-spin,Senior,High,Yes
+P041,Taskin Ahmed,Jaffna Kings,Bangladesh,Star,Bowler,Right-hand bat,Right-arm fast,Senior,High,Yes
+P042,Dunith Wellalage,Jaffna Kings,Sri Lanka,Star,All-Rounder,Left-hand bat,Left-arm spin,Senior,High,Yes
+P043,Shakib Al Hasan,Jaffna Kings,Bangladesh,Icon,All-Rounder,Left-hand bat,Left-arm spin,Veteran,Very High,Yes
+P044,Bhanuka Rajapaksa,Jaffna Kings,Sri Lanka,Icon,WK-Batsman,Left-hand bat,Right-arm medium,Senior,High,Yes
+P045,Nishan Madushka,Jaffna Kings,Sri Lanka,Gold,Batsman,Left-hand bat,None,Senior,Medium,Yes
+P046,Kugathas Mathulan,Jaffna Kings,Sri Lanka,Emerging U23,Batsman,Right-hand bat,None,U23,Low,No
+P047,Praveen Manisha,Jaffna Kings,Sri Lanka,Emerging U23,Bowler,Right-hand bat,Right-arm fast-medium,U23,Low,No
+P048,Dipendra Singh Airee,Jaffna Kings,Nepal,Associate Stars,All-Rounder,Right-hand bat,Right-arm off-break,Senior,Medium,Yes
+P049,Sandeep Lamichhane,Jaffna Kings,Nepal,Classic,Bowler,Right-hand bat,Right-arm leg-spin,Senior,High,Yes
+P050,Lizaad Williams,Jaffna Kings,South Africa,Classic,Bowler,Right-hand bat,Right-arm fast-medium,Senior,Medium,Yes
+P051,Mohommed Shiraz,Jaffna Kings,Sri Lanka,Classic,Bowler,Right-hand bat,Right-arm medium,Senior,Low,No
+P052,Chamindu Wickramasinghe,Jaffna Kings,Sri Lanka,Classic,Batsman,Right-hand bat,None,Senior,Low,No
+P053,Nuwanindu Fernando,Jaffna Kings,Sri Lanka,Classic,Batsman,Left-hand bat,None,Senior,Medium,Yes
+P054,Ibrahim Zadran,Jaffna Kings,Afghanistan,Gold,Batsman,Right-hand bat,None,Senior,Medium,Yes
+P055,Dilshan Madushanka,Jaffna Kings,Sri Lanka,Gold,Bowler,Left-hand bat,Left-arm fast-medium,Senior,High,Yes
+P056,Kamil Mishara,Jaffna Kings,Sri Lanka,Gold,WK-Batsman,Left-hand bat,None,Senior,Medium,Yes
+P057,Traveen Mathews,Jaffna Kings,Sri Lanka,Gold,All-Rounder,Right-hand bat,Right-arm medium,Senior,Low,No
+P058,David Wiese,Jaffna Kings,South Africa,Platinum,All-Rounder,Right-hand bat,Right-arm fast-medium,Senior,High,Yes
+P059,Avishka Fernando,Jaffna Kings,Sri Lanka,Platinum,Batsman,Right-hand bat,Right-arm off-break,Senior,High,Yes
+P060,Reeza Hendricks,Dambulla Sixers,South Africa,Star,Batsman,Right-hand bat,Right-arm off-break,Senior,High,Yes
+P061,Dinesh Chandimal,Dambulla Sixers,Sri Lanka,Star,WK-Batsman,Right-hand bat,Right-arm off-break,Senior,Very High,Yes
+P062,Sahibzada Farhan,Dambulla Sixers,Pakistan,Icon,Batsman,Left-hand bat,Right-arm leg-spin,Senior,High,Yes
+P063,Dushmantha Chameera,Dambulla Sixers,Sri Lanka,Icon,Bowler,Right-hand bat,Right-arm fast,Senior,High,Yes
+P064,Vishva Lahiru Kumara,Dambulla Sixers,Sri Lanka,Emerging U23,Bowler,Right-hand bat,Right-arm fast,U23,Low,No
+P065,Gayana Weerasinghe,Dambulla Sixers,Sri Lanka,Emerging U23,All-Rounder,Right-hand bat,Right-arm medium,U23,Low,No
+P066,Shadley van Schalkwyk,Dambulla Sixers,USA,Associate Stars,All-Rounder,Left-hand bat,Left-arm spin,Senior,Medium,Yes
+P067,Gulbadin Naib,Dambulla Sixers,Afghanistan,Classic,All-Rounder,Right-hand bat,Right-arm fast-medium,Senior,High,Yes
+P068,Dian Forrester,Dambulla Sixers,South Africa,Classic,All-Rounder,Right-hand bat,Right-arm medium,Senior,Medium,Yes
+P069,Dhananjaya Lakshan,Dambulla Sixers,Sri Lanka,Classic,Batsman,Right-hand bat,None,Senior,Low,No
+P070,Ramesh Mendis,Dambulla Sixers,Sri Lanka,Classic,All-Rounder,Right-hand bat,Right-arm off-spin,Senior,High,Yes
+P071,Sachitha Jayathilake,Dambulla Sixers,Sri Lanka,Classic,Batsman,Right-hand bat,None,Senior,Low,No
+P072,Mohammad Wasim Jr.,Dambulla Sixers,Pakistan,Gold,Bowler,Right-hand bat,Right-arm fast,Senior,High,Yes
+P073,Niroshan Dickwella,Dambulla Sixers,Sri Lanka,Gold,WK-Batsman,Left-hand bat,None,Senior,High,Yes
+P074,Pavan Rathanayaka,Dambulla Sixers,Sri Lanka,Gold,Batsman,Right-hand bat,None,Senior,Low,No
+P075,Akila Dananjaya,Dambulla Sixers,Sri Lanka,Gold,Bowler,Right-hand bat,Right-arm off-spin/mystery,Senior,High,Yes
+P076,Fazalhaq Farooqi,Dambulla Sixers,Afghanistan,Platinum,Bowler,Left-hand bat,Left-arm fast,Senior,High,Yes
+P077,Maheesh Theekshana,Dambulla Sixers,Sri Lanka,Platinum,Bowler,Right-hand bat,Right-arm off-spin/carrom,Senior,High,Yes
+P078,Vijay Shankar,Kandy Royals,India,Star,All-Rounder,Right-hand bat,Right-arm medium,Senior,High,Yes
+P079,Angelo Mathews,Kandy Royals,Sri Lanka,Star,All-Rounder,Right-hand bat,Right-arm medium,Veteran,Very High,Yes
+P080,Moeen Ali,Kandy Royals,England,Icon,All-Rounder,Left-hand bat,Right-arm off-spin,Senior,Very High,Yes
+P081,Wanindu Hasaranga,Kandy Royals,Sri Lanka,Icon,All-Rounder,Right-hand bat,Right-arm leg-spin,Senior,High,Yes
+P082,Isitha Wijesundara,Kandy Royals,Sri Lanka,Classic,Batsman,Right-hand bat,None,Senior,Low,No
+P083,Dushan Hemantha,Kandy Royals,Sri Lanka,Gold,All-Rounder,Left-hand bat,Right-arm medium,Senior,Medium,Yes
+P084,Sahan Mihira,Kandy Royals,Sri Lanka,Emerging U23,Batsman,Right-hand bat,None,U23,Low,No
+P085,Deva Pavan Sandesh De Silva,Kandy Royals,Sri Lanka,Emerging U23,Batsman,Right-hand bat,None,U23,Low,No
+P086,Brandon McMullen,Kandy Royals,Scotland,Associate Stars,All-Rounder,Right-hand bat,Right-arm medium,Senior,Medium,Yes
+P087,Dale Phillips,Kandy Royals,New Zealand,Classic,All-Rounder,Right-hand bat,Right-arm medium,Senior,Medium,Yes
+P088,Zahir Khan,Kandy Royals,Afghanistan,Classic,Bowler,Right-hand bat,Left-arm wrist-spin,Senior,High,Yes
+P089,Vishen Halambage,Kandy Royals,Sri Lanka,Classic,Batsman,Right-hand bat,None,Senior,Low,No
+P090,Muditha Lakshan,Kandy Royals,Sri Lanka,Classic,Batsman,Right-hand bat,None,Senior,Low,No
+P091,Lahiru Udara,Kandy Royals,Sri Lanka,Classic,Batsman,Left-hand bat,None,Senior,Medium,Yes
+P092,Daniel Sams,Kandy Royals,Australia,Gold,All-Rounder,Left-hand bat,Left-arm fast-medium,Senior,High,Yes
+P093,Kusal Perera,Kandy Royals,Sri Lanka,Gold,WK-Batsman,Left-hand bat,None,Senior,High,Yes
+P094,Asitha Fernando,Kandy Royals,Sri Lanka,Gold,Bowler,Right-hand bat,Right-arm fast,Senior,High,Yes
+P095,Garuka Sanketh,Kandy Royals,Sri Lanka,Gold,All-Rounder,Right-hand bat,Right-arm medium,Senior,Low,No
+P096,Rahmanullah Gurbaz,Kandy Royals,Afghanistan,Platinum,WK-Batsman,Right-hand bat,None,Senior,High,Yes
+P097,Nuwan Thushara,Kandy Royals,Sri Lanka,Platinum,Bowler,Right-hand bat,Right-arm fast-medium,Senior,High,Yes

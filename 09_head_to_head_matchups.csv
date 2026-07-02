@@ -1,0 +1,21 @@
+match_id,team_home,team_away,venue,home_win_probability,away_win_probability,key_batting_matchup,key_bowling_matchup,pitch_advantage_team,dew_advantage_team,prediction_winner,margin_estimate
+M001,Colombo Kaps,Galle Gallants,Premadasa,58,42,Kusal Mendis vs Muhammad Nawaz,Mujeeb Ur Rahman vs Litton Das,Colombo Kaps,Colombo Kaps,Colombo Kaps,12 runs
+M002,Colombo Kaps,Jaffna Kings,Premadasa,55,45,Kamindu Mendis vs Taskin Ahmed,Mujeeb Ur Rahman vs Avishka Fernando,Colombo Kaps,Colombo Kaps,Colombo Kaps,8 runs
+M003,Colombo Kaps,Dambulla Sixers,Premadasa,48,52,Kusal Mendis vs Maheesh Theekshana,Mujeeb Ur Rahman vs Sahibzada Farhan,Neutral,Colombo Kaps,Dambulla Sixers,6 runs
+M004,Colombo Kaps,Kandy Royals,Premadasa,45,55,Kamindu Mendis vs Wanindu Hasaranga,Mujeeb Ur Rahman vs Rahmanullah Gurbaz,Colombo Kaps,Colombo Kaps,Kandy Royals,10 runs
+M005,Galle Gallants,Colombo Kaps,Galle,56,44,Charith Asalanka vs Binura Fernando,Muhammad Nawaz vs Kamindu Mendis,Galle Gallants,None,Galle Gallants,15 runs
+M006,Galle Gallants,Jaffna Kings,Galle,52,48,Charith Asalanka vs Shakib Al Hasan,Muhammad Nawaz vs Avishka Fernando,Galle Gallants,None,Galle Gallants,8 runs
+M007,Galle Gallants,Dambulla Sixers,Galle,50,50,Litton Das vs Maheesh Theekshana,Akif Javed vs Sahibzada Farhan,Galle Gallants,None,Too close,5 runs
+M008,Galle Gallants,Kandy Royals,Galle,44,56,Charith Asalanka vs Wanindu Hasaranga,Muhammad Nawaz vs Rahmanullah Gurbaz,Galle Gallants,None,Kandy Royals,7 runs
+M009,Jaffna Kings,Colombo Kaps,Pallekele,46,54,Avishka Fernando vs Mujeeb Ur Rahman,Taskin Ahmed vs Kusal Mendis,Jaffna Kings,None,Colombo Kaps,6 runs
+M010,Jaffna Kings,Galle Gallants,Pallekele,52,48,Bhanuka Rajapaksa vs Muhammad Nawaz,Taskin Ahmed vs Litton Das,Jaffna Kings,None,Jaffna Kings,10 runs
+M011,Jaffna Kings,Dambulla Sixers,Pallekele,46,54,Avishka Fernando vs Fazalhaq Farooqi,Taskin Ahmed vs Sahibzada Farhan,Neutral,None,Dambulla Sixers,9 runs
+M012,Jaffna Kings,Kandy Royals,Pallekele,42,58,Bhanuka Rajapaksa vs Wanindu Hasaranga,Taskin Ahmed vs Rahmanullah Gurbaz,Kandy Royals,None,Kandy Royals,15 runs
+M013,Dambulla Sixers,Colombo Kaps,Dambulla,54,46,Sahibzada Farhan vs Mujeeb Ur Rahman,Maheesh Theekshana vs Kusal Mendis,Dambulla Sixers,None,Dambulla Sixers,11 runs
+M014,Dambulla Sixers,Galle Gallants,Dambulla,55,45,Sahibzada Farhan vs Muhammad Nawaz,Maheesh Theekshana vs Litton Das,Dambulla Sixers,None,Dambulla Sixers,13 runs
+M015,Dambulla Sixers,Jaffna Kings,Dambulla,56,44,Sahibzada Farhan vs Taskin Ahmed,Maheesh Theekshana vs Avishka Fernando,Dambulla Sixers,None,Dambulla Sixers,12 runs
+M016,Dambulla Sixers,Kandy Royals,Dambulla,44,56,Sahibzada Farhan vs Wanindu Hasaranga,Maheesh Theekshana vs Rahmanullah Gurbaz,Neutral,None,Kandy Royals,8 runs
+M017,Kandy Royals,Colombo Kaps,Pallekele,58,42,Rahmanullah Gurbaz vs Mujeeb Ur Rahman,Wanindu Hasaranga vs Kamindu Mendis,Kandy Royals,None,Kandy Royals,14 runs
+M018,Kandy Royals,Galle Gallants,Pallekele,56,44,Rahmanullah Gurbaz vs Muhammad Nawaz,Wanindu Hasaranga vs Charith Asalanka,Kandy Royals,None,Kandy Royals,12 runs
+M019,Kandy Royals,Jaffna Kings,Pallekele,58,42,Rahmanullah Gurbaz vs Taskin Ahmed,Wanindu Hasaranga vs Bhanuka Rajapaksa,Kandy Royals,None,Kandy Royals,16 runs
+M020,Kandy Royals,Dambulla Sixers,Pallekele,54,46,Rahmanullah Gurbaz vs Maheesh Theekshana,Wanindu Hasaranga vs Sahibzada Farhan,Kandy Royals,None,Kandy Royals,10 runs

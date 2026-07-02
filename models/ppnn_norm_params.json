@@ -1,0 +1,46 @@
+{
+  "x_min": [
+    1.0,
+    1.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    4.0
+  ],
+  "x_max": [
+    10.0,
+    9.0,
+    9.0,
+    9.0,
+    9.0,
+    8.0,
+    9.0,
+    9.0,
+    9.0,
+    9.0
+  ],
+  "feature_cols": [
+    "batting_power_play_rating",
+    "batting_middle_over_rating",
+    "batting_death_over_rating",
+    "bowling_power_play_rating",
+    "bowling_middle_over_rating",
+    "bowling_death_over_rating",
+    "premadasa_rating",
+    "spin_handling",
+    "pace_handling",
+    "pressure_handling"
+  ],
+  "bat_scale": [
+    200.0,
+    50.0
+  ],
+  "bowl_scale": [
+    5.0,
+    12.0
+  ]
+}

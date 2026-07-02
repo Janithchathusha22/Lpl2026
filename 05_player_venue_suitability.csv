@@ -1,0 +1,19 @@
+player_id,player_name,team,role,premadasa_rating,galle_rating,pallekele_rating,dambulla_rating,best_venue,worst_venue,reason
+P001,Ben McDermott,Colombo Kaps,WK-Batsman,9,6,8,7,Premadasa,Galle,Flat pitch suits power hitting; spin at Galle restricts
+P002,Kamindu Mendis,Colombo Kaps,Bat/Spin,9,8,8,8,Premadasa,Galle,Thrives everywhere; Galle spin slows his bat
+P004,Kusal Mendis,Colombo Kaps,WK-Batsman,9,7,8,8,Premadasa,Galle,Aggressive style fits flat pitches best
+P019,Mujeeb Ur Rahman,Colombo Kaps,Mystery Spinner,9,7,8,9,Premadasa/Dambulla,Galle,Mystery spin devastating on hard flat pitches; Galle suits finger spin more
+P020,Binura Fernando,Colombo Kaps,Left-Arm Fast,8,9,8,7,Galle,Dambulla,Sea breeze at Galle aids left-arm swing
+P021,Litton Kumar Das,Galle Gallants,WK-Batsman,8,7,8,7,Premadasa,Galle,Ironically better on flat pitches; spin at home can trouble him
+P039,Muhammad Nawaz,Galle Gallants,Left-Arm Spin AR,7,9,7,8,Galle,Premadasa,Galle spin conditions ideal for left-arm orthodox
+P040,Charith Asalanka,Galle Gallants,Batsman,8,9,8,8,Galle,Premadasa,Plays spin masterfully; Galle home advantage
+P041,Taskin Ahmed,Jaffna Kings,Fast Bowler,7,6,9,7,Pallekele,Galle,Extra bounce at Pallekele suits his skiddy pace
+P043,Shakib Al Hasan,Jaffna Kings,All-Rounder,7,9,7,8,Galle,Pallekele,Left-arm spin lethal at Galle; bounce at Pallekele reduces effectiveness
+P059,Avishka Fernando,Jaffna Kings,Batsman,8,7,8,7,Premadasa,Galle,Flat pitch explosiveness; struggles against spin
+P063,Dushmantha Chameera,Dambulla Sixers,Fast Bowler,7,6,9,8,Pallekele,Galle,145kph pace + Pallekele bounce = unplayable
+P076,Fazalhaq Farooqi,Dambulla Sixers,Left-Arm Fast,8,8,8,9,Dambulla,Galle,Swing + bounce; dry Dambulla pitch assists left-arm angle
+P077,Maheesh Theekshana,Dambulla Sixers,Carrom Spinner,9,7,8,9,Premadasa/Dambulla,Galle,Hard flat pitches maximise carrom ball turn; Galle suits orthodox
+P081,Wanindu Hasaranga,Kandy Royals,Leg-Spin AR,8,8,10,8,Pallekele,Premadasa,Pallekele bounce + leg-spin = highest effectiveness
+P096,Rahmanullah Gurbaz,Kandy Royals,WK-Batsman,9,6,9,8,Pallekele,Galle,Explosive on bouncy; vulnerable to spin at Galle
+P097,Nuwan Thushara,Kandy Royals,Fast Bowler,8,7,9,8,Pallekele,Galle,Swing + bounce = his best conditions
+P080,Moeen Ali,Kandy Royals,Off-Spin AR,8,9,8,8,Galle,Premadasa,Spin conditions at Galle boost his bowling; batting suits everywhere

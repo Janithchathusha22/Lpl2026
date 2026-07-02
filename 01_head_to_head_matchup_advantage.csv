@@ -1,0 +1,19 @@
+matchup_id,batsman,batsman_team,bowler,bowler_team,bowling_type,balls_faced,runs_scored,dismissals,dot_balls,fours,sixes,strike_rate_in_matchup,dismissal_frequency_pct,league_avg_sr,sr_index,matchup_advantage_score,advantage_favors
+H2H001,Rahmanullah Gurbaz,Kandy Royals,Maheesh Theekshana,Dambulla Sixers,Off-Spin Carrom,28,48,1,13,1,1,171.4,3.57,135.0,127.0,91.3,Even
+H2H002,Rahmanullah Gurbaz,Kandy Royals,Muhammad Nawaz,Galle Gallants,Left-Arm Spin,38,41,1,17,1,0,107.9,2.63,135.0,79.9,53.6,Bowler
+H2H003,Kusal Mendis,Colombo Kaps,Wanindu Hasaranga,Kandy Royals,Leg-Spin,21,27,0,9,1,0,128.6,0.0,135.0,95.3,95.3,Even
+H2H004,Kusal Mendis,Colombo Kaps,Fazalhaq Farooqi,Dambulla Sixers,Left-Arm Pace,34,41,0,15,1,0,120.6,0.0,135.0,89.3,89.3,Even
+H2H005,Charith Asalanka,Galle Gallants,Mujeeb Ur Rahman,Colombo Kaps,Mystery Spin,31,42,0,14,1,0,135.5,0.0,135.0,100.4,100.4,Batsman
+H2H006,Charith Asalanka,Galle Gallants,Wanindu Hasaranga,Kandy Royals,Leg-Spin,20,29,0,9,1,0,145.0,0.0,135.0,107.4,107.4,Batsman
+H2H007,Avishka Fernando,Jaffna Kings,Maheesh Theekshana,Dambulla Sixers,Off-Spin Carrom,36,41,0,16,1,0,113.9,0.0,135.0,84.4,84.4,Even
+H2H008,Avishka Fernando,Jaffna Kings,Binura Fernando,Colombo Kaps,Left-Arm Pace,38,57,0,17,1,1,150.0,0.0,135.0,111.1,111.1,Batsman
+H2H009,Sahibzada Farhan,Dambulla Sixers,Taskin Ahmed,Jaffna Kings,Right-Arm Pace,36,53,0,16,1,1,147.2,0.0,135.0,109.0,109.0,Batsman
+H2H010,Sahibzada Farhan,Dambulla Sixers,Mujeeb Ur Rahman,Colombo Kaps,Mystery Spin,25,27,0,11,1,0,108.0,0.0,135.0,80.0,80.0,Even
+H2H011,Litton Kumar Das,Galle Gallants,Dushmantha Chameera,Dambulla Sixers,Right-Arm Pace,27,36,1,12,1,0,133.3,3.7,135.0,98.7,61.7,Bowler
+H2H012,Bhanuka Rajapaksa,Jaffna Kings,Akif Javed,Galle Gallants,Left-Arm Pace,21,30,1,9,1,0,142.9,4.76,135.0,105.9,58.3,Bowler
+H2H013,Kamindu Mendis,Colombo Kaps,Shakib Al Hasan,Jaffna Kings,Left-Arm Spin,39,46,1,18,1,1,117.9,2.56,135.0,87.3,61.7,Bowler
+H2H014,Kamindu Mendis,Colombo Kaps,Sandeep Lamichhane,Jaffna Kings,Leg-Spin,36,54,0,16,1,1,150.0,0.0,135.0,111.1,111.1,Batsman
+H2H015,Ben McDermott,Colombo Kaps,Fazalhaq Farooqi,Dambulla Sixers,Left-Arm Pace,21,30,0,9,1,0,142.9,0.0,135.0,105.9,105.9,Batsman
+H2H016,Dinesh Chandimal,Dambulla Sixers,Wanindu Hasaranga,Kandy Royals,Leg-Spin,36,39,0,16,1,0,108.3,0.0,135.0,80.2,80.2,Even
+H2H017,Moeen Ali,Kandy Royals,Muhammad Nawaz,Galle Gallants,Left-Arm Spin,33,50,1,15,1,1,151.5,3.03,135.0,112.2,81.9,Even
+H2H018,Angelo Mathews,Kandy Royals,Taskin Ahmed,Jaffna Kings,Right-Arm Pace,42,53,1,19,1,1,126.2,2.38,135.0,93.5,69.7,Bowler

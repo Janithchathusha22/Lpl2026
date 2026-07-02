@@ -1,0 +1,9 @@
+Ground_Name,Location,Match_Timing,Toss_Winner_Choice,Avg_1st_Innings_Score,Avg_2nd_Innings_Score,Safe_Score_Target,Pace_Advantage_pct,Spin_Advantage_pct,Dew_Factor,Bat_First_Win_Rate,Pitch_Type,Powerplay_Avg_Wickets,Death_Over_Avg_Wickets,Humidity_pct,Temperature_C
+R. Premadasa Stadium,Colombo,Day,Bat First,155,142,165,40.0,60.0,Low,0.6,Slow/Turning,1.4,2.8,78,31
+R. Premadasa Stadium,Colombo,Night,Bowl First,160,158,175,35.0,65.0,High,0.3,Slow/Turning,1.1,2.2,88,27
+Pallekele Stadium,Kandy,Day,Bat First,175,168,185,60.0,40.0,Low,0.55,Balanced/Bouncy,1.8,2.5,65,28
+Pallekele Stadium,Kandy,Night,Bowl First,180,182,195,65.0,35.0,Medium,0.45,Balanced/Bouncy,1.6,2.1,75,24
+Rangiri Dambulla,Dambulla,Day,Bat First,150,138,160,45.0,55.0,Low,0.65,Dry/Dusty,1.5,3.0,60,33
+Rangiri Dambulla,Dambulla,Night,Bowl First,160,157,170,40.0,60.0,High,0.4,Dry/Dusty,1.2,2.4,72,28
+SSC Ground,Colombo,Day,Bat First,165,145,180,30.0,70.0,Low,0.7,Flat/Spin-Friendly,1.2,3.2,76,31
+SSC Ground,Colombo,Night,Bowl First,170,166,185,35.0,65.0,Medium,0.5,Flat/Spin-Friendly,1.3,2.7,85,27

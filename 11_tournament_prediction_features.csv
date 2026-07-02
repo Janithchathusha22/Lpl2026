@@ -1,0 +1,14 @@
+feature_id,feature_name,description,colombo_kaps_score,galle_gallants_score,jaffna_kings_score,dambulla_sixers_score,kandy_royals_score,weight_in_model
+F01,Batting Top 3 Quality,Combined skill rating of top 3 batters,8.7,8.3,8.0,8.3,9.2,0.15
+F02,Bowling Attack Quality,Combined quality of best 4 bowlers,8.0,7.8,8.2,9.2,8.8,0.18
+F03,All-Round Depth,Number of genuine all-rounders × quality,7.0,7.5,7.8,6.5,9.0,0.10
+F04,Home Venue Advantage,Strength of home ground conditions for team style,9.0,8.0,7.5,8.5,9.5,0.12
+F05,Overseas Star Quality,Combined impact of overseas players,8.5,7.8,8.0,8.8,9.0,0.13
+F06,Middle Order Depth,Reliability of batters at 4-6,7.5,8.0,6.5,6.5,7.5,0.08
+F07,Death Bowling Strength,Effectiveness of bowlers in overs 17-20,7.5,7.0,7.0,8.5,8.0,0.10
+F08,Powerplay Batting,Ability to score in first 6 overs,8.5,8.0,8.0,8.5,9.2,0.07
+F09,Spin Bowling Quality,Combined spin attack vs spin conditions,8.5,8.0,8.2,8.8,9.0,0.07
+F10,Squad Fitness Risk,Risk of key player injury (inverted),6.5,8.0,7.0,6.0,7.0,0.05
+F11,Captain Leadership,Captain tactical quality and game management,7.5,8.0,7.5,8.0,8.5,0.05
+F12,Big Match Experience,Tournament experience of core players,8.0,7.5,8.5,8.0,9.0,0.05
+F13,Predicted Win Probability,Final model output probability %,20,17,14,23,26,1.00

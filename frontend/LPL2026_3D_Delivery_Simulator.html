@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LPL 2026 — 3D Fielding + Delivery Simulator</title>
+<style>
+:root{--bg:#05080f;--panel:#0c1120;--border:#1a2540;--gold:#f5a623;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:#e8eaf0;font-family:'Segoe UI',sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+header{background:linear-gradient(135deg,#0d1428,#060a14);border-bottom:2px solid var(--gold);padding:10px 18px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+header h1{font-size:1.1rem;color:var(--gold);}
+header p{font-size:0.7rem;color:#667;}
+.team-tabs{display:flex;gap:4px;padding:10px 14px 0;background:#080c18;border-bottom:1px solid #1a2540;flex-shrink:0;flex-wrap:wrap;}
+.team-tab{padding:7px 14px;border:none;border-radius:6px 6px 0 0;cursor:pointer;font-size:0.8rem;font-weight:700;transition:all .2s;}
+.main{display:flex;flex:1;overflow:hidden;}
+.canvas-wrap{flex:1;display:flex;align-items:center;justify-content:center;position:relative;cursor:grab;background:radial-gradient(ellipse at 50% 40%,#0a1828 0%,#04080f 100%);}
+.canvas-wrap:active{cursor:grabbing;}
+canvas{display:block;}
+.hint{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:0.68rem;color:#333;pointer-events:none;}
+.sidebar{width:268px;background:var(--panel);border-left:1px solid var(--border);overflow-y:auto;padding:14px;flex-shrink:0;}
+.sidebar h2{font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--gold);margin-bottom:10px;}
+.bat-btn{display:block;width:100%;padding:9px 11px;background:rgba(255,255,255,0.03);border:1px solid #1a2540;border-radius:7px;cursor:pointer;text-align:left;margin-bottom:7px;color:#eee;transition:all .15s;}
+.bat-btn:hover{background:rgba(255,255,255,0.07);}
+.bat-btn.active{background:rgba(255,255,255,0.09);}
+.bat-btn .nm{font-weight:700;font-size:0.88rem;}
+.bat-btn .dt{font-size:0.72rem;color:#888;margin-top:2px;}
+.ibox{background:rgba(255,255,255,0.04);border-radius:7px;padding:11px;margin-top:12px;border:1px solid #1a2540;}
+.ibox h3{font-size:0.68rem;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;}
+.irow{display:flex;justify-content:space-between;align-items:flex-start;font-size:0.76rem;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);gap:8px;}
+.leg-item{display:flex;align-items:center;gap:7px;font-size:0.74rem;margin-bottom:5px;color:#bbb;}
+.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+
+/* START BUTTON */
+.start-btn{display:block;width:100%;padding:13px;border:none;border-radius:9px;font-size:0.95rem;font-weight:700;cursor:pointer;margin-bottom:12px;transition:all .2s;letter-spacing:.5px;}
+.start-btn:hover{transform:translateY(-2px);}
+.start-btn.ready{background:linear-gradient(135deg,#1a8a3a,#15692d);color:#fff;box-shadow:0 4px 16px rgba(26,138,58,0.4);}
+.start-btn.bowling{background:linear-gradient(135deg,#c74a1a,#a03010);color:#fff;animation:pulse .6s infinite alternate;cursor:not-allowed;}
+.start-btn.reset{background:linear-gradient(135deg,#1a4fc7,#1235a0);color:#fff;}
+@keyframes pulse{from{box-shadow:0 0 8px rgba(199,74,26,0.4)}to{box-shadow:0 0 24px rgba(199,74,26,0.8)}}
+
+/* DELIVERY INFO BOX */
+.delivery-box{background:rgba(255,255,255,0.03);border:1px solid #1a2540;border-radius:8px;padding:10px;margin-bottom:12px;min-height:44px;}
+.del-type{font-size:0.82rem;font-weight:700;margin-bottom:4px;}
+.del-speed{font-size:0.7rem;color:#888;}
+.del-shot{font-size:0.78rem;color:#aab;margin-top:4px;font-style:italic;}
+
+/* RESEARCH PANEL */
+.research-box{background:linear-gradient(135deg,rgba(26,60,120,0.25),rgba(10,20,50,0.5));border:1px solid #1a3060;border-radius:8px;padding:11px;margin-top:12px;}
+.research-box h3{font-size:0.68rem;color:#7a9de8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.catch-prob{text-align:center;margin-bottom:10px;}
+.catch-prob-val{font-size:2rem;font-weight:900;line-height:1;}
+.catch-prob-lbl{font-size:0.65rem;color:#556;margin-top:2px;}
+.prob-bar-wrap{height:6px;background:#1a2030;border-radius:3px;margin:6px 0;}
+.prob-bar-fill{height:6px;border-radius:3px;transition:width .8s;}
+.research-stat{display:flex;justify-content:space-between;font-size:0.72rem;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+.research-note{font-size:0.68rem;color:#445;line-height:1.5;margin-top:7px;}
+
+/* RESULT OVERLAY */
+#resultOverlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:rgba(5,8,15,0.92);border-radius:16px;padding:24px 32px;text-align:center;
+  pointer-events:none;opacity:0;transition:opacity .3s;z-index:10;min-width:220px;backdrop-filter:blur(8px);}
+#resultOverlay.show{opacity:1;}
+.res-emoji{font-size:2.8rem;margin-bottom:8px;}
+.res-title{font-size:1.6rem;font-weight:900;letter-spacing:1px;margin-bottom:6px;}
+.res-detail{font-size:0.82rem;color:#aab;line-height:1.5;}
+.res-fielder{font-size:0.78rem;margin-top:8px;padding:5px 12px;border-radius:20px;display:inline-block;}
+
+/* BALL TRAIL */
+.phase-indicator{position:absolute;top:12px;left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,0.7);border-radius:20px;padding:5px 14px;font-size:0.75rem;
+  font-weight:700;letter-spacing:.5px;opacity:0;transition:opacity .3s;pointer-events:none;}
+.phase-indicator.show{opacity:1;}
+
+@media(max-width:700px){.main{flex-direction:column}.sidebar{width:100%;height:220px;overflow-y:auto}canvas{max-width:100%}}
+</style>
+</head>
+<body>
+<header>
+  <div style="font-size:1.5rem">🏏</div>
+  <div>
+    <h1>LPL 2026 — 3D Fielding + Live Delivery Simulator</h1>
+    <p>Field setup • Ball trajectory • Catch probability research • Shot analysis</p>
+  </div>
+  <a id="homeLink" href="http://localhost:8501" title="Back to the home dashboard" style="margin-left:auto;font-size:0.78rem;color:#9fb0d0;text-decoration:none;padding:8px 14px;border:1px solid rgba(255,255,255,.14);border-radius:8px;font-weight:700;white-space:nowrap" onmouseover="this.style.color='#ffd37a';this.style.borderColor='rgba(245,166,35,.6)'" onmouseout="this.style.color='#9fb0d0';this.style.borderColor='rgba(255,255,255,.14)'">🏠 Home</a>
+</header>
+<script>if(location.protocol==='file:'){var _h=document.getElementById('homeLink');if(_h)_h.setAttribute('href','index.html');}</script>
+<div class="team-tabs" id="teamTabs"></div>
+<div class="main">
+  <div class="canvas-wrap" id="cWrap">
+    <canvas id="fld" width="680" height="490"></canvas>
+    <div class="hint">🖱 Drag = Rotate | Scroll = Zoom | Dbl-click = Reset</div>
+    <div id="resultOverlay">
+      <div class="res-emoji" id="resEmoji"></div>
+      <div class="res-title" id="resTitle"></div>
+      <div class="res-detail" id="resDetail"></div>
+      <div class="res-fielder" id="resFielder"></div>
+    </div>
+    <div class="phase-indicator" id="phaseInd"></div>
+  </div>
+  <div class="sidebar" id="sidebar"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// SHOT LIBRARY  (research-based per batsman)
+// Catch probabilities based on cricket fielding science:
+//  - Slip: 68-75% (T20 — high speed, 0.1-0.15s reaction time)
+//  - Ring catches: 78-85% (fielder set, ball clearly tracked)
+//  - Aerial/deep: 62-80% (height, sun, pressure variables)
+//  - Sources: CricViz, CricSheet analytics, ICC coaching manuals
+// ═══════════════════════════════════════════════════════════════════
+const SHOT_LIBRARY = {
+  // KUSAL MENDIS — RHB Aggressive
+  'kusal': [
+    {shot:'Outswinger Edge',del:'145 kph OUTSWINGER',to:{x:0.22,y:0.15,z:0.38},arc:{x:0.12,y:0.22,z:0.27},
+     targetName:'1st Slip',result:'CAUGHT!',catchProb:72,emoji:'🤿',
+     detail:'Ball swings late, outside edge flies to slip!',
+     research:'Slip catch: ball travels ~2m in 0.05s. Fielder reaction window: 0.12s. Success rate 72% (T20).',
+     reactionMs:120,ballSpeedPost:88,spinType:'Fast Swing'},
+    {shot:'Cover Drive',del:'138 kph SEAM UP',to:{x:0.61,y:0.04,z:-0.40},arc:{x:0.35,y:0.12,z:-0.1},
+     targetName:'Cover',result:'CAUGHT!',catchProb:82,emoji:'🧤',
+     detail:'Drives hard — cover fielder positioned exactly right!',
+     research:'Ring catch: fielder has 0.35s to react. Low trajectory. Success 82% in this position.',
+     reactionMs:350,ballSpeedPost:65,spinType:'Seam'},
+    {shot:'Pull Shot',del:'148 kph SHORT BALL',to:{x:-0.84,y:0.1,z:0.29},arc:{x:-0.5,y:0.35,z:0.15},
+     targetName:'Deep Sq Leg',result:'CAUGHT!',catchProb:65,emoji:'🫳',
+     detail:'Pulls hard — top edge? Deep fielder tracks it...',
+     research:'Aerial catch: 0.8s in air, wind & sun factors. Deep fielder success 65% on pulls.',
+     reactionMs:800,ballSpeedPost:72,spinType:'Bouncer'},
+    {shot:'Lofted Drive',del:'132 kph FULL BALL',to:{x:0.36,y:0.05,z:-0.90},arc:{x:0.22,y:0.5,z:-0.55},
+     targetName:'Long Off',result:'SIX! 🚀',catchProb:0,emoji:'💥',
+     detail:'Clears long off — MAXIMUM!',
+     research:'Target clear by 8m. Long off fielder correctly placed but ball over boundary.',
+     reactionMs:0,ballSpeedPost:55,spinType:'Full'},
+    {shot:'Inside Edge',del:'136 kph INSWINGER',to:{x:-0.26,y:0.02,z:-0.75},arc:{x:-0.1,y:0.06,z:-0.4},
+     targetName:'Mid On',result:'DOT BALL',catchProb:0,emoji:'😤',
+     detail:'Inside edge — defended safely to mid-on.',
+     research:'Inswinger beat inside edge. Ball rolled safely to mid-on. No run.',
+     reactionMs:0,ballSpeedPost:12,spinType:'Inswinger'},
+  ],
+  // KAMINDU MENDIS — LHB 360
+  'kamindu': [
+    {shot:'Reverse Sweep',del:'96 kph OFF-SPIN',to:{x:0.30,y:0.06,z:0.90},arc:{x:0.15,y:0.18,z:0.65},
+     targetName:'3rd Man',result:'FOUR! 🏃',catchProb:0,emoji:'🔥',
+     detail:'Reverse sweep races to the 3rd man boundary!',
+     research:'Reverse sweep travels at 45° behind square. Field not set — 4 runs.',
+     reactionMs:0,ballSpeedPost:48,spinType:'Off-Spin'},
+    {shot:'Flick Off Pads',del:'90 kph LEFT-ARM SPIN',to:{x:0.72,y:0.03,z:0.05},arc:{x:0.55,y:0.1,z:0.12},
+     targetName:'Sq Leg',result:'CAUGHT!',catchProb:76,emoji:'🧤',
+     detail:'Plays the flick — square leg is right there!',
+     research:'Leg-side catch: ball skims pads, goes chest height at sq leg. 76% success rate.',
+     reactionMs:280,ballSpeedPost:52,spinType:'Spin Flick'},
+    {shot:'Down the Ground',del:'85 kph CARROM BALL',to:{x:-0.24,y:0.04,z:-0.88},arc:{x:-0.1,y:0.32,z:-0.52},
+     targetName:'Long On',result:'CAUGHT!',catchProb:70,emoji:'🫳',
+     detail:'Goes for the big one — long on is in position!',
+     research:'High aerial ball: 1.2s in air. Misread turn — caught at long on. 70% probability.',
+     reactionMs:1200,ballSpeedPost:45,spinType:'Carrom'},
+    {shot:'Guided to 3rd Man',del:'142 kph AWAY SWINGER',to:{x:-0.28,y:0.08,z:0.89},arc:{x:-0.12,y:0.14,z:0.6},
+     targetName:'3rd Man',result:'CAUGHT!',catchProb:68,emoji:'🤿',
+     detail:'Faint edge — 3rd man positioned for the slash!',
+     research:'Edge catch: ball deflects at 120° from bat angle. 3rd man correctly placed. 68%.',
+     reactionMs:180,ballSpeedPost:78,spinType:'Edge'},
+    {shot:'Lofted Mid Wicket',del:'88 kph GOOGLY',to:{x:0.58,y:0.02,z:-0.32},arc:{x:0.4,y:0.4,z:-0.05},
+     targetName:'Mid Wicket',result:'CAUGHT!',catchProb:80,emoji:'🧤',
+     detail:'Misread the googly — high ball to mid-wicket!',
+     research:'Mid-height catch: 0.6s in air, straight trajectory. Ring fielder 80% success.',
+     reactionMs:600,ballSpeedPost:38,spinType:'Googly'},
+  ],
+  // BEN MCDERMOTT — RHB Power
+  'mcdermott': [
+    {shot:'Slog Over Mid-On',del:'128 kph FULL TOSS',to:{x:-0.26,y:0.08,z:-0.88},arc:{x:-0.1,y:0.6,z:-0.55},
+     targetName:'Long On',result:'CAUGHT!',catchProb:62,emoji:'🫳',
+     detail:'Goes for maximum — long on is back!',
+     research:'Highest aerial ball (1.4s). Wind factor. Power hitter success vs deep: 62%. Close.',
+     reactionMs:1400,ballSpeedPost:62,spinType:'Full Toss'},
+    {shot:'Square Cut',del:'144 kph SHORT WIDE',to:{x:0.72,y:0.03,z:0.02},arc:{x:0.65,y:0.1,z:0.08},
+     targetName:'Point',result:'CAUGHT!',catchProb:78,emoji:'🧤',
+     detail:'Cuts hard — point fielder dives to his right!',
+     research:'Hard cut: ball travels at near bat-speed. Point fielder has 0.25s. 78% success.',
+     reactionMs:250,ballSpeedPost:82,spinType:'Short Wide'},
+    {shot:'Ramp Over Keeper',del:'146 kph BOUNCER',to:{x:0.0,y:0.1,z:0.92},arc:{x:0.02,y:0.55,z:0.65},
+     targetName:'Fine Leg',result:'FOUR! 🏃',catchProb:0,emoji:'🔥',
+     detail:'Ramps over the keeper — fine leg too square!',
+     research:'Ramp shot: ball travels 0-15° direction. Fine leg incorrectly positioned. Boundary.',
+     reactionMs:0,ballSpeedPost:72,spinType:'Bouncer'},
+    {shot:'Straight Drive Mis-hit',del:'130 kph YORKER',to:{x:0.0,y:0.06,z:-0.52},arc:{x:0.0,y:0.22,z:-0.22},
+     targetName:'Bowler',result:'CAUGHT!',catchProb:58,emoji:'😮',
+     detail:'Yorker cramps him — straight catch to the bowler!',
+     research:'Return catch: hardest for bowler — momentum stops. 58% success. Highest-pressure catch.',
+     reactionMs:95,ballSpeedPost:42,spinType:'Yorker'},
+  ],
+  // CHARITH ASALANKA — LHB Anchor
+  'asalanka': [
+    {shot:'Paddle Sweep',del:'88 kph LEG-SPIN',to:{x:0.23,y:0.05,z:0.86},arc:{x:0.12,y:0.2,z:0.58},
+     targetName:'3rd Man',result:'FOUR! 🏃',catchProb:0,emoji:'🏃',
+     detail:'Sweeps fine — races through to the boundary!',
+     research:'Fine sweep: ball hugs the turf at 18°. No fielder in paddle sweep zone. 4 runs.',
+     reactionMs:0,ballSpeedPost:44,spinType:'Leg-Spin'},
+    {shot:'Cover Drive',del:'94 kph GOOGLY',to:{x:-0.58,y:0.04,z:-0.40},arc:{x:-0.35,y:0.12,z:-0.16},
+     targetName:'Cover',result:'CAUGHT!',catchProb:85,emoji:'🧤',
+     detail:'Drives beautifully — cover perfectly placed!',
+     research:'Drives for LHB go to right side. Cover positioned at optimal angle. 85% success.',
+     reactionMs:320,ballSpeedPost:56,spinType:'Misread Turn'},
+    {shot:'Flick to Long On',del:'90 kph DOOSRA',to:{x:0.35,y:0.05,z:-0.87},arc:{x:0.18,y:0.42,z:-0.5},
+     targetName:'Long On',result:'CAUGHT!',catchProb:72,emoji:'🫳',
+     detail:'Flicks it high — long on settles under it!',
+     research:'Doosra angles in. Flick goes aerial to long on. High ball: 1.1s. 72% probability.',
+     reactionMs:1100,ballSpeedPost:42,spinType:'Doosra'},
+    {shot:'Late Cut',del:'140 kph AWAY SEAM',to:{x:-0.30,y:0.05,z:0.88},arc:{x:-0.16,y:0.1,z:0.6},
+     targetName:'3rd Man',result:'CAUGHT!',catchProb:65,emoji:'🤿',
+     detail:'Late cut finds the fielder at 3rd man!',
+     research:'Late cut angle: 30-45° behind square. 3rd man optimally placed. 65% catch rate.',
+     reactionMs:200,ballSpeedPost:68,spinType:'Seam Away'},
+  ],
+  // RAHMANULLAH GURBAZ — RHB Explosive
+  'gurbaz': [
+    {shot:'Lofted Cover Drive',del:'136 kph HALF VOLLEY',to:{x:0.36,y:0.08,z:-0.85},arc:{x:0.22,y:0.55,z:-0.5},
+     targetName:'Long Off',result:'CAUGHT!',catchProb:60,emoji:'🫳',
+     detail:'Goes for the boundary — long off takes a screamer!',
+     research:'High lofted drive: 1.3s in air. Wind affects trajectory. Deep fielder 60% — difficult catch.',
+     reactionMs:1300,ballSpeedPost:58,spinType:'Half Volley'},
+    {shot:'Slog Over Midwicket',del:'128 kph SHORT BALL',to:{x:-0.38,y:0.08,z:-0.88},arc:{x:-0.2,y:0.65,z:-0.5},
+     targetName:'Long On',result:'SIX! 🚀',catchProb:0,emoji:'💥',
+     detail:'MAXIMUM! Over the rope at long on!',
+     research:'Ball clears rope by 12m. Even with deep fielder, no chance. Gurbaz signature shot.',
+     reactionMs:0,ballSpeedPost:68,spinType:'Slog'},
+    {shot:'Ramp Scoop',del:'148 kph YORKER',to:{x:0.0,y:0.15,z:0.94},arc:{x:0.01,y:0.6,z:0.6},
+     targetName:'Fine Leg',result:'FOUR! 🏃',catchProb:0,emoji:'🔥',
+     detail:'Ramp over keeper — fine leg too wide!',
+     research:'Scoops over keeper: needs fine leg very fine (15°). Field set at 30°. Gap found.',
+     reactionMs:0,ballSpeedPost:62,spinType:'Bouncer Scoop'},
+    {shot:'Thick Edge',del:'144 kph OUTSWINGER',to:{x:0.22,y:0.12,z:0.38},arc:{x:0.14,y:0.2,z:0.28},
+     targetName:'1st Slip',result:'CAUGHT!',catchProb:74,emoji:'🤿',
+     detail:'Thick edge — diving catch at first slip!',
+     research:'Thick edge: 70% of delivery speed. Slip fielder 0.13s reaction. 74% success T20.',
+     reactionMs:130,ballSpeedPost:102,spinType:'Swing'},
+    {shot:'Pull to Fine Leg',del:'152 kph BOUNCER',to:{x:-0.26,y:0.08,z:0.88},arc:{x:-0.15,y:0.3,z:0.55},
+     targetName:'Fine Leg',result:'FOUR! 🏃',catchProb:0,emoji:'🏃',
+     detail:'Pulled past fine leg — no one there!',
+     research:'Pull shot at 152kph: fine leg too straight. Ball bisects fine leg / deep sq leg gap.',
+     reactionMs:0,ballSpeedPost:82,spinType:'Bouncer'},
+  ],
+  // WANINDU HASARANGA — (batsman role)
+  'hasaranga': [
+    {shot:'Lofted Off Drive',del:'120 kph INSWINGER',to:{x:0.28,y:0.06,z:-0.85},arc:{x:0.16,y:0.45,z:-0.48},
+     targetName:'Long Off',result:'CAUGHT!',catchProb:75,emoji:'🫳',
+     detail:'Hasaranga goes big — long off takes a clean catch!',
+     research:'Hasaranga batting: lower-order tends to aerial shots. Long off set. 75% catch rate.',
+     reactionMs:900,ballSpeedPost:48,spinType:'Inswing'},
+  ],
+};
+
+// Map batsman names to library keys
+const BAT_KEY = {
+  'Kusal Mendis':'kusal','Kamindu Mendis':'kamindu','Ben McDermott':'mcdermott',
+  'Charith Asalanka':'asalanka','Litton Kumar Das':'kusal','Rassie van der Dussen':'mcdermott',
+  'Avishka Fernando':'kusal','Bhanuka Rajapaksa':'kamindu','Ibrahim Zadran':'mcdermott',
+  'Sahibzada Farhan':'kamindu','Reeza Hendricks':'mcdermott','Dinesh Chandimal':'mcdermott',
+  'Rahmanullah Gurbaz':'gurbaz','Moeen Ali':'kamindu','Angelo Mathews':'mcdermott',
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// TEAM + FIELDING DATA
+// ═══════════════════════════════════════════════════════════════════
+const T = {
+  'Colombo Kaps':    {c:'#1a6ec7',a:'#4a9ae8',e:'🦁'},
+  'Galle Gallants':  {c:'#1a8a4a',a:'#3dcf7a',e:'⚔️'},
+  'Jaffna Kings':    {c:'#c7a51a',a:'#d4bc60',e:'👑'},
+  'Dambulla Sixers': {c:'#2a4db5',a:'#7a9de8',e:'💥'},
+  'Kandy Royals':    {c:'#c74a1a',a:'#e89070',e:'🔥'},
+};
+
+const TEAMS = [
+  {id:'kaps',name:'Colombo Kaps',short:'🦁 Kaps',color:'#1a6ec7',accent:'#4a9ae8',
+   batsmen:[
+    {name:'Kusal Mendis',nat:'🇱🇰',hand:'RHB',style:'Aggressive WK-Bat',threat:'Cover drive, pull, punch',fieldType:'Slip cordon + tight ring',
+     pos:[{n:'WK',t:'wk',x:.05,z:.24},{n:'1st Slip',t:'close',x:.23,z:.39},{n:'2nd Slip',t:'close',x:.33,z:.36},{n:'Gully',t:'close',x:.53,z:.23},{n:'Point',t:'ring',x:.77,z:.02},{n:'Cover',t:'ring',x:.61,z:-.40},{n:'Mid Off',t:'ring',x:.29,z:-.73},{n:'Mid On',t:'ring',x:-.27,z:-.73},{n:'Sq Leg',t:'ring',x:-.73,z:.05},{n:'Fine Leg',t:'deep',x:-.28,z:.88},{n:'3rd Man',t:'deep',x:.32,z:.89}]},
+    {name:'Kamindu Mendis',nat:'🇱🇰',hand:'LHB',style:'360-Degree Bat',threat:'All-round — no weak zone',fieldType:'Full 360 spread field',
+     pos:[{n:'WK',t:'wk',x:-.05,z:.24},{n:'1st Slip',t:'close',x:-.23,z:.39},{n:'Gully',t:'close',x:-.51,z:.23},{n:'Point',t:'ring',x:-.75,z:.02},{n:'Cover',t:'ring',x:-.59,z:-.40},{n:'Mid Off',t:'ring',x:-.27,z:-.73},{n:'Mid On',t:'ring',x:.27,z:-.73},{n:'Mid Wkt',t:'ring',x:.59,z:-.32},{n:'Sq Leg',t:'ring',x:.73,z:.05},{n:'Fine Leg',t:'deep',x:.27,z:.88},{n:'3rd Man',t:'deep',x:-.31,z:.89}]},
+    {name:'Ben McDermott',nat:'🇦🇺',hand:'RHB',style:'Explosive Power Opener',threat:'Square cuts, slog sweep, pull',fieldType:'Boundary protection + catching at point',
+     pos:[{n:'WK',t:'wk',x:.05,z:.24},{n:'1st Slip',t:'close',x:.22,z:.39},{n:'Point',t:'ring',x:.74,z:.02},{n:'Cover',t:'ring',x:.60,z:-.38},{n:'Mid Off',t:'ring',x:.28,z:-.73},{n:'Mid On',t:'ring',x:-.26,z:-.73},{n:'Mid Wkt',t:'ring',x:-.58,z:-.32},{n:'Sq Leg',t:'ring',x:-.72,z:.05},{n:'Dp Sq Leg',t:'deep',x:-.83,z:.29},{n:'Fine Leg',t:'deep',x:-.24,z:.90},{n:'3rd Man',t:'deep',x:.28,z:.90}]},
+  ]},
+  {id:'gallants',name:'Galle Gallants',short:'⚔️ Gallants',color:'#1a8a4a',accent:'#3dcf7a',
+   batsmen:[
+    {name:'Charith Asalanka',nat:'🇱🇰',hand:'LHB',style:'Anchor-Finisher',threat:'Cover drive, paddle sweep, flick',fieldType:'Deep cover + leg ring',
+     pos:[{n:'WK',t:'wk',x:-.05,z:.24},{n:'1st Slip',t:'close',x:-.22,z:.39},{n:'Point',t:'ring',x:-.74,z:.02},{n:'Cover',t:'ring',x:-.58,z:-.40},{n:'Mid Off',t:'ring',x:-.28,z:-.73},{n:'Mid On',t:'ring',x:.26,z:-.73},{n:'Mid Wkt',t:'ring',x:.56,z:-.32},{n:'Sq Leg',t:'ring',x:.72,z:.05},{n:'Dp Cover',t:'deep',x:-.82,z:-.28},{n:'Fine Leg',t:'deep',x:.26,z:.90},{n:'3rd Man',t:'deep',x:-.30,z:.90}]},
+    {name:'Litton Kumar Das',nat:'🇧🇩',hand:'RHB',style:'Elegant Opener',threat:'Cover drive, late cut, on-drive',fieldType:'Cover umbrella + slip cordon',
+     pos:[{n:'WK',t:'wk',x:.05,z:.24},{n:'1st Slip',t:'close',x:.22,z:.39},{n:'2nd Slip',t:'close',x:.32,z:.36},{n:'Point',t:'ring',x:.74,z:.02},{n:'Dp Cover',t:'deep',x:.82,z:-.28},{n:'Mid Off',t:'ring',x:.28,z:-.73},{n:'Mid On',t:'ring',x:-.26,z:-.73},{n:'Mid Wkt',t:'ring',x:-.58,z:-.32},{n:'Sq Leg',t:'ring',x:-.72,z:.05},{n:'Fine Leg',t:'deep',x:-.26,z:.90},{n:'3rd Man',t:'deep',x:.30,z:.90}]},
+    {name:'Rassie van der Dussen',nat:'🇿🇦',hand:'RHB',style:'Solid Anchor',threat:'Nudge gaps, rotate strike',fieldType:'Tight inner ring — cut off singles',
+     pos:[{n:'WK',t:'wk',x:.05,z:.24},{n:'1st Slip',t:'close',x:.22,z:.39},{n:'Point',t:'ring',x:.72,z:.02},{n:'Cover Pt',t:'ring',x:.58,z:-.36},{n:'Ex Cover',t:'ring',x:.43,z:-.57},{n:'Mid Off',t:'ring',x:.26,z:-.74},{n:'Mid On',t:'ring',x:-.24,z:-.74},{n:'Mid Wkt',t:'ring',x:-.56,z:-.34},{n:'Sq Leg',t:'ring',x:-.70,z:.05},{n:'Fine Leg',t:'deep',x:-.24,z:.90},{n:'3rd Man',t:'deep',x:.28,z:.90}]},
+  ]},
+  {id:'kings',name:'Jaffna Kings',short:'👑 Kings',color:'#c7a51a',accent:'#d4bc60',
+   batsmen:[
+    {name:'Avishka Fernando',nat:'🇱🇰',hand:'RHB',style:'Explosive Opener',threat:'Lofted drives, square cut, hook',fieldType:'Deep boundary first',
+     pos:[{n:'WK',t:'wk',x:.05,z:.24},{n:'1st Slip',t:'close',x:.22,z:.39},{n:'Point',t:'ring',x:.70,z:.02},{n:'Cover',t:'ring',x:.56,z:-.38},{n:'Mid Off',t:'ring',x:.26,z:-.73},{n:'Mid On',t:'ring',x:-.24,z:-.73},{n:'Mid Wkt',t:'ring',x:-.56,z:-.30},{n:'Sq Leg',t:'ring',x:-.70,z:.05},{n:'Dp Sq Leg',t:'deep',x:-.84,z:.29},{n:'Fine Leg',t:'deep',x:-.24,z:.90},{n:'3rd Man',t:'deep',x:.28,z:.90}]},
+    {name:'Bhanuka Rajapaksa',nat:'🇱🇰',hand:'LHB',style:'Aggressive WK-Bat',threat:'Pull, hook, ramp over keeper',fieldType:'Close catching + deep leg',
+     pos:[{n:'WK',t:'wk',x:-.05,z:.24},{n:'1st Slip',t:'close',x:-.22,z:.39},{n:'2nd Slip',t:'close',x:-.32,z:.36},{n:'Gully',t:'close',x:-.51,z:.23},{n:'Point',t:'ring',x:-.72,z:.02},{n:'Cover',t:'ring',x:-.56,z:-.38},{n:'Mid Off',t:'ring',x:-.24,z:-.73},{n:'Mid On',t:'ring',x:.24,z:-.73},{n:'Sq Leg',t:'ring',x:.70,z:.05},{n:'Dp Fine Lg',t:'deep',x:.26,z:.90},{n:'3rd Man',t:'deep',x:-.28,z:.90}]},
+    {name:'Ibrahim Zadran',nat:'🇦🇫',hand:'RHB',style:'Composed Opener',threat:'Off-side drives, pull',fieldType:'Off-side umbrella + deep sq leg',
+     pos:[{n:'WK',t:'wk',x:.05,z:.24},{n:'1st Slip',t:'close',x:.22,z:.39},{n:'Gully',t:'close',x:.50,z:.24},{n:'Point',t:'ring',x:.74,z:.02},{n:'Cover',t:'ring',x:.58,z:-.38},{n:'Mid Off',t:'ring',x:.28,z:-.73},{n:'Mid On',t:'ring',x:-.24,z:-.73},{n:'Mid Wkt',t:'ring',x:-.56,z:-.30},{n:'Sq Leg',t:'ring',x:-.70,z:.05},{n:'Fine Leg',t:'deep',x:-.24,z:.90},{n:'3rd Man',t:'deep',x:.28,z:.90}]},
+  ]},
+  {id:'sixers',name:'Dambulla Sixers',short:'💥 Sixers',color:'#2a4db5',accent:'#7a9de8',
+   batsmen:[
+    {name:'Sahibzada Farhan',nat:'🇵🇰',hand:'LHB',style:'Stylish Aggressive Opener',threat:'Lofted drives, flick, sweep',fieldType:'Mid-on block + leg ring',
+     pos:[{n:'WK',t:'wk',x:-.05,z:.24},{n:'1st Slip',t:'close',x:-.22,z:.39},{n:'Gully',t:'close',x:-.50,z:.23},{n:'Point',t:'ring',x:-.72,z:.02},{n:'Cover',t:'ring',x:-.56,z:-.38},{n:'Mid Off',t:'ring',x:-.24,z:-.73},{n:'Mid On',t:'ring',x:.24,z:-.73},{n:'Mid Wkt',t:'ring',x:.56,z:-.30},{n:'Sq Leg',t:'ring',x:.70,z:.05},{n:'Fine Leg',t:'deep',x:.24,z:.90},{n:'3rd Man',t:'deep',x:-.28,z:.90}]},
+    {name:'Reeza Hendricks',nat:'🇿🇦',hand:'RHB',style:'Power Opener',threat:'Aggressive off-side, muscled pull',fieldType:'Boundary first + catching at cover',
+     pos:[{n:'WK',t:'wk',x:.05,z:.24},{n:'1st Slip',t:'close',x:.22,z:.39},{n:'Point',t:'ring',x:.72,z:.02},{n:'Sh Cover',t:'ring',x:.56,z:-.36},{n:'Mid Off',t:'ring',x:.26,z:-.73},{n:'Mid On',t:'ring',x:-.24,z:-.73},{n:'Mid Wkt',t:'ring',x:-.58,z:-.30},{n:'Sq Leg',t:'ring',x:-.72,z:.05},{n:'Dp Sq Leg',t:'deep',x:-.84,z:.29},{n:'Fine Leg',t:'deep',x:-.24,z:.90},{n:'3rd Man',t:'deep',x:.28,z:.90}]},
+    {name:'Dinesh Chandimal',nat:'🇱🇰',hand:'RHB',style:'Experienced Anchor',threat:'Rotate strike, back-foot punch',fieldType:'Packed inner ring — no singles',
+     pos:[{n:'WK',t:'wk',x:.05,z:.24},{n:'Point',t:'ring',x:.72,z:.02},{n:'Cover Pt',t:'ring',x:.58,z:-.34},{n:'Ex Cover',t:'ring',x:.42,z:-.56},{n:'Mid Off',t:'ring',x:.26,z:-.74},{n:'Mid On',t:'ring',x:-.24,z:-.74},{n:'Mid Wkt',t:'ring',x:-.54,z:-.34},{n:'Sq Leg',t:'ring',x:-.68,z:.05},{n:'Sh Sq Leg',t:'ring',x:-.52,z:.28},{n:'Fine Leg',t:'deep',x:-.22,z:.90},{n:'3rd Man',t:'deep',x:.26,z:.90}]},
+  ]},
+  {id:'royals',name:'Kandy Royals',short:'🔥 Royals',color:'#c74a1a',accent:'#e89070',
+   batsmen:[
+    {name:'Rahmanullah Gurbaz',nat:'🇦🇫',hand:'RHB',style:'World-Class Explosive Opener',threat:'Lofted drives, slog, ramp scoop',fieldType:'Deep riders + fast attack',
+     pos:[{n:'WK',t:'wk',x:.05,z:.24},{n:'1st Slip',t:'close',x:.22,z:.39},{n:'Point',t:'ring',x:.70,z:.02},{n:'Cover',t:'ring',x:.56,z:-.36},{n:'Mid Off',t:'ring',x:.26,z:-.73},{n:'Dp Mid Off',t:'deep',x:.36,z:-.85},{n:'Mid On',t:'ring',x:-.24,z:-.73},{n:'Mid Wkt',t:'ring',x:-.54,z:-.30},{n:'Sq Leg',t:'ring',x:-.68,z:.05},{n:'Fine Leg',t:'deep',x:-.22,z:.90},{n:'3rd Man',t:'deep',x:.26,z:.90}]},
+    {name:'Moeen Ali',nat:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',hand:'LHB',style:'Experienced Middle-Order',threat:'Sweep, slog sweep, off-side drives',fieldType:'Sweep protection + slip',
+     pos:[{n:'WK',t:'wk',x:-.05,z:.24},{n:'1st Slip',t:'close',x:-.22,z:.39},{n:'Point',t:'ring',x:-.70,z:.02},{n:'Cover',t:'ring',x:-.54,z:-.36},{n:'Mid Off',t:'ring',x:-.24,z:-.73},{n:'Mid On',t:'ring',x:.22,z:-.73},{n:'Mid Wkt',t:'ring',x:.52,z:-.30},{n:'Sq Leg',t:'ring',x:.68,z:.05},{n:'Dp Sq Leg',t:'deep',x:.82,z:.28},{n:'Fine Leg',t:'deep',x:.22,z:.90},{n:'3rd Man',t:'deep',x:-.26,z:.90}]},
+    {name:'Angelo Mathews',nat:'🇱🇰',hand:'RHB',style:'Senior Anchor',threat:'Back-foot punch, leg glance, sweep',fieldType:'Tight ring — cut off rotation',
+     pos:[{n:'WK',t:'wk',x:.05,z:.24},{n:'1st Slip',t:'close',x:.22,z:.39},{n:'Point',t:'ring',x:.70,z:.02},{n:'Cover Pt',t:'ring',x:.56,z:-.34},{n:'Ex Cover',t:'ring',x:.40,z:-.56},{n:'Mid Off',t:'ring',x:.24,z:-.74},{n:'Mid On',t:'ring',x:-.22,z:-.74},{n:'Mid Wkt',t:'ring',x:-.52,z:-.32},{n:'Sq Leg',t:'ring',x:-.68,z:.05},{n:'Fine Leg',t:'deep',x:-.22,z:.90},{n:'3rd Man',t:'deep',x:.26,z:.90}]},
+  ]},
+];
+
+// ═══════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════
+let curTeam=TEAMS[0], curBat=TEAMS[0].batsmen[0];
+let rotX=-0.60, rotY=0.18, zoom=1.0;
+let dragging=false, lx=0, ly=0;
+let curShot=null, animHandle=null;
+let ball={active:false, x:0, y:0.3, z:-0.5, phase:'idle'};
+let ballTrail=[];
+
+// ═══════════════════════════════════════════════════════════════════
+// 3D ENGINE
+// ═══════════════════════════════════════════════════════════════════
+const canvas=document.getElementById('fld');
+const ctx=canvas.getContext('2d');
+const W=canvas.width, H=canvas.height, CX=W/2, CY=H/2+20, FS=200;
+
+function project(wx,wy,wz){
+  const cy=Math.cos(rotY),sy=Math.sin(rotY);
+  let x1=wx*cy+wz*sy, z1=-wx*sy+wz*cy, y1=wy;
+  const cx=Math.cos(rotX),sx=Math.sin(rotX);
+  let x2=x1, y2=y1*cx-z1*sx, z2=y1*sx+z1*cx;
+  const fov=3.8, sc=(fov/(fov+z2))*FS*zoom;
+  return{sx:CX+x2*sc, sy:CY+y2*sc, depth:z2, sc};
+}
+
+function bezierPt(p0,p1,p2,t){
+  return{
+    x:(1-t)*(1-t)*p0.x+2*(1-t)*t*p1.x+t*t*p2.x,
+    y:(1-t)*(1-t)*p0.y+2*(1-t)*t*p1.y+t*t*p2.y,
+    z:(1-t)*(1-t)*p0.z+2*(1-t)*t*p1.z+t*t*p2.z,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// DRAW FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════
+const RCOL={
+  wk:   {dot:'#a0dfff',ring:'#55aee0',lbl:'#b0e8ff'},
+  close:{dot:'#ff6868',ring:'#e03030',lbl:'#ff9090'},
+  ring: {dot:'#ffe055',ring:'#e0a010',lbl:'#ffe880'},
+  deep: {dot:'#55e07a',ring:'#20b040',lbl:'#80e8a0'},
+};
+
+function drawGroundOval(rx,rz,fill,stroke,lw,steps=72){
+  const pts=Array.from({length:steps+1},(_,i)=>{
+    const a=i/steps*Math.PI*2;
+    return project(Math.cos(a)*rx,0,Math.sin(a)*rz);
+  });
+  ctx.beginPath(); ctx.moveTo(pts[0].sx,pts[0].sy);
+  pts.slice(1).forEach(p=>ctx.lineTo(p.sx,p.sy)); ctx.closePath();
+  if(fill){ctx.fillStyle=fill;ctx.fill();}
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=lw;ctx.stroke();}
+}
+
+function drawPitch(){
+  const pts=[[-0.046,0,-0.28],[0.046,0,-0.28],[0.046,0,0.28],[-0.046,0,0.28]].map(c=>project(...c));
+  ctx.beginPath(); ctx.moveTo(pts[0].sx,pts[0].sy);
+  pts.slice(1).forEach(p=>ctx.lineTo(p.sx,p.sy));
+  ctx.closePath(); ctx.fillStyle='#c4a045'; ctx.fill();
+  ctx.strokeStyle='#a08030'; ctx.lineWidth=1; ctx.stroke();
+  [[[-0.046,0,0.13],[0.046,0,0.13]],[[-0.046,0,-0.13],[0.046,0,-0.13]]].forEach(([a,b])=>{
+    const p1=project(...a),p2=project(...b);
+    ctx.beginPath(); ctx.moveTo(p1.sx,p1.sy); ctx.lineTo(p2.sx,p2.sy);
+    ctx.strokeStyle='rgba(255,255,255,.55)'; ctx.lineWidth=1.5; ctx.stroke();
+  });
+  [[-0.012,0.15],[0,0.15],[0.012,0.15],[-0.012,-0.15],[0,-0.15],[0.012,-0.15]].forEach(([sx,sz])=>{
+    const b=project(sx,0,sz),t=project(sx,0.05,sz);
+    ctx.beginPath(); ctx.moveTo(b.sx,b.sy); ctx.lineTo(t.sx,t.sy);
+    ctx.strokeStyle='#f5c842'; ctx.lineWidth=2.5; ctx.stroke();
+  });
+}
+
+function drawLabel(txt,wx,wy,wz,color,size){
+  const p=project(wx,wy,wz);
+  ctx.save(); ctx.shadowColor='#000'; ctx.shadowBlur=5;
+  ctx.fillStyle=color;
+  ctx.font=`bold ${Math.max(8,size*(p.sc/FS))}px Segoe UI`;
+  ctx.textAlign='center'; ctx.textBaseline='bottom';
+  ctx.fillText(txt,p.sx,p.sy); ctx.restore();
+}
+
+function drawPlayer(pos,idx,dimmed){
+  const p=project(pos.x,0.02,pos.z);
+  const rc=RCOL[pos.t];
+  const r=Math.max(6,9.5*(p.sc/FS));
+  const alpha=dimmed?0.3:1.0;
+  ctx.globalAlpha=alpha;
+  const g=ctx.createRadialGradient(p.sx,p.sy,0,p.sx,p.sy,r*3);
+  g.addColorStop(0,rc.dot+'66'); g.addColorStop(1,'transparent');
+  ctx.beginPath(); ctx.arc(p.sx,p.sy,r*3,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+  ctx.beginPath(); ctx.arc(p.sx,p.sy,r,0,Math.PI*2);
+  ctx.fillStyle=rc.dot; ctx.fill(); ctx.strokeStyle=rc.ring; ctx.lineWidth=2; ctx.stroke();
+  ctx.fillStyle='#111';
+  ctx.font=`bold ${Math.max(7,r*.88)}px Segoe UI`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(idx+1,p.sx,p.sy);
+  ctx.globalAlpha=1;
+  drawLabel(pos.n,pos.x,0.14,pos.z,rc.lbl,10);
+}
+
+function drawSpecials(){
+  const bp=project(0,0.04,0.15);
+  const gr=ctx.createRadialGradient(bp.sx,bp.sy,0,bp.sx,bp.sy,11);
+  gr.addColorStop(0,'#fff'); gr.addColorStop(1,curTeam.color+'88');
+  ctx.beginPath(); ctx.arc(bp.sx,bp.sy,9,0,Math.PI*2);
+  ctx.fillStyle=gr; ctx.fill(); ctx.strokeStyle=curTeam.accent; ctx.lineWidth=2.5; ctx.stroke();
+  drawLabel('BATSMAN',0,0.22,0.15,'#fff',9.5);
+  const bwp=project(0,0.04,-0.52);
+  ctx.beginPath(); ctx.arc(bwp.sx,bwp.sy,7,0,Math.PI*2);
+  ctx.fillStyle='#ff9944'; ctx.fill(); ctx.strokeStyle='#cc6600'; ctx.lineWidth=2; ctx.stroke();
+  drawLabel('BOWLER',0,0.18,-0.52,'#ffaa55',9);
+}
+
+function drawBall(){
+  if(!ball.active) return;
+  // Trail
+  if(ballTrail.length>1){
+    for(let i=1;i<ballTrail.length;i++){
+      const p0=project(ballTrail[i-1].x,ballTrail[i-1].y,ballTrail[i-1].z);
+      const p1=project(ballTrail[i].x,ballTrail[i].y,ballTrail[i].z);
+      const alpha=(i/ballTrail.length)*0.4;
+      ctx.beginPath(); ctx.moveTo(p0.sx,p0.sy); ctx.lineTo(p1.sx,p1.sy);
+      ctx.strokeStyle=`rgba(255,100,30,${alpha})`; ctx.lineWidth=2; ctx.stroke();
+    }
+  }
+  // Ball
+  const p=project(ball.x,ball.y,ball.z);
+  const r=Math.max(5,10*(p.sc/FS));
+  const grd=ctx.createRadialGradient(p.sx,p.sy,0,p.sx,p.sy,r*2.5);
+  grd.addColorStop(0,'rgba(255,120,30,0.8)'); grd.addColorStop(1,'transparent');
+  ctx.beginPath(); ctx.arc(p.sx,p.sy,r*2.5,0,Math.PI*2); ctx.fillStyle=grd; ctx.fill();
+  ctx.beginPath(); ctx.arc(p.sx,p.sy,r,0,Math.PI*2);
+  const bGrd=ctx.createRadialGradient(p.sx-r*.3,p.sy-r*.3,0,p.sx,p.sy,r);
+  bGrd.addColorStop(0,'#ee4422'); bGrd.addColorStop(1,'#aa1100');
+  ctx.fillStyle=bGrd; ctx.fill();
+  ctx.strokeStyle='#ff7755'; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.beginPath();
+  ctx.ellipse(p.sx,p.sy,r*.9,r*.25,Math.PI/4,0,Math.PI*2);
+  ctx.strokeStyle='rgba(255,255,255,0.4)'; ctx.lineWidth=1; ctx.stroke();
+}
+
+function render(){
+  ctx.clearRect(0,0,W,H);
+  drawGroundOval(1.08,0.95,'#143a12',null,0);
+  for(let i=0;i<14;i++){
+    const r=0.06+i*0.065, dark=i%2===0;
+    drawGroundOval(r*1.05,r*.93,dark?'rgba(20,80,20,.25)':'rgba(30,100,30,.22)',null,0);
+  }
+  drawGroundOval(.42,.37,'rgba(25,80,20,.4)',null,0);
+  for(let i=0;i<12;i++){
+    const a=i/12*Math.PI*2, p0=project(0,0,0), p1=project(Math.cos(a),0,Math.sin(a)*.88);
+    ctx.beginPath(); ctx.moveTo(p0.sx,p0.sy); ctx.lineTo(p1.sx,p1.sy);
+    ctx.strokeStyle='rgba(255,255,255,.04)'; ctx.lineWidth=1; ctx.stroke();
+  }
+  drawGroundOval(.42,.37,null,curTeam.color+'99',1.5,48);
+  // 30-yd label
+  const lp=project(.42,0.04,0);
+  ctx.fillStyle=curTeam.accent+'88'; ctx.font='bold 8px Segoe UI';
+  ctx.textAlign='center'; ctx.fillText('30-yd',lp.sx,lp.sy);
+  drawGroundOval(1.02,.90,null,curTeam.accent+'cc',3,80);
+  for(let i=0;i<32;i++){
+    const a=i/32*Math.PI*2, p=project(Math.cos(a)*1.02,.015,Math.sin(a)*.90);
+    ctx.beginPath(); ctx.arc(p.sx,p.sy,2,0,Math.PI*2);
+    ctx.fillStyle=curTeam.accent+'bb'; ctx.fill();
+  }
+  drawPitch();
+  drawLabel('◀ BATTING END',0,.04,.95,'rgba(255,255,255,.28)',8.5);
+  drawLabel('BOWLING END ▶',0,.04,-.95,'rgba(255,255,255,.28)',8.5);
+  const pos=curBat.pos, dimmed=ball.active&&ball.phase==='shot';
+  const sorted=pos.map((p,i)=>({p,i})).sort((a,b)=>
+    project(a.p.x,0,a.p.z).depth-project(b.p.x,0,b.p.z).depth);
+  sorted.forEach(({p,i})=>drawPlayer(p,i,dimmed));
+  drawSpecials();
+  drawBall();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ANIMATION
+// ═══════════════════════════════════════════════════════════════════
+function startDelivery(){
+  if(ball.active) return;
+  const key=BAT_KEY[curBat.name]||'kusal';
+  const library=SHOT_LIBRARY[key]||SHOT_LIBRARY['kusal'];
+  curShot=library[Math.floor(Math.random()*library.length)];
+
+  ball.active=true; ball.phase='delivery';
+  ballTrail=[];
+
+  const phaseDef=[
+    // Phase 1: Delivery — bowler run-up to batsman
+    {name:'delivery', dur:1400,
+     from:{x:0,y:0.3,z:-0.55}, via:{x:curShot.to.x*.08,y:0.18,z:-0.18}, to:{x:0,y:0.06,z:0.16}},
+    // Phase 2: Impact pause
+    {name:'impact', dur:350,
+     from:{x:0,y:0.06,z:0.16}, via:{x:0,y:0.12,z:0.16}, to:{x:0,y:0.06,z:0.16}},
+    // Phase 3: Shot trajectory → fielder or boundary
+    {name:'shot', dur:1900,
+     from:{x:0,y:0.06,z:0.16}, via:curShot.arc, to:curShot.to},
+  ];
+
+  // Update delivery UI
+  const db=document.getElementById('deliveryBox');
+  if(db){ db.innerHTML=`
+    <div class="del-type" style="color:${curTeam.accent}">🏏 ${curShot.del}</div>
+    <div class="del-speed">Reacting in ${curShot.reactionMs}ms | Post-contact: ${curShot.ballSpeedPost} kph</div>
+    <div class="del-shot">Shot: ${curShot.shot}</div>`; }
+  document.getElementById('phaseInd').textContent='BOWLING...';
+  document.getElementById('phaseInd').classList.add('show');
+  document.getElementById('startBtn').className='start-btn bowling';
+  document.getElementById('startBtn').textContent='⚡ LIVE...';
+  hideResult();
+
+  let startTime=null;
+  function animate(ts){
+    if(!startTime) startTime=ts;
+    const elapsed=ts-startTime;
+    let cumDur=0;
+    for(const ph of phaseDef){
+      if(elapsed<cumDur+ph.dur){
+        const t=Math.max(0,Math.min(1,(elapsed-cumDur)/ph.dur));
+        const pos=bezierPt(ph.from,ph.via,ph.to,t);
+        ball.x=pos.x; ball.y=pos.y; ball.z=pos.z; ball.phase=ph.name;
+        ballTrail.push({x:pos.x,y:pos.y,z:pos.z});
+        if(ballTrail.length>12) ballTrail.shift();
+        if(ph.name==='delivery') document.getElementById('phaseInd').textContent='DELIVERY ▶';
+        if(ph.name==='impact')   document.getElementById('phaseInd').textContent='💥 IMPACT!';
+        if(ph.name==='shot')     document.getElementById('phaseInd').textContent=`→ ${curShot.shot.toUpperCase()}`;
+        render();
+        animHandle=requestAnimationFrame(animate);
+        return;
+      }
+      cumDur+=ph.dur;
+    }
+    // Animation complete
+    ball.phase='result';
+    document.getElementById('phaseInd').classList.remove('show');
+    showResult(curShot);
+    updateResearchPanel(curShot);
+    document.getElementById('startBtn').className='start-btn reset';
+    document.getElementById('startBtn').textContent='🔄 NEXT DELIVERY';
+    document.getElementById('startBtn').onclick=resetDelivery;
+    render();
+  }
+  animHandle=requestAnimationFrame(animate);
+}
+
+function resetDelivery(){
+  if(animHandle) cancelAnimationFrame(animHandle);
+  ball.active=false; ballTrail=[];
+  hideResult();
+  document.getElementById('phaseInd').classList.remove('show');
+  const btn=document.getElementById('startBtn');
+  btn.className='start-btn ready';
+  btn.textContent='▶  START DELIVERY';
+  btn.onclick=startDelivery;
+  const db=document.getElementById('deliveryBox');
+  if(db) db.innerHTML=`<div style="color:#445;font-size:.78rem;text-align:center">Press START to bowl a delivery</div>`;
+  render();
+}
+
+function showResult(shot){
+  const ov=document.getElementById('resultOverlay');
+  const isCatch=shot.result.startsWith('CAUGHT');
+  const isBoundary=shot.result.includes('FOUR')||shot.result.includes('SIX');
+  const isDot=shot.result==='DOT BALL';
+  document.getElementById('resEmoji').textContent=shot.emoji;
+  document.getElementById('resTitle').style.color=isCatch?'#ff6060':isBoundary?'#f5a623':isDot?'#888':'#fff';
+  document.getElementById('resTitle').textContent=shot.result;
+  document.getElementById('resDetail').textContent=shot.detail;
+  const fielderEl=document.getElementById('resFielder');
+  if(isCatch){
+    fielderEl.style.background='rgba(255,60,60,0.2)';
+    fielderEl.style.color='#ff9090';
+    fielderEl.style.border='1px solid rgba(255,60,60,0.3)';
+    fielderEl.textContent=`Caught: ${shot.targetName} (${shot.catchProb}% success rate)`;
+  } else {
+    fielderEl.style.background=`rgba(245,166,35,0.15)`;
+    fielderEl.style.color='#f5a623';
+    fielderEl.style.border='1px solid rgba(245,166,35,0.2)';
+    fielderEl.textContent=isBoundary?`${shot.targetName} fielder beaten — gap found!`:`Fielded by ${shot.targetName}`;
+  }
+  ov.classList.add('show');
+  setTimeout(()=>ov.classList.remove('show'),3800);
+}
+
+function hideResult(){
+  document.getElementById('resultOverlay').classList.remove('show');
+}
+
+function updateResearchPanel(shot){
+  const rp=document.getElementById('researchPanel');
+  if(!rp) return;
+  const isCatch=shot.result.startsWith('CAUGHT');
+  const prob=shot.catchProb;
+  const probColor=prob>=75?'#55e07a':prob>=55?'#f5a623':'#ff6868';
+  rp.innerHTML=`
+    <h3>🔬 Research Analysis</h3>
+    <div class="catch-prob">
+      <div class="catch-prob-val" style="color:${isCatch?probColor:'#556'}">${isCatch?prob+'%':'—'}</div>
+      <div class="catch-prob-lbl">${isCatch?'Catch success probability':'No catch attempt'}</div>
+    </div>
+    ${isCatch?`<div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:${prob}%;background:${probColor}"></div></div>`:''}
+    <div class="research-stat"><span>Shot Type</span><span style="color:${curTeam.accent}">${shot.shot}</span></div>
+    <div class="research-stat"><span>Spin Type</span><span>${shot.spinType}</span></div>
+    <div class="research-stat"><span>Reaction Window</span><span>${shot.reactionMs?shot.reactionMs+'ms':'N/A'}</span></div>
+    <div class="research-stat"><span>Post-contact Speed</span><span>${shot.ballSpeedPost} kph</span></div>
+    <div class="research-stat"><span>Target Fielder</span><span style="color:${isCatch?'#ff9090':'#3dcf7a'}">${shot.targetName}</span></div>
+    <div class="research-note">${shot.research}</div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// UI BUILD
+// ═══════════════════════════════════════════════════════════════════
+function showTab(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+function buildUI(){
+  const tabs=document.getElementById('teamTabs');
+  tabs.innerHTML='';
+  TEAMS.forEach(t=>{
+    const b=document.createElement('button');
+    b.className='team-tab';
+    b.textContent=t.short;
+    b.style.cssText=`background:${t===curTeam?t.color:t.color+'33'};color:${t===curTeam?'#fff':t.accent};`;
+    b.onclick=()=>{curTeam=t;curBat=t.batsmen[0];resetDelivery();buildUI();render();};
+    tabs.appendChild(b);
+  });
+
+  const sb=document.getElementById('sidebar');
+  sb.innerHTML='';
+
+  // START BUTTON
+  const startBtn=document.createElement('button');
+  startBtn.id='startBtn';
+  startBtn.className='start-btn ready';
+  startBtn.textContent='▶  START DELIVERY';
+  startBtn.onclick=startDelivery;
+  sb.appendChild(startBtn);
+
+  // DELIVERY BOX
+  const dBox=document.createElement('div');
+  dBox.id='deliveryBox';
+  dBox.className='delivery-box';
+  dBox.innerHTML=`<div style="color:#445;font-size:.78rem;text-align:center">Press START to bowl a delivery</div>`;
+  sb.appendChild(dBox);
+
+  // BATSMEN
+  const h1=document.createElement('h2'); h1.textContent='🏏 Select Batsman'; sb.appendChild(h1);
+  curTeam.batsmen.forEach(bat=>{
+    const b=document.createElement('button');
+    b.className='bat-btn'+(bat===curBat?' active':'');
+    b.style.borderColor=bat===curBat?curTeam.color:'#1a2540';
+    b.innerHTML=`<div class="nm">${bat.nat} ${bat.name}</div><div class="dt">${bat.hand} · ${bat.style}</div>`;
+    b.onclick=()=>{curBat=bat;resetDelivery();buildUI();render();};
+    sb.appendChild(b);
+  });
+
+  // BATSMAN INFO
+  const info=document.createElement('div'); info.className='ibox';
+  info.innerHTML=`<h3>🎯 Field Strategy</h3>
+    <div class="irow"><span>Batsman</span><span style="color:${curTeam.accent};font-weight:700">${curBat.name}</span></div>
+    <div class="irow"><span>Style</span><span>${curBat.hand}</span></div>
+    <div class="irow"><span>Key Threat</span><span style="font-size:.7rem">${curBat.threat}</span></div>
+    <div style="margin-top:8px;font-size:.76rem;color:${curTeam.accent};background:rgba(0,0,0,.3);padding:7px;border-radius:5px">${curBat.fieldType}</div>`;
+  sb.appendChild(info);
+
+  // LEGEND
+  const leg=document.createElement('div'); leg.style.marginTop='12px';
+  leg.innerHTML='<h2 style="margin-bottom:8px">📍 Positions</h2>'+
+    Object.entries(RCOL).map(([k,v],i)=>{
+      const descs={wk:'Wicket Keeper',close:'Close Catching',ring:'Ring Field (30yd)',deep:'Deep / Boundary'};
+      return`<div class="leg-item"><div class="leg-dot" style="background:${v.dot}"></div><span>${descs[k]}</span></div>`;
+    }).join('')+
+    `<div class="leg-item"><div class="leg-dot" style="background:#cc2200;border:1px solid #ff6644"></div><span>🏏 Cricket Ball</span></div>`;
+  sb.appendChild(leg);
+
+  // RESEARCH PANEL
+  const rp=document.createElement('div'); rp.className='research-box'; rp.id='researchPanel';
+  rp.innerHTML=`<h3>🔬 Research Analysis</h3>
+    <div style="color:#445;font-size:.76rem;text-align:center;padding:12px">
+      Bowl a delivery to see catch probability analysis, fielder reaction data, and ball physics breakdown here.
+    </div>`;
+  sb.appendChild(rp);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MOUSE / TOUCH
+// ═══════════════════════════════════════════════════════════════════
+const wrap=document.getElementById('cWrap');
+wrap.addEventListener('mousedown',e=>{dragging=true;lx=e.clientX;ly=e.clientY;});
+window.addEventListener('mouseup',()=>dragging=false);
+window.addEventListener('mousemove',e=>{
+  if(!dragging)return;
+  rotY+=(e.clientX-lx)*.008; rotX+=(e.clientY-ly)*.008;
+  rotX=Math.max(-1.4,Math.min(-.08,rotX));
+  lx=e.clientX;ly=e.clientY;render();
+});
+wrap.addEventListener('wheel',e=>{
+  zoom*=e.deltaY>0?.92:1.08; zoom=Math.max(.45,Math.min(2.2,zoom));
+  render(); e.preventDefault();
+},{passive:false});
+wrap.addEventListener('dblclick',()=>{rotX=-.60;rotY=.18;zoom=1.0;render();});
+wrap.addEventListener('touchstart',e=>{if(e.touches.length===1){dragging=true;lx=e.touches[0].clientX;ly=e.touches[0].clientY;}});
+wrap.addEventListener('touchmove',e=>{
+  if(!dragging||e.touches.length!==1)return;
+  rotY+=(e.touches[0].clientX-lx)*.009; rotX+=(e.touches[0].clientY-ly)*.009;
+  rotX=Math.max(-1.4,Math.min(-.08,rotX));
+  lx=e.touches[0].clientX;ly=e.touches[0].clientY;render();e.preventDefault();
+},{passive:false});
+wrap.addEventListener('touchend',()=>dragging=false);
+
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+buildUI();
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LPL 2026 — Prediction Hub</title>
+<style>
+:root{
+  --bg:#05070d;--panel:#0b101b;--border:#24314a;
+  --gold:#f5a623;--mint:#47d18c;--cyan:#65d7ff;--coral:#ff6f61;--violet:#9d7bff;
+  --ink:#eef1f7;--muted:#94a1bd;--muted2:#6f7c98;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:
+    radial-gradient(circle at 8% 4%,rgba(71,209,140,.14),transparent 26%),
+    radial-gradient(circle at 90% 8%,rgba(101,215,255,.12),transparent 30%),
+    radial-gradient(circle at 50% 130%,rgba(157,123,255,.12),transparent 42%),
+    linear-gradient(135deg,#06090f 0%,#0e1016 48%,#07110d 100%);
+  color:var(--ink);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden;line-height:1.5;
+}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);
+  background-size:46px 46px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.7),transparent 92%);}
+a{color:inherit;}
+
+/* ── Header ── */
+header{background:linear-gradient(135deg,rgba(12,18,30,.98),rgba(7,14,15,.94));border-bottom:1px solid rgba(245,166,35,.5);padding:13px 22px;display:flex;align-items:center;gap:13px;position:sticky;top:0;z-index:30;backdrop-filter:blur(18px);}
+header::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,var(--mint),var(--gold),var(--cyan),transparent);}
+.logo{width:44px;height:44px;border-radius:11px;display:grid;place-items:center;background:radial-gradient(circle at 50% 38%,rgba(245,166,35,.42),transparent 54%),linear-gradient(145deg,rgba(71,209,140,.22),rgba(101,215,255,.1));border:1px solid rgba(245,166,35,.42);font-size:1.55rem;flex-shrink:0;}
+header h1{font-size:1.12rem;color:#ffd37a;line-height:1.1;}
+header p{font-size:0.68rem;color:var(--muted);margin-top:2px;}
+.status-pill{font-size:0.62rem;padding:4px 10px;border-radius:20px;font-weight:800;margin-left:auto;letter-spacing:.4px;}
+.status-live{background:rgba(71,209,140,.16);color:#5fe0a0;border:1px solid rgba(71,209,140,.4);}
+.status-static{background:rgba(245,166,35,.14);color:#ffce7a;border:1px solid rgba(245,166,35,.4);}
+
+/* ── Nav ── */
+.nav{display:flex;gap:6px;padding:9px 16px;overflow-x:auto;position:sticky;top:71px;z-index:25;background:rgba(7,11,18,.85);backdrop-filter:blur(14px);border-bottom:1px solid rgba(36,49,74,.6);}
+.nav a{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:9px;font-size:0.78rem;font-weight:800;color:#a7b4d2;text-decoration:none;border:1px solid rgba(255,255,255,.08);white-space:nowrap;transition:.16s;background:rgba(255,255,255,.02);}
+.nav a:hover{color:#ffd37a;border-color:rgba(245,166,35,.55);transform:translateY(-1px);}
+.nav a.primary{color:#031018;background:linear-gradient(135deg,var(--gold),#ffce7a);border-color:transparent;}
+
+main{max-width:1240px;margin:0 auto;padding:24px 20px 70px;position:relative;z-index:1;}
+
+/* ── Section scaffolding ── */
+.sec{margin-bottom:34px;scroll-margin-top:130px;}
+.sec-head{display:flex;align-items:center;gap:12px;margin-bottom:6px;}
+.sec-num{width:30px;height:30px;border-radius:9px;flex-shrink:0;display:grid;place-items:center;font-size:0.82rem;font-weight:900;color:#031018;background:linear-gradient(135deg,var(--cyan),var(--mint));}
+.sec-head h2{font-size:1.22rem;font-weight:900;color:#fff;}
+.sec-head .dash{flex:1;height:1px;background:linear-gradient(90deg,rgba(245,166,35,.45),transparent);}
+.sec-head .hint{font-size:0.72rem;color:var(--muted);white-space:nowrap;}
+.sec-intro{font-size:0.86rem;color:var(--muted);margin:0 0 16px 42px;max-width:74ch;}
+
+/* ── Cards ── */
+.card{background:linear-gradient(145deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.085);border-radius:15px;padding:18px;backdrop-filter:blur(12px);}
+
+/* ── Hero ── */
+.hero{display:grid;grid-template-columns:1.18fr .82fr;gap:18px;margin-bottom:30px;}
+.hero-left{background:linear-gradient(150deg,rgba(36,58,34,.5),rgba(12,20,14,.78));border:1px solid rgba(245,166,35,.3);border-radius:20px;padding:28px;position:relative;overflow:hidden;}
+.hero-left::after{content:"🏏";position:absolute;right:-12px;bottom:-26px;font-size:9.5rem;opacity:.06;transform:rotate(-18deg);}
+.eyebrow{font-size:0.68rem;text-transform:uppercase;letter-spacing:2.4px;color:#f5a623cc;font-weight:800;}
+.hero-title{font-size:2.15rem;font-weight:900;line-height:1.08;margin:9px 0 8px;background:linear-gradient(120deg,#fff,#ffd37a 62%,#ffb347);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.hero-sub{font-size:0.92rem;color:#c2cce0;max-width:48ch;}
+.champ-row{display:flex;align-items:center;gap:14px;margin-top:22px;padding:14px 16px;border-radius:14px;background:rgba(0,0,0,.3);border:1px solid rgba(245,166,35,.35);}
+.champ-emoji{font-size:2.6rem;}
+.champ-meta .lbl{font-size:0.64rem;text-transform:uppercase;letter-spacing:1.4px;color:#f5a623bb;font-weight:800;}
+.champ-meta .nm{font-size:1.35rem;font-weight:900;color:var(--gold);}
+.champ-meta .pr{font-size:0.78rem;color:var(--muted);}
+.hero-right{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-content:start;}
+.kpi{background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.09);border-radius:15px;padding:17px;text-align:center;}
+.kpi .v{font-size:2rem;font-weight:900;line-height:1;background:linear-gradient(120deg,var(--cyan),var(--mint));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.kpi .l{font-size:0.62rem;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-top:7px;font-weight:700;}
+
+/* ── Explainer (New to cricket) ── */
+.explainer{border:1px solid rgba(101,215,255,.28);background:linear-gradient(150deg,rgba(101,215,255,.06),rgba(157,123,255,.05));border-radius:16px;overflow:hidden;}
+.exp-toggle{width:100%;display:flex;align-items:center;gap:12px;padding:16px 18px;background:none;border:none;color:var(--ink);cursor:pointer;text-align:left;font-family:inherit;}
+.exp-toggle .ico{font-size:1.5rem;}
+.exp-toggle .tt{font-size:1rem;font-weight:900;}
+.exp-toggle .ss{font-size:0.76rem;color:var(--muted);margin-top:1px;}
+.exp-toggle .chev{margin-left:auto;font-size:1rem;color:var(--cyan);transition:.25s;}
+.explainer.open .chev{transform:rotate(180deg);}
+.exp-body{display:none;padding:0 18px 20px;}
+.explainer.open .exp-body{display:block;animation:fade .25s;}
+.learn-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:6px;}
+.learn{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:14px;}
+.learn h4{font-size:0.86rem;color:#fff;margin-bottom:6px;display:flex;align-items:center;gap:7px;}
+.learn p{font-size:0.78rem;color:var(--muted);}
+.learn p b{color:#bfe7ff;}
+.phasebar{display:flex;height:30px;border-radius:8px;overflow:hidden;margin-top:10px;font-size:0.6rem;font-weight:800;}
+.phasebar span{display:grid;place-items:center;color:#031018;padding:0 4px;text-align:center;}
+
+/* ── Explorer ── */
+.explorer-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+.search{flex:1;min-width:230px;position:relative;}
+.search input{width:100%;background:#0d1428;border:1px solid var(--border);color:var(--ink);padding:12px 14px 12px 40px;border-radius:12px;font-size:0.92rem;}
+.search input:focus{outline:none;border-color:rgba(101,215,255,.6);box-shadow:0 0 0 3px rgba(101,215,255,.12);}
+.search::before{content:"🔍";position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:.9rem;opacity:.7;}
+.sortsel{background:#0d1428;border:1px solid var(--border);color:var(--ink);padding:11px 13px;border-radius:11px;font-size:0.82rem;font-weight:700;cursor:pointer;}
+.fbtns{display:flex;gap:6px;flex-wrap:wrap;}
+.fbtn{padding:8px 13px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:#aeb9d2;font-size:0.76rem;font-weight:800;cursor:pointer;transition:.15s;white-space:nowrap;}
+.fbtn:hover{color:#fff;border-color:rgba(255,255,255,.25);}
+.fbtn.active{color:#031018;background:linear-gradient(135deg,var(--cyan),var(--mint));border-color:transparent;}
+.frow-lbl{font-size:0.64rem;text-transform:uppercase;letter-spacing:.6px;color:var(--muted2);font-weight:800;margin-right:2px;align-self:center;}
+
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(244px,1fr));gap:14px;}
+.pcard{position:relative;background:linear-gradient(150deg,rgba(255,255,255,.055),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.085);border-radius:15px;padding:16px;cursor:pointer;transition:.18s;overflow:hidden;}
+.pcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--tc,#65d7ff);}
+.pcard:hover{transform:translateY(-3px);border-color:var(--tc,rgba(101,215,255,.5));box-shadow:0 22px 46px rgba(0,0,0,.4);}
+.pc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.pc-name{font-size:1.02rem;font-weight:800;line-height:1.18;}
+.pc-team{font-size:0.7rem;color:var(--muted);margin-top:2px;}
+.pc-ovr{flex-shrink:0;width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font-size:1.18rem;font-weight:900;color:#031018;}
+.pc-arch{display:inline-flex;align-items:center;gap:5px;font-size:0.7rem;font-weight:800;padding:4px 9px;border-radius:8px;background:rgba(255,255,255,.06);color:#dbe4f5;margin:11px 0 6px;}
+.pc-desc{font-size:0.74rem;color:var(--muted);min-height:32px;}
+.pc-mini{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:11px;}
+.mini{background:rgba(0,0,0,.26);border-radius:9px;padding:7px 4px;text-align:center;}
+.mini .mv{font-size:0.95rem;font-weight:900;color:#fff;}
+.mini .ml{font-size:0.54rem;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-top:2px;}
+.empty{text-align:center;padding:50px;color:var(--muted);grid-column:1/-1;}
+
+/* ── Standings ── */
+.stand-table{width:100%;border-collapse:collapse;font-size:0.85rem;}
+.stand-table th{padding:9px 11px;text-align:left;color:#8190ad;font-size:0.64rem;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);}
+.stand-table td{padding:11px;border-bottom:1px solid rgba(255,255,255,.04);}
+.stand-table tr:hover td{background:rgba(101,215,255,.045);}
+.pos-badge{width:25px;height:25px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:800;}
+.team-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:7px;vertical-align:middle;}
+.prob-bar{height:8px;border-radius:4px;background:#1a2030;overflow:hidden;}
+.prob-fill{height:8px;border-radius:4px;background:linear-gradient(90deg,var(--mint),var(--cyan));transition:width .8s;}
+
+/* ── Explore-more cards ── */
+.xgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
+.xcard{display:block;text-decoration:none;background:linear-gradient(150deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.085);border-radius:15px;padding:18px;transition:.18s;}
+.xcard:hover{transform:translateY(-3px);border-color:rgba(245,166,35,.5);box-shadow:0 20px 42px rgba(0,0,0,.35);}
+.xcard .xi{font-size:1.7rem;}
+.xcard .xt{font-size:1rem;font-weight:900;color:#fff;margin:8px 0 5px;}
+.xcard .xd{font-size:0.78rem;color:var(--muted);}
+.xcard .xgo{font-size:0.74rem;color:var(--cyan);font-weight:800;margin-top:10px;display:inline-block;}
+
+/* ── Glossary ── */
+.gloss{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;}
+.gitem{background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.06);border-radius:11px;padding:13px;}
+.gitem dt{font-size:0.82rem;font-weight:800;color:#bfe7ff;margin-bottom:3px;}
+.gitem dd{font-size:0.76rem;color:var(--muted);}
+
+/* ── Tooltip ── */
+.info{display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;background:rgba(101,215,255,.18);color:#9fe3ff;font-size:0.62rem;font-weight:900;cursor:help;margin-left:5px;position:relative;vertical-align:middle;border:1px solid rgba(101,215,255,.35);}
+.info:hover,.info.tap{background:rgba(101,215,255,.35);}
+.info::after{content:attr(data-tip);position:absolute;bottom:140%;left:50%;transform:translateX(-50%) translateY(4px);width:max-content;max-width:240px;background:#0a1322;border:1px solid rgba(101,215,255,.4);color:#dcecff;font-size:0.72rem;font-weight:500;line-height:1.45;padding:9px 11px;border-radius:9px;box-shadow:0 14px 34px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:.16s;z-index:60;text-align:left;text-transform:none;letter-spacing:normal;}
+.info:hover::after,.info.tap::after{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── Modal ── */
+.modal{position:fixed;inset:0;z-index:50;display:none;align-items:flex-start;justify-content:center;padding:40px 16px;background:rgba(3,6,12,.74);backdrop-filter:blur(6px);overflow-y:auto;}
+.modal.show{display:flex;animation:fade .2s;}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.sheet{width:100%;max-width:780px;background:linear-gradient(160deg,#0d1422,#080d18);border:1px solid rgba(255,255,255,.12);border-radius:20px;overflow:hidden;box-shadow:0 40px 90px rgba(0,0,0,.55);animation:rise .25s cubic-bezier(.2,.8,.2,1);}
+@keyframes rise{from{transform:translateY(20px);opacity:0}to{transform:none;opacity:1}}
+.sheet-head{padding:22px 24px;position:relative;border-bottom:1px solid rgba(255,255,255,.08);}
+.sheet-head::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--tc,#65d7ff);}
+.sh-close{position:absolute;top:16px;right:18px;width:33px;height:33px;border-radius:9px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#cfd8ea;font-size:1.1rem;cursor:pointer;line-height:1;}
+.sh-close:hover{border-color:rgba(255,111,97,.6);color:#ff9d92;}
+.sh-name{font-size:1.55rem;font-weight:900;color:#fff;}
+.sh-team{font-size:0.85rem;color:var(--muted);margin-top:3px;}
+.sh-arch{display:inline-flex;align-items:center;gap:6px;margin-top:11px;font-size:0.78rem;font-weight:800;padding:5px 12px;border-radius:9px;background:rgba(245,166,35,.14);color:#ffce7a;}
+.sh-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px;}
+.tag{font-size:0.64rem;font-weight:800;padding:4px 9px;border-radius:8px;background:rgba(255,255,255,.07);color:#c7d4ea;}
+.sheet-body{padding:22px 24px;}
+.tldr{background:rgba(101,215,255,.07);border:1px solid rgba(101,215,255,.25);border-radius:12px;padding:13px 15px;font-size:0.84rem;color:#d6e8fb;margin-bottom:20px;}
+.tldr b{color:#fff;}
+.ov-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(82px,1fr));gap:10px;margin-bottom:22px;}
+.ov{background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px 6px;text-align:center;}
+.ov .v{font-size:1.4rem;font-weight:900;color:var(--cyan);}
+.ov .l{font-size:0.56rem;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-top:4px;}
+.blk{margin-bottom:22px;}
+.blk h3{font-size:0.74rem;text-transform:uppercase;letter-spacing:1px;color:#8190ad;margin-bottom:4px;display:flex;align-items:center;gap:7px;}
+.blk .cap{font-size:0.74rem;color:var(--muted2);margin-bottom:12px;}
+.rrow{display:flex;align-items:center;gap:10px;margin:8px 0;}
+.rlabel{width:142px;font-size:0.78rem;color:#c7d4ea;flex-shrink:0;}
+.rtrack{flex:1;height:18px;background:#141b2c;border-radius:6px;overflow:hidden;}
+.rfill{height:100%;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:7px;font-size:0.66rem;font-weight:800;color:#031018;width:0;transition:width .8s cubic-bezier(.2,.8,.2,1);}
+.venue-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px;}
+.vchip{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:11px;text-align:center;}
+.vchip .vn{font-size:0.64rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+.vchip .vv{font-size:1.2rem;font-weight:900;margin-top:4px;}
+.note{font-size:0.76rem;color:var(--muted);}
+.skel{background:linear-gradient(90deg,rgba(255,255,255,.04),rgba(255,255,255,.09),rgba(255,255,255,.04));background-size:200% 100%;animation:sk 1.2s infinite;border-radius:8px;}
+@keyframes sk{from{background-position:200% 0}to{background-position:-200% 0}}
+/* ── Forecast: champion + progression ── */
+.fc-hero{display:grid;grid-template-columns:1.2fr 1fr;gap:14px;margin-bottom:16px;}
+.champ-big{background:linear-gradient(140deg,rgba(40,32,8,.92),rgba(14,12,6,.95));border:2px solid var(--gold);border-radius:16px;padding:22px;text-align:center;position:relative;overflow:hidden;}
+.champ-big .tr{font-size:2.8rem;}
+.champ-big .lb{font-size:0.66rem;text-transform:uppercase;letter-spacing:1.6px;color:#f5a623aa;margin:5px 0;font-weight:800;}
+.champ-big .nm{font-size:1.6rem;font-weight:900;color:var(--gold);}
+.champ-big .pc{font-size:0.86rem;color:#cdb98a;margin-top:5px;}
+.runner-big{background:rgba(0,0,0,.26);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:22px;display:flex;flex-direction:column;justify-content:center;text-align:center;}
+.runner-big .lb{font-size:0.64rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:800;}
+.runner-big .nm{font-size:1.3rem;font-weight:900;color:#cfe3ff;margin-top:6px;}
+.prog-row{display:grid;grid-template-columns:160px 1fr;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+.prog-team{display:flex;align-items:center;gap:8px;font-weight:800;font-size:0.86rem;}
+.prog-bars{display:flex;flex-direction:column;gap:5px;}
+.mini-bar{display:flex;align-items:center;gap:8px;}
+.mini-lbl{width:64px;font-size:0.62rem;color:var(--muted);text-transform:uppercase;flex-shrink:0;}
+.mini-track{flex:1;height:14px;background:#141b2c;border-radius:5px;overflow:hidden;}
+.mini-fill{height:100%;border-radius:5px;width:0;transition:width .9s cubic-bezier(.2,.8,.2,1);}
+.mini-val{width:46px;text-align:right;font-size:0.7rem;font-weight:800;flex-shrink:0;}
+
+/* ── Fixtures + tactical plan ── */
+.match{background:linear-gradient(150deg,rgba(255,255,255,.045),rgba(255,255,255,.018));border:1px solid rgba(255,255,255,.09);border-radius:13px;margin-bottom:11px;overflow:hidden;}
+.match-top{display:flex;align-items:center;gap:11px;padding:13px 15px;cursor:pointer;flex-wrap:wrap;transition:.15s;}
+.match-top:hover{background:rgba(101,215,255,.04);}
+.match-no{font-size:0.62rem;color:var(--muted);background:rgba(255,255,255,.06);padding:3px 8px;border-radius:6px;font-weight:800;white-space:nowrap;}
+.match-meta{font-size:0.68rem;color:var(--muted2);white-space:nowrap;}
+.stage-pill{font-size:0.58rem;padding:2px 8px;border-radius:10px;font-weight:800;}
+.stage-group{background:rgba(101,215,255,.12);color:#8fd7ff;}
+.stage-playoff{background:rgba(157,123,255,.16);color:#c2adff;}
+.stage-final{background:rgba(245,166,35,.18);color:#ffce7a;}
+.match-teams{flex:1;min-width:230px;display:flex;align-items:center;gap:9px;}
+.mt-side{flex:1;display:flex;align-items:center;gap:6px;font-weight:800;font-size:0.9rem;}
+.mt-side.t2{justify-content:flex-end;text-align:right;}
+.mt-side.win{color:#fff;}.mt-side.lose{color:var(--muted);}
+.vs{font-size:0.68rem;color:var(--muted2);font-weight:700;}
+.wbar{display:flex;height:26px;border-radius:8px;overflow:hidden;min-width:190px;flex:1.1;border:1px solid rgba(255,255,255,.1);}
+.wbar .a{background:linear-gradient(135deg,#1a6ec7,#2a8de0);display:grid;place-items:center;color:#fff;font-size:0.72rem;font-weight:800;min-width:34px;}
+.wbar .b{background:linear-gradient(135deg,#c74a1a,#e0682a);display:grid;place-items:center;color:#fff;font-size:0.72rem;font-weight:800;min-width:34px;}
+.expand-ico{color:var(--muted2);font-size:0.9rem;margin-left:auto;transition:.2s;}
+.match.open .expand-ico{transform:rotate(180deg);color:var(--cyan);}
+.plan{display:none;padding:4px 15px 16px;border-top:1px dashed rgba(255,255,255,.1);}
+.match.open .plan{display:block;animation:fade .25s;}
+.plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px;margin-top:13px;}
+.pbox{background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px;}
+.pbox .pl{font-size:0.6rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:5px;display:flex;align-items:center;}
+.pbox .pv{font-size:0.86rem;font-weight:800;color:#eef1f7;line-height:1.4;}
+.pbox .ps{font-size:0.68rem;color:var(--muted);font-weight:600;margin-top:3px;}
+.advbars{display:flex;flex-direction:column;gap:4px;margin-top:7px;}
+.advbar{display:flex;align-items:center;gap:6px;font-size:0.62rem;color:var(--muted);}
+.advbar .t{flex:1;height:7px;background:#141b2c;border-radius:4px;overflow:hidden;}
+.advbar .f{height:7px;border-radius:4px;}
+.badge-spin{color:#c2adff;font-weight:800;}.badge-pace{color:#8fd7ff;font-weight:800;}
+.why{margin-top:12px;font-size:0.82rem;color:#d6e8d9;background:rgba(71,209,140,.06);border:1px solid rgba(71,209,140,.28);border-radius:10px;padding:13px;line-height:1.55;}
+.why b{color:#fff;}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+.filters select{background:#0d1428;border:1px solid var(--border);color:var(--ink);padding:9px 12px;border-radius:10px;font-size:0.8rem;font-weight:700;cursor:pointer;}
+
+/* ── Per-team outlook ── */
+.tout{background:linear-gradient(150deg,rgba(255,255,255,.045),rgba(255,255,255,.018));border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:16px;margin-bottom:11px;}
+.tout-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.tout-name{font-size:1.05rem;font-weight:900;}
+.tout-rank{font-size:0.64rem;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,.08);margin-left:auto;color:#cfe3ff;}
+.tout-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:9px;}
+.tout-stat{background:rgba(0,0,0,.26);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px;text-align:center;}
+.tout-val{font-size:1.3rem;font-weight:900;line-height:1;}
+.tout-lbl{font-size:0.56rem;color:var(--muted);text-transform:uppercase;margin-top:5px;}
+.formchips{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;}
+.fchip{font-size:0.66rem;padding:4px 9px;border-radius:8px;font-weight:700;}
+
+.footer{text-align:center;color:#56627d;font-size:0.72rem;padding:30px 0 0;line-height:1.7;}
+@media(max-width:820px){.hero{grid-template-columns:1fr;}.hero-title{font-size:1.7rem;}.sec-intro{margin-left:0;}}
+@media(max-width:560px){.rlabel{width:106px;}.sec-head h2{font-size:1.05rem;}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">🏏</div>
+  <div>
+    <h1>LPL 2026 — Prediction Hub</h1>
+    <p>Made simple for everyone — learn the game while you explore the data</p>
+  </div>
+  <span id="dataStatus" class="status-pill status-static">● STATIC</span>
+</header>
+
+<nav class="nav">
+  <a href="#learn" class="primary">🎓 New to cricket?</a>
+  <a href="#explorer">🧍 Players</a>
+  <a href="#predictions">📊 Who wins?</a>
+  <a href="#gameplans">🎯 AI game plans</a>
+  <a id="lnkDash" href="/dashboard.html">🏆 Tournament</a>
+  <a id="lnkForecast" href="/forecast.html">🔮 AI Forecast</a>
+  <a id="lnkField" href="/field.html">🛡️ Field Lab</a>
+  <a id="lnkResearch" href="/research.html">🔬 How it works</a>
+</nav>
+
+<main>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-left">
+      <div class="eyebrow">Lanka Premier League 2026</div>
+      <div class="hero-title">Understand the cricket. See the prediction.</div>
+      <div class="hero-sub">No cricket background needed. Explore every player in plain language, learn what each number means, and see who the AI model thinks will win — step by step.</div>
+      <div class="champ-row" id="champRow">
+        <div class="champ-emoji">🏆</div>
+        <div class="champ-meta">
+          <div class="lbl">Model's predicted champion</div>
+          <div class="nm" id="champName">—</div>
+          <div class="pr" id="champProb">Loading prediction…</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-right" id="kpis">
+      <div class="kpi"><div class="v" id="kpiPlayers">—</div><div class="l">Players to explore</div></div>
+      <div class="kpi"><div class="v" id="kpiTeams">5</div><div class="l">Teams</div></div>
+      <div class="kpi"><div class="v" id="kpiVenues">4</div><div class="l">Stadiums</div></div>
+      <div class="kpi"><div class="v">7</div><div class="l">AI models</div></div>
+    </div>
+  </section>
+
+  <!-- 1. LEARN -->
+  <section class="sec" id="learn">
+    <div class="explainer" id="explainer">
+      <button class="exp-toggle" id="expToggle">
+        <span class="ico">🎓</span>
+        <span><span class="tt">New to cricket? Start here (60-second crash course)</span><span class="ss" style="display:block">Click to learn the basics — then everything below will make sense</span></span>
+        <span class="chev">▾</span>
+      </button>
+      <div class="exp-body">
+        <div class="learn-grid">
+          <div class="learn">
+            <h4>🏏 What is the LPL?</h4>
+            <p>The <b>Lanka Premier League</b> is Sri Lanka's pro <b>T20</b> tournament: <b>5 teams</b>, fast 20-over matches (~3 hours). Each team has batters, bowlers and all-rounders fighting to win the trophy.</p>
+          </div>
+          <div class="learn">
+            <h4>👥 The 4 player types</h4>
+            <p><b>Batter</b> scores runs. <b>Bowler</b> takes wickets. <b>All-rounder</b> does both. <b>Wicket-keeper</b> catches behind the stumps & also bats. We label every player so you know their job.</p>
+          </div>
+          <div class="learn">
+            <h4>⏱️ The 3 phases of an innings</h4>
+            <p>A 20-over innings is split into 3 stages. Players are often great at one stage, not all three:</p>
+            <div class="phasebar">
+              <span style="flex:6;background:#65d7ff">Powerplay · ov 1-6</span>
+              <span style="flex:9;background:#47d18c">Middle · ov 7-15</span>
+              <span style="flex:5;background:#f5a623">Death · ov 16-20</span>
+            </div>
+            <p style="margin-top:8px"><b>Powerplay</b>: attack, field is restricted. <b>Middle</b>: build steadily. <b>Death</b>: all-out hitting at the end.</p>
+          </div>
+          <div class="learn">
+            <h4>🔢 How to read the ratings</h4>
+            <p>Every skill is scored <b>0 to 10</b> (10 = world-class). We turn these into a single <b>Overall</b> score out of 100 for quick comparison. Higher = better.</p>
+          </div>
+          <div class="learn">
+            <h4>📈 Strike rate & average</h4>
+            <p><b>Strike rate</b> = runs per 100 balls (how fast a batter scores; 150+ is explosive). <b>Average</b> = runs per dismissal (how reliable). <b>Economy</b> = runs a bowler concedes per over (lower is better).</p>
+          </div>
+          <div class="learn">
+            <h4>🏟️ Why the stadium matters</h4>
+            <p>Pitches behave differently. Some help fast (<b>pace</b>) bowling, some help <b>spin</b>, some are great for batting. A player's <b>venue rating</b> shows how well they suit each ground.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. PLAYERS -->
+  <section class="sec" id="explorer">
+    <div class="sec-head">
+      <span class="sec-num">1</span>
+      <h2>Explore the players</h2>
+      <span class="dash"></span>
+      <span class="hint" id="exHint">Click a card for the full story</span>
+    </div>
+    <p class="sec-intro">Every player gets a plain-language label (like “Power hitter” or “Death-overs bowler”) so you instantly know what they do. Search, filter, or sort — then click anyone to see a friendly breakdown of their strengths.</p>
+    <div class="explorer-bar">
+      <div class="search"><input id="searchBox" type="text" placeholder="Search a player by name…" autocomplete="off"></div>
+      <select class="sortsel" id="sortSel">
+        <option value="overall">Best overall first</option>
+        <option value="batting">Best batters first</option>
+        <option value="bowling">Best bowlers first</option>
+        <option value="impact">Biggest match-winners</option>
+        <option value="name">Name (A–Z)</option>
+      </select>
+    </div>
+    <div class="explorer-bar" style="margin-bottom:8px"><span class="frow-lbl">Team</span><div class="fbtns" id="teamFilters"></div></div>
+    <div class="explorer-bar"><span class="frow-lbl">Type</span><div class="fbtns" id="roleFilters"></div></div>
+    <div class="pgrid" id="playerGrid"><div class="empty">Loading players…</div></div>
+  </section>
+
+  <!-- 2. TOURNAMENT FORECAST -->
+  <section class="sec" id="predictions">
+    <div class="sec-head">
+      <span class="sec-num">2</span>
+      <h2>Who will win the title?</h2>
+      <span class="dash"></span>
+      <span class="hint" id="fcHint">Monte-Carlo forecast</span>
+    </div>
+    <p class="sec-intro">The AI plays the <b>entire tournament thousands of times</b> (a “Monte-Carlo” simulation). Each bar below is simply: <i>out of 100 imaginary seasons, how often did this team reach the play-offs, the final, or lift the cup?</i> It's a guide — upsets are part of cricket.</p>
+    <div id="fcHero"></div>
+    <div class="card" style="margin-bottom:14px">
+      <h2 style="font-size:.72rem;text-transform:uppercase;letter-spacing:1px;color:#8190ad;margin-bottom:6px">Each team's road to the trophy
+        <span class="info" data-tip="Play-off = finish top 3. Final = reach the title match. Champion = win it all.">i</span></h2>
+      <div id="progRows"><div class="empty">Running simulation…</div></div>
+    </div>
+    <div class="card">
+      <h2 style="font-size:.72rem;text-transform:uppercase;letter-spacing:1px;color:#8190ad;margin-bottom:10px">Projected group table</h2>
+      <table class="stand-table">
+        <thead><tr><th>#</th><th>Team</th>
+          <th>M<span class="info" data-tip="Matches played in the group stage.">i</span></th>
+          <th>Exp. wins<span class="info" data-tip="Average wins across all simulations.">i</span></th>
+          <th>Exp. pts<span class="info" data-tip="Average points (2 per win). The table is ranked by this.">i</span></th>
+          <th>Status</th></tr></thead>
+        <tbody id="standBody"><tr><td colspan="6" class="empty" style="padding:30px">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 3. MATCH PREDICTIONS + AI GAME PLANS -->
+  <section class="sec" id="gameplans">
+    <div class="sec-head">
+      <span class="sec-num">3</span>
+      <h2>Match predictions & AI game plans</h2>
+      <span class="dash"></span>
+      <span class="hint" id="gpHint">Tap a match to open its plan</span>
+    </div>
+    <p class="sec-intro">For every fixture the AI gives a <b>win probability</b> and a full <b>tactical game plan</b> — what to do at the toss, whether to bat first or chase, what the pitch will do, and which bowlers matter. Each piece is explained in plain words. This is the heart of the project.</p>
+    <div class="filters">
+      <span class="frow-lbl">Team</span>
+      <select id="fxTeam" onchange="renderFixtures()"><option value="">All teams</option></select>
+      <span class="frow-lbl">Stage</span>
+      <select id="fxStage" onchange="renderFixtures()">
+        <option value="">All stages</option><option value="group">Group</option><option value="play">Play-off</option><option value="final">Final</option>
+      </select>
+      <button class="fbtn" id="expandAll" onclick="toggleAllPlans()">Expand all plans</button>
+    </div>
+    <div id="fixtureList"><div class="empty">Loading fixtures…</div></div>
+  </section>
+
+  <!-- 4. PER-TEAM OUTLOOK -->
+  <section class="sec" id="outlook">
+    <div class="sec-head">
+      <span class="sec-num">4</span>
+      <h2>Per-team outlook</h2>
+      <span class="dash"></span>
+      <span class="hint">Route to the cup</span>
+    </div>
+    <p class="sec-intro">A quick scoreboard for each team: their chances, expected points, and predicted result in every group match (green = win, red = loss).</p>
+    <div id="outlookList"><div class="empty">Loading…</div></div>
+  </section>
+
+  <!-- 5. EXPLORE MORE -->
+  <section class="sec">
+    <div class="sec-head">
+      <span class="sec-num">5</span>
+      <h2>Go deeper</h2>
+      <span class="dash"></span>
+      <span class="hint">Specialised tools</span>
+    </div>
+    <p class="sec-intro">Want even more? These pages dig into specific match-ups, simulations and the AI itself.</p>
+    <div class="xgrid">
+      <a class="xcard" id="xDash" href="/dashboard.html"><div class="xi">🏆</div><div class="xt">Tournament Dashboard</div><div class="xd">Full bracket, awards race, and a match simulator where you pick two teams and watch a predicted result.</div><span class="xgo">Open →</span></a>
+      <a class="xcard" id="xForecast" href="/forecast.html"><div class="xi">🔮</div><div class="xt">AI Forecast</div><div class="xd">Match-by-match win chances across the real fixture list, plus who's most likely to make the final.</div><span class="xgo">Open →</span></a>
+      <a class="xcard" id="xField" href="/field.html"><div class="xi">🛡️</div><div class="xt">3D Field Lab</div><div class="xd">See where to place fielders against each batter on a 3D ground — the tactics side of the game.</div><span class="xgo">Open →</span></a>
+      <a class="xcard" id="xResearch" href="/research.html"><div class="xi">🔬</div><div class="xt">How the AI works</div><div class="xd">A plain tour of the data, models and pipeline behind every prediction on this site.</div><span class="xgo">Open →</span></a>
+    </div>
+  </section>
+
+  <!-- 6. GLOSSARY -->
+  <section class="sec">
+    <div class="sec-head">
+      <span class="sec-num">6</span>
+      <h2>Cricket dictionary</h2>
+      <span class="dash"></span>
+      <span class="hint">Every term, in one place</span>
+    </div>
+    <dl class="gloss">
+      <div class="gitem"><dt>Powerplay (overs 1–6)</dt><dd>Start of the innings; fielding is restricted so batters attack.</dd></div>
+      <div class="gitem"><dt>Middle overs (7–15)</dt><dd>Batters build the innings and rotate the strike; spinners often bowl here.</dd></div>
+      <div class="gitem"><dt>Death overs (16–20)</dt><dd>The finish — batters go for maximum runs, bowlers defend.</dd></div>
+      <div class="gitem"><dt>Strike rate</dt><dd>Runs scored per 100 balls. 150+ means very fast, attacking batting.</dd></div>
+      <div class="gitem"><dt>Batting average</dt><dd>Runs scored per time out. Higher = more consistent and reliable.</dd></div>
+      <div class="gitem"><dt>Economy</dt><dd>Runs a bowler gives away per over. Lower is better (under 7 is good in T20).</dd></div>
+      <div class="gitem"><dt>Wicket</dt><dd>Getting a batter out. Bowlers want wickets; “wkts/match” = expected wickets per game.</dd></div>
+      <div class="gitem"><dt>All-rounder</dt><dd>A player good at both batting and bowling.</dd></div>
+      <div class="gitem"><dt>Pace vs spin</dt><dd>Two bowling styles: pace = fast, spin = slow with turn. Pitches favour one or the other.</dd></div>
+      <div class="gitem"><dt>Venue / pitch</dt><dd>The ground and its surface. It changes how easy batting or bowling is.</dd></div>
+      <div class="gitem"><dt>Toss</dt><dd>A coin flip before the match; the winner chooses to bat or bowl first — a real tactical edge.</dd></div>
+      <div class="gitem"><dt>Bat first vs Chase</dt><dd>Bat first = set a target. Chase = bowl first, then try to beat the target. Conditions decide which is smarter.</dd></div>
+      <div class="gitem"><dt>Dew</dt><dd>Night moisture that makes the ball wet and slippery, so bowling gets harder — chasing teams often benefit.</dd></div>
+      <div class="gitem"><dt>Safe score / target</dt><dd>A first-innings total that's usually enough to win on that pitch.</dd></div>
+      <div class="gitem"><dt>Monte-Carlo simulation</dt><dd>Playing the tournament thousands of times with the model to see how often each outcome happens.</dd></div>
+      <div class="gitem"><dt>Win probability</dt><dd>The model's estimate of each team's chance of winning a single match, shown as a split bar.</dd></div>
+    </dl>
+  </section>
+
+  <div class="footer">
+    LPL 2026 Prediction Hub • Built on the full LPL data stack with FastAPI + PyTorch<br>
+    These are data-driven projections for fun and learning — not betting advice.
+  </div>
+</main>
+
+<div class="modal" id="modal" onclick="if(event.target===this)closeModal()"><div class="sheet" id="sheet"></div></div>
+
+<script>
+const API_CANDIDATES = location.protocol==='file:' ? ['http://127.0.0.1:8001','http://127.0.0.1:8000'] : [''];
+const FILE = location.protocol==='file:';
+const TEAM_ICONS={'Colombo Kaps':'🦁','Galle Gallants':'⚔️','Jaffna Kings':'👑','Dambulla Sixers':'💥','Kandy Royals':'🔥'};
+const FLAGS={'Sri Lanka':'🇱🇰','Afghanistan':'🇦🇫','Bangladesh':'🇧🇩','Pakistan':'🇵🇰','Australia':'🇦🇺','South Africa':'🇿🇦','England':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','India':'🇮🇳','New Zealand':'🇳🇿','West Indies':'🏝️','Nepal':'🇳🇵'};
+let TEAM_COLORS={};
+let ALL_PLAYERS=[], FILTER={team:'All',role:'All',q:'',sort:'overall'};
+
+if(FILE){
+  [['lnkDash','dashboard.html'],['lnkForecast','forecast.html'],['lnkField','field.html'],['lnkResearch','research.html'],
+   ['xDash','dashboard.html'],['xForecast','forecast.html'],['xField','field.html'],['xResearch','research.html']]
+    .forEach(([id,h])=>{const e=document.getElementById(id);if(e)e.href=h;});
+}
+
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=(v,d=0)=>{const n=Number(v);return isNaN(n)?d:n;};
+
+async function api(path){
+  let err=null;
+  for(const base of API_CANDIDATES){
+    try{const r=await fetch(base+path);if(!r.ok)throw new Error(r.status);return await r.json();}
+    catch(e){err=e;}
+  }
+  throw err;
+}
+
+// ── scoring (0-10 inputs) ──
+const battingScore=p=>(num(p.batting_power_play_rating)+num(p.batting_middle_over_rating)+num(p.batting_death_over_rating))/3;
+const bowlingScore=p=>(num(p.bowling_power_play_rating)+num(p.bowling_middle_over_rating)+num(p.bowling_death_over_rating))/3;
+const impactScore=p=>num(p.match_winner_potential)||num(p.impact_weight)*10;
+function overall(p){
+  const b=battingScore(p),w=bowlingScore(p);
+  const core=Math.max(b,w)*0.7+Math.min(b,w)*0.3;
+  const extra=(num(p.fielding_rating)+num(p.pressure_handling)+num(p.consistency_score))/3;
+  return Math.round((core*0.78+extra*0.22)*10);
+}
+const colorFor=t=>TEAM_COLORS[t]||'#65d7ff';
+
+// ── plain-language archetype (label + emoji + one-liner) ──
+function archetype(p){
+  const role=(p.role||'').toLowerCase();
+  const style=((p.bowling_style||'')+' '+(p.batting_style||'')).toLowerCase();
+  const bat=battingScore(p), bowl=bowlingScore(p);
+  const bpp=num(p.batting_power_play_rating),bm=num(p.batting_middle_over_rating),bd=num(p.batting_death_over_rating);
+  const wpp=num(p.bowling_power_play_rating),wm=num(p.bowling_middle_over_rating),wd=num(p.bowling_death_over_rating);
+  const isSpin=/spin|leg break|off break|orthodox|googly|chinaman|legbreak|offbreak/.test(style);
+  const isWK=role.includes('keep')||role.includes('wk');
+  const isAR=role.includes('all')||role.includes('ar')||(bat>=5&&bowl>=5);
+
+  if(isAR) return {e:'⚡',t:'All-rounder',d:'Contributes with both bat and ball — a flexible match-winner.'};
+  if(bowl>bat+0.5){
+    if(isSpin) return {e:'🪄',t:'Spin bowler',d:'Slows batters down with turn, mainly in the middle overs.'};
+    if(wpp>=wm&&wpp>=wd) return {e:'🎯',t:'New-ball bowler',d:'Strikes early with pace in the powerplay.'};
+    if(wd>=wm&&wd>=wpp) return {e:'🛡️',t:'Death-overs bowler',d:'Trusted to defend runs at the tense finish.'};
+    return {e:'🎳',t:'Bowler',d:'Built to take wickets and contain runs.'};
+  }
+  // batting-leaning
+  let label='Batter',emoji='🏏',desc='Scores the runs for the team.';
+  if(bd>=bm&&bd>=bpp){label='Finisher';emoji='💥';desc='Specialist at smashing runs in the closing death overs.';}
+  else if(bpp>=bm&&bpp>=bd){label='Power hitter';emoji='🚀';desc='Explosive at the top — attacks from ball one.';}
+  else {label='Anchor';emoji='🧱';desc='Steady run-builder who holds the innings together.';}
+  if(isWK){label='Keeper-'+label.toLowerCase();emoji='🧤';desc='Keeps wicket and '+desc.charAt(0).toLowerCase()+desc.slice(1);}
+  return {e:emoji,t:label,d:desc};
+}
+
+// ── KPIs from dashboard (venues/teams only) ──
+function renderKpis(d){
+  document.getElementById('kpiVenues').textContent=(d?.venues||[]).length||4;
+  const teams=(d?.teams||[]).length; if(teams)document.getElementById('kpiTeams').textContent=teams;
+}
+
+// ── FORECAST (champion, progression, standings, fixtures, outlook) ──
+let FC=null;
+const tdot=t=>`<span class="team-dot" style="background:${colorFor(t)}"></span>`;
+function stagePill(stage){
+  const s=(stage||'').toLowerCase();
+  if(s.includes('final'))return '<span class="stage-pill stage-final">FINAL</span>';
+  if(s.includes('play'))return '<span class="stage-pill stage-playoff">PLAY-OFF</span>';
+  return '<span class="stage-pill stage-group">GROUP</span>';
+}
+
+function renderForecast(fc){
+  FC=fc;
+  const prog=fc.progression||[], stand=fc.standings_projection||[];
+  document.getElementById('fcHint').textContent=`${(fc.n_simulations||0).toLocaleString()} simulations`;
+
+  // champion hero
+  const champ=prog[0], runner=prog[1];
+  if(champ){
+    document.getElementById('champName').textContent=champ.team;
+    document.getElementById('champProb').textContent=`Lifts the cup in ${champ.champion_pct}% of simulations`;
+    document.querySelector('.champ-emoji').textContent=TEAM_ICONS[champ.team]||'🏆';
+    document.getElementById('fcHero').innerHTML=`<div class="fc-hero">
+      <div class="champ-big"><div class="tr">🏆</div><div class="lb">Projected champion</div>
+        <div class="nm">${TEAM_ICONS[champ.team]||''} ${esc(champ.team)}</div>
+        <div class="pc">${champ.champion_pct}% chance of winning it all</div></div>
+      <div class="runner-big"><div class="lb">Most likely runner-up</div>
+        <div class="nm">${runner?(TEAM_ICONS[runner.team]||'')+' '+esc(runner.team):'—'}</div>
+        <div class="pc" style="color:var(--muted);margin-top:6px;font-size:.8rem">${runner?runner.champion_pct+'% title chance':''}</div></div>
+    </div>`;
+  }
+
+  // progression bars
+  document.getElementById('progRows').innerHTML=prog.map(p=>`<div class="prog-row">
+    <div class="prog-team">${tdot(p.team)}${TEAM_ICONS[p.team]||''} ${esc(p.team)}</div>
+    <div class="prog-bars">
+      <div class="mini-bar"><span class="mini-lbl">Play-off</span><div class="mini-track"><div class="mini-fill" data-w="${p.semi_pct}" style="background:linear-gradient(90deg,#65d7ff,#47d18c)"></div></div><span class="mini-val" style="color:#8fd7ff">${p.semi_pct}%</span></div>
+      <div class="mini-bar"><span class="mini-lbl">Final</span><div class="mini-track"><div class="mini-fill" data-w="${p.final_pct}" style="background:linear-gradient(90deg,#9d7bff,#65d7ff)"></div></div><span class="mini-val" style="color:#c2adff">${p.final_pct}%</span></div>
+      <div class="mini-bar"><span class="mini-lbl">Champion</span><div class="mini-track"><div class="mini-fill" data-w="${p.champion_pct}" style="background:linear-gradient(90deg,#f5a623,#ffce7a)"></div></div><span class="mini-val" style="color:#ffce7a">${p.champion_pct}%</span></div>
+    </div></div>`).join('');
+  requestAnimationFrame(()=>setTimeout(()=>document.querySelectorAll('#progRows .mini-fill').forEach(f=>f.style.width=f.dataset.w+'%'),60));
+
+  // projected table
+  document.getElementById('standBody').innerHTML=stand.map(r=>`<tr>
+    <td><span class="pos-badge ${r.qualifies?'q':''}" style="${r.qualifies?'background:rgba(71,209,140,.2);color:#5fe0a0':''}">${r.projected_position}</span></td>
+    <td>${tdot(r.team)}<b>${TEAM_ICONS[r.team]||''} ${esc(r.team)}</b></td>
+    <td>${r.matches}</td><td>${r.expected_wins}</td><td><b>${r.expected_points}</b></td>
+    <td>${r.qualifies?'<span style="color:#5fe0a0;font-weight:800">✓ Play-off</span>':'<span style="color:var(--muted)">Eliminated</span>'}</td>
+  </tr>`).join('');
+
+  // team filter options
+  const sel=document.getElementById('fxTeam');
+  sel.innerHTML='<option value="">All teams</option>'+(fc.teams||[]).map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+
+  renderFixtures();
+  renderOutlook();
+}
+
+// ── tactical plan (rich + explained) ──
+function planHTML(m){
+  const p=m.tactical_plan||{};
+  const heavy=p.spin_heavy?'<span class="badge-spin">Spin-heavy</span>':'<span class="badge-pace">Pace-led</span>';
+  const spin=num(p.spin_advantage_pct),pace=num(p.pace_advantage_pct);
+  return `<div class="plan-grid">
+    <div class="pbox"><div class="pl">At the toss<span class="info" data-tip="The coin-flip choice. Winning the toss lets a captain pick the easier option for the conditions.">i</span></div>
+      <div class="pv">${esc(p.toss_decision||'—')}</div></div>
+    <div class="pbox"><div class="pl">Strategy<span class="info" data-tip="Bat first = set a target. Chase = let them bat, then beat their score.">i</span></div>
+      <div class="pv">${esc(p.bat_or_bowl||'—')} · ${heavy}</div>
+      ${p.safe_score_target?`<div class="ps">Par score here ≈ ${Math.round(num(p.safe_score_target))}</div>`:''}</div>
+    <div class="pbox"><div class="pl">Pitch & conditions<span class="info" data-tip="How the surface behaves. Higher spin% favours slow bowlers; higher pace% favours fast bowlers; dew helps the chasing team at night.">i</span></div>
+      <div class="pv">${esc(p.pitch_type||'—')} · Dew ${esc(p.dew_factor||'—')}</div>
+      <div class="advbars">
+        <div class="advbar"><span style="width:34px">Spin</span><div class="t"><div class="f" style="width:${spin}%;background:#9d7bff"></div></div><span>${spin}%</span></div>
+        <div class="advbar"><span style="width:34px">Pace</span><div class="t"><div class="f" style="width:${pace}%;background:#65d7ff"></div></div><span>${pace}%</span></div>
+      </div></div>
+    <div class="pbox"><div class="pl">Key bowlers</div><div class="pv">${esc(p.key_bowler_type||'—')}</div>
+      ${p.bowling_strategy?`<div class="ps">${esc(p.bowling_strategy)}</div>`:''}</div>
+  </div>
+  <div class="why">🧠 <b>Why this plan?</b> ${esc(p.summary||p.condition_note||'')}</div>`;
+}
+
+function fixtureRow(m,idx){
+  const decided=m.is_decided && m.win_prob_team1!=null;
+  let teams;
+  if(m.team1&&m.team2){
+    const w1=m.predicted_winner===m.team1;
+    teams=`<div class="mt-side ${decided?(w1?'win':'lose'):''}">${tdot(m.team1)}${TEAM_ICONS[m.team1]||''} ${esc(m.team1)}</div>
+      <span class="vs">vs</span>
+      <div class="mt-side t2 ${decided?(!w1?'win':'lose'):''}">${esc(m.team2)} ${TEAM_ICONS[m.team2]||''}${tdot(m.team2)}</div>`;
+  }else teams=`<div class="vs" style="flex:1">TBD — decided by play-offs</div>`;
+  const wbar=decided
+    ? `<div class="wbar"><div class="a" style="flex:${m.win_prob_team1}">${m.win_prob_team1}%</div><div class="b" style="flex:${m.win_prob_team2}">${m.win_prob_team2}%</div></div>`
+    : `<div class="wbar" style="border-style:dashed"><div style="flex:1;display:grid;place-items:center;color:var(--muted2);font-size:.7rem">awaiting seeding</div></div>`;
+  return `<div class="match" id="m${idx}">
+    <div class="match-top" onclick="togglePlan(${idx})">
+      <span class="match-no">${esc(m.match_no)}</span>
+      ${stagePill(m.stage)}
+      <span class="match-meta">📅 ${esc(m.date)} · 🕒 ${esc(m.time)} · 📍 ${esc(m.city)}</span>
+      <div class="match-teams">${teams}</div>
+      ${wbar}
+      <span class="expand-ico">▾</span>
+    </div>
+    <div class="plan">${m.is_decided?planHTML(m):'<p class="note" style="padding:12px 0">Game plan appears once the play-off line-up is set.</p>'}</div>
+  </div>`;
+}
+function renderFixtures(){
+  const tf=document.getElementById('fxTeam').value;
+  const sf=(document.getElementById('fxStage').value||'').toLowerCase();
+  const list=(FC.matches||[]).map((m,i)=>({m,i}))
+    .filter(({m})=>(!tf||m.team1===tf||m.team2===tf)&&(!sf||(m.stage||'').toLowerCase().includes(sf)));
+  document.getElementById('gpHint').textContent=`${list.length} matches`;
+  document.getElementById('fixtureList').innerHTML=list.length
+    ? list.map(({m,i})=>fixtureRow(m,i)).join('')
+    : '<div class="empty">No matches for this filter.</div>';
+}
+function togglePlan(i){const el=document.getElementById('m'+i);if(el)el.classList.toggle('open');}
+let _allOpen=false;
+function toggleAllPlans(){
+  _allOpen=!_allOpen;
+  document.querySelectorAll('#fixtureList .match').forEach(el=>el.classList.toggle('open',_allOpen));
+  document.getElementById('expandAll').textContent=_allOpen?'Collapse all plans':'Expand all plans';
+}
+
+function renderOutlook(){
+  const prog=FC.progression||[], stand=FC.standings_projection||[];
+  const sMap=Object.fromEntries(stand.map(s=>[s.team,s]));
+  document.getElementById('outlookList').innerHTML=prog.map(p=>{
+    const s=sMap[p.team]||{};
+    const fx=(FC.matches||[]).filter(m=>m.is_decided&&(m.team1===p.team||m.team2===p.team));
+    const wins=fx.filter(m=>m.predicted_winner===p.team).length;
+    return `<div class="tout">
+      <div class="tout-head">${tdot(p.team)}<span class="tout-name">${TEAM_ICONS[p.team]||''} ${esc(p.team)}</span>
+        <span class="tout-rank">Projected #${s.projected_position||'—'}${s.qualifies?' · ✓ Play-off':''}</span></div>
+      <div class="tout-stats">
+        <div class="tout-stat"><div class="tout-val" style="color:#8fd7ff">${p.semi_pct}%</div><div class="tout-lbl">Play-off</div></div>
+        <div class="tout-stat"><div class="tout-val" style="color:#c2adff">${p.final_pct}%</div><div class="tout-lbl">Final</div></div>
+        <div class="tout-stat"><div class="tout-val" style="color:#ffce7a">${p.champion_pct}%</div><div class="tout-lbl">Champion</div></div>
+        <div class="tout-stat"><div class="tout-val">${s.expected_points??'—'}</div><div class="tout-lbl">Exp. pts</div></div>
+        <div class="tout-stat"><div class="tout-val" style="color:#5fe0a0">${wins}/${fx.length}</div><div class="tout-lbl">Pred. wins</div></div>
+      </div>
+      <div class="formchips">${fx.map(m=>{const opp=m.team1===p.team?m.team2:m.team1;const win=m.predicted_winner===p.team;
+        return `<span class="fchip" style="background:${win?'rgba(71,209,140,.14)':'rgba(255,111,97,.12)'};color:${win?'#5fe0a0':'#ff9d92'}">${win?'W':'L'} vs ${TEAM_ICONS[opp]||''} ${esc((opp||'').split(' ')[0])}</span>`;
+      }).join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── filters ──
+function buildFilters(){
+  const teams=['All',...Array.from(new Set(ALL_PLAYERS.map(p=>p.team))).sort()];
+  document.getElementById('teamFilters').innerHTML=teams.map(t=>
+    `<button class="fbtn ${t===FILTER.team?'active':''}" data-team="${esc(t)}">${t==='All'?'All teams':(TEAM_ICONS[t]||'')+' '+esc(t)}</button>`).join('');
+  const roles=[['All','All types'],['Batter','🏏 Batters'],['Bowler','🎳 Bowlers'],['All-Rounder','⚡ All-rounders'],['Wicket-Keeper','🧤 Keepers']];
+  document.getElementById('roleFilters').innerHTML=roles.map(([v,l])=>
+    `<button class="fbtn ${v===FILTER.role?'active':''}" data-role="${esc(v)}">${esc(l)}</button>`).join('');
+  document.querySelectorAll('[data-team]').forEach(b=>b.onclick=()=>{FILTER.team=b.dataset.team;buildFilters();renderGrid();});
+  document.querySelectorAll('[data-role]').forEach(b=>b.onclick=()=>{FILTER.role=b.dataset.role;buildFilters();renderGrid();});
+}
+function matchesRole(p){
+  if(FILTER.role==='All')return true;
+  const r=(p.role||'').toLowerCase();
+  if(FILTER.role==='Batter')return r.includes('bat')&&!r.includes('all');
+  if(FILTER.role==='Bowler')return (r.includes('bowl')||r.includes('spin')||r.includes('pace'))&&!r.includes('all');
+  if(FILTER.role==='All-Rounder')return r.includes('all')||/\bar\b/.test(r);
+  if(FILTER.role==='Wicket-Keeper')return r.includes('keep')||r.includes('wk');
+  return true;
+}
+function renderGrid(){
+  let list=ALL_PLAYERS.filter(p=>(FILTER.team==='All'||p.team===FILTER.team)&&matchesRole(p)&&(!FILTER.q||(p.player_name||'').toLowerCase().includes(FILTER.q)));
+  const S={overall:(a,b)=>overall(b)-overall(a),batting:(a,b)=>battingScore(b)-battingScore(a),bowling:(a,b)=>bowlingScore(b)-bowlingScore(a),impact:(a,b)=>impactScore(b)-impactScore(a),name:(a,b)=>(a.player_name||'').localeCompare(b.player_name||'')};
+  list.sort(S[FILTER.sort]||S.overall);
+  document.getElementById('exHint').textContent=`${list.length} player${list.length!==1?'s':''} shown`;
+  const grid=document.getElementById('playerGrid');
+  if(!list.length){grid.innerHTML='<div class="empty">No players match your filters. Try “All teams”.</div>';return;}
+  grid.innerHTML=list.map(p=>{
+    const c=colorFor(p.team),ov=overall(p),a=archetype(p),flag=FLAGS[p.nationality]||'';
+    return `<div class="pcard" style="--tc:${c}" onclick="openPlayer('${esc(p.player_id)}')">
+      <div class="pc-top">
+        <div><div class="pc-name">${esc(p.player_name)}</div>
+        <div class="pc-team">${TEAM_ICONS[p.team]||''} ${esc(p.team)} ${flag}</div></div>
+        <div class="pc-ovr" style="background:linear-gradient(135deg,${c},#ffffff55)" title="Overall rating out of 100">${ov}</div>
+      </div>
+      <div class="pc-arch">${a.e} ${esc(a.t)}</div>
+      <div class="pc-desc">${esc(a.d)}</div>
+      <div class="pc-mini">
+        <div class="mini"><div class="mv">${battingScore(p).toFixed(1)}</div><div class="ml">Bat /10</div></div>
+        <div class="mini"><div class="mv">${bowlingScore(p).toFixed(1)}</div><div class="ml">Bowl /10</div></div>
+        <div class="mini"><div class="mv">${num(p.fielding_rating).toFixed(0)}</div><div class="ml">Field /10</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── modal ──
+const PH={pp:'#65d7ff',mid:'#47d18c',death:'#f5a623'};
+function bar(label,val,max,color,tip){
+  const w=Math.max(3,Math.min(100,(num(val)/max)*100));
+  return `<div class="rrow"><div class="rlabel">${esc(label)}${tip?`<span class="info" data-tip="${esc(tip)}">i</span>`:''}</div>
+    <div class="rtrack"><div class="rfill" style="background:${color}" data-w="${w}">${num(val).toFixed(1)}</div></div></div>`;
+}
+const vchip=(n,val)=>{const v=num(val);const col=v>=7?'#5fe0a0':v>=5?'#ffce7a':'#ff9d92';return `<div class="vchip"><div class="vn">${esc(n)}</div><div class="vv" style="color:${col}">${v?v.toFixed(1):'—'}</div></div>`;};
+const srchip=(n,val,max)=>{const v=num(val);return `<div class="vchip"><div class="vn">${esc(n)}</div><div class="vv" style="color:#65d7ff">${v?(max?v.toFixed(1):v.toFixed(0)):'—'}</div></div>`;};
+
+async function openPlayer(id){
+  const modal=document.getElementById('modal'),sheet=document.getElementById('sheet');
+  const base=ALL_PLAYERS.find(p=>p.player_id===id)||{}, c=colorFor(base.team);
+  sheet.style.setProperty('--tc',c);
+  sheet.innerHTML=`<div class="sheet-head"><button class="sh-close" onclick="closeModal()">✕</button>
+    <div class="sh-name">${esc(base.player_name||'Player')}</div>
+    <div class="sh-team">${TEAM_ICONS[base.team]||''} ${esc(base.team||'')}</div></div>
+    <div class="sheet-body"><div class="skel" style="height:320px"></div></div>`;
+  modal.classList.add('show');document.body.style.overflow='hidden';
+
+  let p=base;
+  try{const full=await api('/player/'+encodeURIComponent(id));if(full&&!full.detail)p={...base,...full};}catch(e){}
+
+  const bat=battingScore(p),bowl=bowlingScore(p),ov=overall(p),a=archetype(p);
+  const isBowler=bowl>bat;
+  const tldr=`<b>${esc(p.player_name)}</b> is a <b>${esc(a.t.toLowerCase())}</b> for ${esc(p.team)}. ${esc(a.d)} ${
+    isBowler ? `Strongest with the ball (${bowl.toFixed(1)}/10).` : `Strongest with the bat (${bat.toFixed(1)}/10).`
+  } ${p.best_venue?`Performs best at <b>${esc(p.best_venue)}</b>.`:''}`;
+
+  sheet.innerHTML=`<div class="sheet-head">
+    <button class="sh-close" onclick="closeModal()">✕</button>
+    <div class="sh-name">${esc(p.player_name||'Player')}</div>
+    <div class="sh-team">${TEAM_ICONS[p.team]||''} ${esc(p.team||'')} ${FLAGS[p.nationality]||''} ${esc(p.nationality||'')}</div>
+    <div class="sh-arch">${a.e} ${esc(a.t)}</div>
+    <div class="sh-tags"><span class="tag">${esc(p.role||'Player')}</span>${p.category?`<span class="tag">${esc(p.category)}</span>`:''}${p.batting_style?`<span class="tag">${esc(p.batting_style)}</span>`:''}${p.bowling_style?`<span class="tag">${esc(p.bowling_style)}</span>`:''}</div>
+  </div>
+  <div class="sheet-body">
+    <div class="tldr">📝 ${tldr}</div>
+    <div class="ov-strip">
+      <div class="ov"><div class="v" style="color:${c}">${ov}</div><div class="l">Overall /100</div></div>
+      <div class="ov"><div class="v">${bat.toFixed(1)}</div><div class="l">Batting /10</div></div>
+      <div class="ov"><div class="v">${bowl.toFixed(1)}</div><div class="l">Bowling /10</div></div>
+      <div class="ov"><div class="v">${num(p.fielding_rating).toFixed(0)}</div><div class="l">Fielding /10</div></div>
+      <div class="ov"><div class="v">${num(p.pressure_handling).toFixed(0)}</div><div class="l">Pressure /10</div></div>
+    </div>
+
+    <div class="blk">
+      <h3>🏏 Batting by phase</h3>
+      <div class="cap">How good they are at scoring in each part of the innings (0–10).</div>
+      ${bar('Powerplay',p.batting_power_play_rating,10,PH.pp,'Overs 1–6: attack while the field is up.')}
+      ${bar('Middle overs',p.batting_middle_over_rating,10,PH.mid,'Overs 7–15: build and rotate strike.')}
+      ${bar('Death overs',p.batting_death_over_rating,10,PH.death,'Overs 16–20: all-out hitting.')}
+      ${(num(p.spin_handling)||num(p.pace_handling))?`<div style="display:flex;gap:18px;margin-top:12px;flex-wrap:wrap">
+        <span class="note">vs Spin <b style="color:#9fe3ff">${num(p.spin_handling).toFixed(1)}</b></span>
+        <span class="note">vs Pace <b style="color:#9fe3ff">${num(p.pace_handling).toFixed(1)}</b></span>
+        ${num(p.avg_estimate)?`<span class="note">Avg <b style="color:#9fe3ff">${num(p.avg_estimate).toFixed(1)}</b></span>`:''}</div>`:''}
+    </div>
+
+    <div class="blk">
+      <h3>🎳 Bowling by phase</h3>
+      <div class="cap">How good they are at taking wickets / saving runs in each phase (0–10).</div>
+      ${bar('Powerplay',p.bowling_power_play_rating,10,PH.pp,'Overs 1–6: strike early with the new ball.')}
+      ${bar('Middle overs',p.bowling_middle_over_rating,10,PH.mid,'Overs 7–15: control and squeeze.')}
+      ${bar('Death overs',p.bowling_death_over_rating,10,PH.death,'Overs 16–20: defend under pressure.')}
+      ${(num(p.wickets_per_match_estimate)||num(p.economy_middle))?`<div style="display:flex;gap:18px;margin-top:12px;flex-wrap:wrap">
+        ${num(p.wickets_per_match_estimate)?`<span class="note">Wkts/match <b style="color:#9fe3ff">${num(p.wickets_per_match_estimate).toFixed(2)}</b></span>`:''}
+        ${num(p.economy_middle)?`<span class="note">Economy <b style="color:#9fe3ff">${num(p.economy_middle).toFixed(2)}</b></span>`:''}</div>`:''}
+    </div>
+
+    <div class="blk">
+      <h3>🏟️ Stadium fit</h3>
+      <div class="cap">How well they suit each ground (0–10). Green = strong, red = weaker.</div>
+      <div class="venue-grid">
+        ${vchip('Premadasa',p.premadasa_rating)}${vchip('Pallekele',p.pallekele_rating)}${vchip('Dambulla',p.dambulla_rating)}${vchip('Galle',p.galle_rating)}
+      </div>
+      ${(p.best_venue||p.worst_venue)?`<p class="note" style="margin-top:12px">${p.best_venue?`Best at <b style="color:#5fe0a0">${esc(p.best_venue)}</b>. `:''}${p.worst_venue?`Weakest at <b style="color:#ff9d92">${esc(p.worst_venue)}</b>.`:''}</p>`:''}
+    </div>
+
+    <div class="blk" style="margin-bottom:0">
+      <h3>📈 Scoring speed (strike rate)</h3>
+      <div class="cap">Estimated runs per 100 balls in each phase — higher means faster scoring.</div>
+      <div class="venue-grid">
+        ${srchip('Powerplay',p.powerplay_sr_estimate)}${srchip('Middle',p.middle_over_sr_estimate)}${srchip('Death',p.death_over_sr_estimate)}${srchip('Consistency',p.consistency_score,10)}
+      </div>
+    </div>
+  </div>`;
+  requestAnimationFrame(()=>setTimeout(()=>sheet.querySelectorAll('.rfill').forEach(f=>f.style.width=f.dataset.w+'%'),60));
+}
+function closeModal(){document.getElementById('modal').classList.remove('show');document.body.style.overflow='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+// ── interactions ──
+document.getElementById('expToggle').onclick=()=>document.getElementById('explainer').classList.toggle('open');
+document.getElementById('searchBox').addEventListener('input',e=>{FILTER.q=e.target.value.toLowerCase().trim();renderGrid();});
+document.getElementById('sortSel').addEventListener('change',e=>{FILTER.sort=e.target.value;renderGrid();});
+// tap-to-show tooltips on touch devices
+document.addEventListener('click',e=>{
+  const i=e.target.closest('.info');
+  document.querySelectorAll('.info.tap').forEach(x=>{if(x!==i)x.classList.remove('tap');});
+  if(i){i.classList.toggle('tap');e.stopPropagation();}
+});
+
+// ── init ──
+async function init(){
+  let live=false;
+  try{
+    const pd=await api('/api/players');
+    ALL_PLAYERS=pd.players||[];
+    TEAM_COLORS=Object.fromEntries(Object.entries(pd.team_visuals||{}).map(([k,v])=>[k,v.color]));
+    document.getElementById('kpiPlayers').textContent=pd.total||ALL_PLAYERS.length;
+    buildFilters();renderGrid();live=true;
+  }catch(e){
+    document.getElementById('playerGrid').innerHTML='<div class="empty">⚠️ Start the backend to load players:<br><br><code style="color:#9fe3ff">.venv\\Scripts\\python.exe -m uvicorn backend:app --port 8000</code></div>';
+  }
+  try{const d=await api('/api/dashboard');renderKpis(d);live=true;}catch(e){}
+
+  try{
+    const fc=await api('/api/tournament-forecast');
+    renderForecast(fc);live=true;
+  }catch(e){
+    document.getElementById('champProb').textContent='Start the backend to load predictions.';
+    const off='<div class="empty">⚠️ Start the backend to load the forecast.</div>';
+    ['progRows','fixtureList','outlookList'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=off;});
+    document.getElementById('standBody').innerHTML='<tr><td colspan="6" class="empty" style="padding:30px">Forecast unavailable.</td></tr>';
+  }
+  if(live){const pill=document.getElementById('dataStatus');pill.textContent='● LIVE DATA';pill.className='status-pill status-live';}
+}
+init();
+</script>
+</body>
+</html>

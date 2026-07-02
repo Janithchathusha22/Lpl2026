@@ -1,0 +1,8 @@
+category,description,typical_role,typical_price_range_usd,overseas_eligible,max_per_team,total_in_tournament,impact_weight,example_players
+Star,Top internationals with proven T20 track record,Opening batsman or strike bowler,200000-300000,Yes,2,10,9,Ben McDermott / Kamindu Mendis / Taskin Ahmed / Litton Das
+Icon,Franchise legend or highly impactful international,Anchor batsman or specialist bowler,150000-200000,Yes,2,10,8,Kusal Mendis / Shakib Al Hasan / Wanindu Hasaranga / Dushmantha Chameera
+Platinum,Elite retained or high-value pick,Game-changer in key phases,100000-150000,Mixed,2,9,10,Mujeeb Ur Rahman / Maheesh Theekshana / Fazalhaq Farooqi / Rahmanullah Gurbaz
+Gold,Quality domestic and international players,Core playing XI members,50000-100000,Mixed,4,20,7,Sadeera Samarawickrama / Kasun Rajitha / Mohammad Wasim Jr. / Wanindu Hasaranga (if retained)
+Classic,Experienced domestic & mid-tier international,Squad depth and specialist roles,20000-50000,Mixed,6,30,6,Jeffrey Vandersay / Sam Harper / Sandeep Lamichhane / Moeen Ali (if not Icon)
+Emerging U23,Young Sri Lankan talent under 23,Future prospects and development,5000-15000,No,2,10,5,Malsha Tharupathi / Dinura Kalupahana / Vishva Lahiru Kumara
+Associate Stars,Players from Associate member nations,Specialist international flavour,15000-30000,Yes,1,5,5,Kushal Bhurtel / Haider Ali / Dipendra Singh Airee / Shadley van Schalkwyk
