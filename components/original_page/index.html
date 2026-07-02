@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    html, body { margin: 0; padding: 0; width: 100%; background: transparent; overflow: hidden; }
+    #page { display: block; width: 100%; border: 0; background: #05070d; }
+  </style>
+</head>
+<body>
+  <iframe id="page" title="LPL original page"></iframe>
+  <script>
+    const page = document.getElementById("page");
+    let currentDocumentId = null;
+
+    function send(type, data = {}) {
+      window.parent.postMessage({ isStreamlitMessage: true, type, ...data }, "*");
+    }
+
+    function setValue(value) {
+      send("streamlit:setComponentValue", { value });
+    }
+
+    function setHeight(height) {
+      const safeHeight = Math.max(500, Number(height) || 2200);
+      page.style.height = `${safeHeight}px`;
+      send("streamlit:setFrameHeight", { height: safeHeight });
+    }
+
+    window.addEventListener("message", (event) => {
+      const message = event.data || {};
+
+      if (message.type === "streamlit:render") {
+        const args = message.args || {};
+        setHeight(args.height);
+
+        if (args.document_id !== currentDocumentId) {
+          currentDocumentId = args.document_id;
+          page.srcdoc = args.html || "";
+        }
+
+        if (args.api_response) {
+          page.contentWindow?.postMessage({
+            type: "lpl-api-response",
+            response: args.api_response
+          }, "*");
+        }
+        return;
+      }
+
+      if (event.source !== page.contentWindow) return;
+
+      if (message.type === "lpl-api-request") {
+        setValue({
+          kind: "api",
+          request_id: message.request_id,
+          path: message.path,
+          method: message.method || "GET",
+          body: message.body || null
+        });
+      } else if (message.type === "lpl-navigate") {
+        setValue({ kind: "navigate", page: message.page || "home" });
+      } else if (message.type === "lpl-resize") {
+        setHeight(message.height);
+      }
+    });
+
+    send("streamlit:componentReady", { apiVersion: 1 });
+    setHeight(2200);
+  </script>
+</body>
+</html>

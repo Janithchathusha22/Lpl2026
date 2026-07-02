@@ -2,6 +2,7 @@
 
 import sys, os, json, time, base64, html
 import streamlit as st
+import streamlit.components.v1 as components
 import requests
 import pandas as pd
 import numpy as np
@@ -10,6 +11,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.patches import FancyArrowPatch
 import matplotlib.patheffects as pe
+from local_api import ensure_prediction_api
 
 matplotlib.rcParams['axes.facecolor']  = '#0f111a'
 matplotlib.rcParams['figure.facecolor']= '#0f111a'
@@ -35,7 +37,16 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+API_BOOT_READY, API_BOOT_ERROR = ensure_prediction_api(API)
+
 ASSET_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "frontend", "assets")
+ORIGINAL_PAGE_COMPONENT_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "components", "original_page"
+)
+original_page_component = components.declare_component(
+    "lpl_original_page",
+    path=ORIGINAL_PAGE_COMPONENT_DIR,
+)
 
 
 def asset_data_uri(filename):
@@ -768,7 +779,8 @@ header[data-testid="stHeader"] { height:0; background:transparent; }
 @st.cache_data(ttl=30)
 def api_get(path):
     try:
-        r = requests.get(f"{API}{path}", timeout=8)
+        timeout = 180 if path.startswith("/api/tournament-forecast") else 30
+        r = requests.get(f"{API}{path}", timeout=timeout)
         r.raise_for_status()
         return r.json()
     except Exception as e:
@@ -776,7 +788,7 @@ def api_get(path):
 
 def api_post(path, payload):
     try:
-        r = requests.post(f"{API}{path}", json=payload, timeout=10)
+        r = requests.post(f"{API}{path}", json=payload, timeout=60)
         r.raise_for_status()
         return r.json()
     except Exception as e:
@@ -808,13 +820,18 @@ ROLE_ICONS = {
     "Bat/Spin": "🏏", "WK": "🧤",
 }
 
-backend_ok = api_get("/") is not None
+backend_ok = API_BOOT_READY
 if not backend_ok:
+    connection_message = (
+        f"Prediction engine failed to start: {html.escape(API_BOOT_ERROR)}"
+        if API_BOOT_ERROR
+        else "Connecting to the live prediction engine… this page will fill in automatically."
+    )
     st.markdown(
         "<div style='margin-bottom:1rem;padding:11px 16px;border-radius:12px;"
         "border:1px solid rgba(101,215,255,.28);background:rgba(101,215,255,.07);"
         "color:#bfe7ff;font-size:.85rem;font-weight:600'>"
-        "📡 Connecting to the live prediction engine… this page will fill in automatically."
+        f"📡 {connection_message}"
         "</div>",
         unsafe_allow_html=True,
     )
@@ -831,6 +848,7 @@ squad_df = pd.DataFrame(squads_data) if squads_data else pd.DataFrame()
 VALID_VIEWS = {
     "home", "match", "player", "live", "squad", "tournament", "field",
     "command", "forecast", "tactics", "field_lab",
+    "original_site", "research", "delivery",
 }
 current_view = st.query_params.get("page", "home")
 if current_view not in VALID_VIEWS:
@@ -864,6 +882,9 @@ with st.container(key="site_nav"):
         <a class="{nav_class('squad')}" href="?page=squad">Squad Intel</a>
         <a class="{nav_class('tournament')}" href="?page=tournament">Tournament</a>
         <a class="{nav_class('field', True)}" href="?page=field">3D Field Lab</a>
+        <a class="{nav_class('delivery')}" href="?page=delivery">Delivery Sim</a>
+        <a class="{nav_class('original_site')}" href="?page=original_site">Original Site</a>
+        <a class="{nav_class('research')}" href="?page=research">Research</a>
       </div>
     </nav>
     """, unsafe_allow_html=True)
@@ -1731,135 +1752,200 @@ def _field_figure(positions, title):
     return fig
 
 
-def _render_original_forecast(initial_tab="progression"):
-    """Render the project's original forecast.html with live API data."""
-    with st.spinner("Loading the original AI Forecast…"):
-        forecast_payload = api_get("/api/tournament-forecast?sims=5000")
-    if not forecast_payload:
-        st.error("The original AI Forecast could not load its model data.")
-        return
-
-    forecast_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "frontend", "forecast.html")
+def _render_original_document(filename, static_api_data=None, initial_tab=None, height=2600):
+    """Render an original frontend page and proxy its API calls to Python."""
+    page_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "frontend", filename)
     try:
-        with open(forecast_path, "r", encoding="utf-8") as forecast_file:
-            forecast_html = forecast_file.read()
+        with open(page_path, "r", encoding="utf-8") as page_file:
+            page_html = page_file.read()
     except OSError as exc:
-        st.error(f"Could not open frontend/forecast.html: {exc}")
+        st.error(f"Could not open frontend/{filename}: {exc}")
         return
 
-    payload_json = json.dumps(
-        {"/api/tournament-forecast": forecast_payload},
-        ensure_ascii=False,
-    ).replace("</", "<\\/")
-    bridge = f"""
+    payload_json = json.dumps(static_api_data or {}, ensure_ascii=False).replace("</", "<\\/")
+    bridge = """
     <script>
-    const __STREAMLIT_API_DATA__ = {payload_json};
+    const __STREAMLIT_API_DATA__ = __LPL_STATIC_DATA__;
+    const __lplPendingRequests = new Map();
     const __nativeFetch = window.fetch.bind(window);
     window.fetch = async function(input, options) {{
       const raw = typeof input === "string" ? input : input.url;
       const path = new URL(raw, "https://streamlit.local").pathname;
-      if (Object.prototype.hasOwnProperty.call(__STREAMLIT_API_DATA__, path)) {{
+      const method = String(options?.method || "GET").toUpperCase();
+      if (method === "GET" && Object.prototype.hasOwnProperty.call(__STREAMLIT_API_DATA__, path)) {{
         return new Response(JSON.stringify(__STREAMLIT_API_DATA__[path]), {{
           status: 200,
           headers: {{"Content-Type": "application/json"}}
         }});
       }}
+
+      if (path.startsWith("/api/") || path.startsWith("/predict/")) {{
+        const requestId = `${{Date.now()}}-${{Math.random().toString(36).slice(2)}}`;
+        window.parent.postMessage({{
+          type: "lpl-api-request",
+          request_id: requestId,
+          path,
+          method,
+          body: options?.body || null
+        }}, "*");
+        return new Promise((resolve, reject) => {{
+          __lplPendingRequests.set(requestId, {{resolve, reject}});
+          window.setTimeout(() => {{
+            if (__lplPendingRequests.has(requestId)) {{
+              __lplPendingRequests.delete(requestId);
+              reject(new Error("Prediction request timed out"));
+            }}
+          }}, 30000);
+        }});
+      }}
       return __nativeFetch(input, options);
     }};
+
+    window.addEventListener("message", event => {{
+      if (event.data?.type !== "lpl-api-response") return;
+      const response = event.data.response || {{}};
+      const pending = __lplPendingRequests.get(response.request_id);
+      if (!pending) return;
+      __lplPendingRequests.delete(response.request_id);
+      pending.resolve(new Response(JSON.stringify(response.data || {{}}), {{
+        status: response.ok ? 200 : (response.status || 500),
+        headers: {{"Content-Type": "application/json"}}
+      }}));
+    }});
+
+    document.addEventListener("click", event => {{
+      const anchor = event.target.closest("a");
+      if (!anchor) return;
+      const rawHref = anchor.getAttribute("href") || "";
+      if (!rawHref || rawHref.startsWith("#")) return;
+      let target = null;
+      try {{
+        const url = new URL(rawHref, "https://lpl.local");
+        const path = url.pathname.toLowerCase();
+        if (url.hostname === "localhost" && (url.port === "8501" || !url.port)) target = "original_site";
+        else if (path.endsWith("/index.html")) target = "original_site";
+        else if (path.endsWith("/dashboard.html")) target = "command";
+        else if (path.endsWith("/forecast.html") && url.hash === "#tactics") target = "tactics";
+        else if (path.endsWith("/forecast.html")) target = "forecast";
+        else if (path.endsWith("/field.html")) target = "field_lab";
+        else if (path.endsWith("/research.html")) target = "research";
+        else if (path.includes("lpl2026_3d_delivery_simulator")) target = "delivery";
+      }} catch (_) {{}}
+      if (target) {{
+        event.preventDefault();
+        window.parent.postMessage({{type: "lpl-navigate", page: target}}, "*");
+      }}
+    }}, true);
     </script>
-    """
-    forecast_html = forecast_html.replace("</head>", f"{bridge}</head>", 1)
-    forecast_html = forecast_html.replace(
+    """.replace("{{", "{").replace("}}", "}").replace("__LPL_STATIC_DATA__", payload_json)
+    page_html = page_html.replace("</head>", f"{bridge}</head>", 1)
+    page_html = page_html.replace(
         "const FORECAST_ART=location.protocol==='file:'?'assets/ai-tournament-forecast.png':'/frontend/assets/ai-tournament-forecast.png';",
         f"const FORECAST_ART={json.dumps(FORECAST_ART)};",
         1,
     )
-    forecast_html = forecast_html.replace(
-        "const initialTab=location.hash.slice(1);",
-        f"const initialTab={json.dumps(initial_tab)};",
+    page_html = page_html.replace(
+        "const TOURNAMENT_ART_URL = location.protocol === 'file:' ? 'assets/tournament-command-center.png' : '/frontend/assets/tournament-command-center.png';",
+        f"const TOURNAMENT_ART_URL={json.dumps(TOURNAMENT_ART)};",
         1,
     )
-    forecast_html = forecast_html.replace(
-        'href="http://localhost:8501"',
-        'href="#" onclick="window.open(new URL(\'?page=home\', document.referrer).href, \'_top\'); return false;"',
-        1,
+    if initial_tab:
+        page_html = page_html.replace(
+            "const initialTab=location.hash.slice(1);",
+            f"const initialTab={json.dumps(initial_tab)};",
+            1,
+        )
+
+    component_key = f"original-page-{filename}-{initial_tab or 'default'}"
+    response_key = f"{component_key}-response"
+    request_key = f"{component_key}-request"
+    value = original_page_component(
+        html=page_html,
+        document_id=f"{filename}:{initial_tab or 'default'}",
+        api_response=st.session_state.get(response_key),
+        height=height,
+        key=component_key,
+        default=None,
     )
-    st.iframe(forecast_html, height=2600)
+
+    if not isinstance(value, dict):
+        return
+    if value.get("kind") == "navigate":
+        target = value.get("page")
+        if target in VALID_VIEWS:
+            st.query_params["page"] = target
+            st.rerun()
+        return
+    if value.get("kind") != "api":
+        return
+
+    request_id = value.get("request_id")
+    if not request_id or request_id == st.session_state.get(request_key):
+        return
+    st.session_state[request_key] = request_id
+    path = str(value.get("path") or "")
+    method = str(value.get("method") or "GET").upper()
+    allowed_paths = {
+        "/api/dashboard", "/api/fielding", "/api/players", "/api/research-guide",
+        "/api/tournament-forecast", "/api/simulate-match", "/api/tactical-plan",
+    }
+    if path not in allowed_paths:
+        response = {"request_id": request_id, "ok": False, "status": 404, "data": {"detail": "Unsupported route"}}
+    else:
+        try:
+            if method == "GET":
+                result = api_get(path)
+            else:
+                body = value.get("body")
+                if isinstance(body, str):
+                    body = json.loads(body or "{}")
+                result = api_post(path, body or {})
+            ok = result is not None
+            response = {
+                "request_id": request_id,
+                "ok": ok,
+                "status": 200 if ok else 500,
+                "data": result or {"detail": "Prediction engine request failed"},
+            }
+        except Exception as exc:
+            response = {
+                "request_id": request_id,
+                "ok": False,
+                "status": 500,
+                "data": {"detail": str(exc)},
+            }
+    st.session_state[response_key] = response
+    st.rerun()
+
+
+def _render_original_forecast(initial_tab="progression"):
+    with st.spinner("Loading the original AI Forecast…"):
+        forecast_payload = api_get("/api/tournament-forecast?sims=5000")
+    if not forecast_payload:
+        st.error("The original AI Forecast could not load its model data.")
+        return
+    _render_original_document(
+        "forecast.html",
+        {"/api/tournament-forecast": forecast_payload},
+        initial_tab=initial_tab,
+        height=2600,
+    )
 
 
 if current_view == "command":
-    _subpage_header(
-        "Tournament operations",
-        "Tournament Command Center",
-        "Standings, qualification picture, awards and venue intelligence in one cloud-ready view.",
-        "tournament",
-    )
-    command_data = api_get("/api/dashboard") or {}
-    command_standings = command_data.get("standings") or []
-    bracket = command_data.get("bracket") or {}
-    awards = (command_data.get("awards") or {}).get("labels") or []
-    venue_profiles = command_data.get("venue_profiles") or []
-
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Projected champion", bracket.get("champion", "—"))
-    c2.metric("Runner-up", bracket.get("runner_up", "—"))
-    c3.metric("Qualified teams", len(bracket.get("qualified") or []))
-    c4.metric("Model status", "Online" if (command_data.get("model_status") or {}).get("match_model_loaded") else "Fallback")
-
-    st.markdown("### Projected standings")
-    if command_standings:
-        standings_df = pd.DataFrame(command_standings)
-        standings_cols = [c for c in ["pos", "team", "p", "w", "l", "pts", "nrr", "cup", "qualifies"] if c in standings_df.columns]
-        st.dataframe(
-            standings_df[standings_cols].rename(columns={
-                "pos": "Rank", "team": "Team", "p": "P", "w": "W", "l": "L",
-                "pts": "Points", "nrr": "NRR", "cup": "Cup %", "qualifies": "Qualifies",
-            }),
-            width="stretch",
-            hide_index=True,
+    command_data = api_get("/api/dashboard")
+    if command_data:
+        _render_original_document(
+            "dashboard.html",
+            {"/api/dashboard": command_data},
+            height=3200,
         )
-
-    left, right = st.columns(2)
-    with left:
-        st.markdown("### Tournament awards")
-        if awards:
-            award_df = pd.DataFrame(awards)
-            award_cols = [c for c in ["label_type", "label_value", "confidence_pct", "basis"] if c in award_df.columns]
-            st.dataframe(
-                award_df[award_cols].rename(columns={
-                    "label_type": "Award", "label_value": "Prediction",
-                    "confidence_pct": "Confidence %", "basis": "Model basis",
-                }),
-                width="stretch",
-                hide_index=True,
-            )
-    with right:
-        st.markdown("### Venue intelligence")
-        if venue_profiles:
-            venue_df = pd.DataFrame(venue_profiles)
-            venue_cols = [c for c in [
-                "label", "pitch_type", "safe_score_target", "spin_advantage_pct",
-                "pace_advantage_pct", "dew_factor",
-            ] if c in venue_df.columns]
-            st.dataframe(
-                venue_df[venue_cols].rename(columns={
-                    "label": "Venue", "pitch_type": "Pitch", "safe_score_target": "Safe target",
-                    "spin_advantage_pct": "Spin %", "pace_advantage_pct": "Pace %",
-                    "dew_factor": "Dew",
-                }),
-                width="stretch",
-                hide_index=True,
-            )
+    else:
+        st.error("The original Tournament Dashboard could not load its model data.")
 
 
 if current_view == "forecast":
     _render_original_forecast("progression")
-
-
-if current_view == "field_lab":
-    cloud_field_data = api_get("/api/fielding") or {}
-    cloud_field_teams = cloud_field_data.get("teams") or []
-    cloud_field_venues = cloud_field_data.get("venues") or []
 
 
 if current_view == "tactics":
@@ -1867,42 +1953,50 @@ if current_view == "tactics":
 
 
 if current_view == "field_lab":
-    _subpage_header(
-        "Interactive placement map",
-        "Full Field Lab",
-        "Explore batter-specific, venue-aware field placements from the tactical dataset.",
-        "field",
-    )
-    if cloud_field_teams and cloud_field_venues:
-        team_names = [t.get("name") for t in cloud_field_teams]
-        fl1, fl2 = st.columns(2)
-        selected_team_name = fl1.selectbox("Team", team_names, key="field_lab_team")
-        selected_team = next(t for t in cloud_field_teams if t.get("name") == selected_team_name)
-        batters = selected_team.get("batsmen") or []
-        selected_batter_name = fl2.selectbox(
-            "Batter", [b.get("name") for b in batters], key="field_lab_batter"
+    field_data = api_get("/api/fielding")
+    if field_data:
+        _render_original_document(
+            "field.html",
+            {"/api/fielding": field_data},
+            height=3200,
         )
-        selected_batter = next(b for b in batters if b.get("name") == selected_batter_name)
-
-        available_plans = selected_batter.get("plans") or {}
-        plan_venues = list(available_plans) or [v.get("venue_name") for v in cloud_field_venues]
-        selected_plan_venue = st.selectbox("Venue", plan_venues, key="field_lab_venue")
-        field_plan = available_plans.get(selected_plan_venue) or {}
-
-        m1, m2, m3, m4 = st.columns(4)
-        m1.metric("Model score", selected_batter.get("modelScore", "—"))
-        m2.metric("Pitch", field_plan.get("pitchType", "—"))
-        m3.metric("Timing", field_plan.get("matchTiming", "—"))
-        m4.metric("Safe target", (field_plan.get("summary") or "—").split("|")[0].strip())
-        st.info(field_plan.get("fieldType") or selected_batter.get("fieldType") or "Field plan ready.")
-        fig = _field_figure(
-            field_plan.get("pos") or [],
-            f"{selected_batter_name} · {selected_plan_venue}",
-        )
-        st.pyplot(fig)
-        plt.close(fig)
     else:
-        st.error("Fielding data is unavailable. Check the prediction-engine logs.")
+        st.error("The original 3D Field Lab could not load its model data.")
+
+
+if current_view == "original_site":
+    with st.spinner("Loading the original LPL Prediction Hub…"):
+        original_players = api_get("/api/players")
+        original_dashboard = api_get("/api/dashboard")
+        original_forecast = api_get("/api/tournament-forecast?sims=2000")
+    _render_original_document(
+        "index.html",
+        {
+            "/api/players": original_players or {},
+            "/api/dashboard": original_dashboard or {},
+            "/api/tournament-forecast": original_forecast or {},
+        },
+        height=4200,
+    )
+
+
+if current_view == "research":
+    research_data = api_get("/api/research-guide")
+    if research_data:
+        _render_original_document(
+            "research.html",
+            {"/api/research-guide": research_data},
+            height=3800,
+        )
+    else:
+        st.error("The original ML Research Guide could not load its data.")
+
+
+if current_view == "delivery":
+    _render_original_document(
+        "LPL2026_3D_Delivery_Simulator.html",
+        height=1800,
+    )
 
 
 st.markdown("""
