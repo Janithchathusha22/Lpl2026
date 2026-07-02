@@ -22,10 +22,10 @@ API = os.environ.get("LPL_API_URL", "http://127.0.0.1:8000").rstrip("/")
 
 # Keep navigation inside the public Streamlit URL. The FastAPI service is an
 # internal prediction engine on Community Cloud and is not exposed publicly.
-HTML_DASHBOARD_URL = "?page=tournament"
-HTML_FIELD_URL = "?page=field"
-HTML_FORECAST_URL = "?page=tournament"
-HTML_TACTICS_URL = "?page=field"
+HTML_DASHBOARD_URL = "?page=command"
+HTML_FIELD_URL = "?page=field_lab"
+HTML_FORECAST_URL = "?page=forecast"
+HTML_TACTICS_URL = "?page=tactics"
 
 # ── Page Config ───────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -827,7 +827,10 @@ h2h_data     = api_get("/h2h-matchups") or []
 
 squad_df = pd.DataFrame(squads_data) if squads_data else pd.DataFrame()
 
-VALID_VIEWS = {"home", "match", "player", "live", "squad", "tournament", "field"}
+VALID_VIEWS = {
+    "home", "match", "player", "live", "squad", "tournament", "field",
+    "command", "forecast", "tactics", "field_lab",
+}
 current_view = st.query_params.get("page", "home")
 if current_view not in VALID_VIEWS:
     current_view = "home"
@@ -835,7 +838,11 @@ if current_view not in VALID_VIEWS:
 
 def nav_class(view, primary=False):
     classes = []
-    if current_view == view:
+    view_groups = {
+        "tournament": {"tournament", "command", "forecast", "tactics"},
+        "field": {"field", "field_lab"},
+    }
+    if current_view == view or current_view in view_groups.get(view, set()):
         classes.append("active")
     if primary:
         classes.append("primary")
@@ -1674,6 +1681,264 @@ if current_view == "field":
 
     if not backend_ok:
         st.caption("📡 The 3D field view connects automatically once the prediction engine is ready.")
+
+
+# ════════════════════════════════════════════════════════════════════════
+# CLOUD-SAFE FULL VIEWS
+# FastAPI's localhost HTML routes are not publicly exposed by Streamlit
+# Community Cloud, so the launch buttons open native Streamlit views.
+# ════════════════════════════════════════════════════════════════════════
+def _subpage_header(eyebrow, title, copy, back_page):
+    st.markdown(
+        f"""
+        <div style="margin:1rem 0 1.5rem">
+          <a href="?page={back_page}" style="color:#ffd37a;text-decoration:none;font-weight:800">← Back</a>
+          <div class="web-section-head" style="margin-top:1.3rem">
+            <div><small>{eyebrow}</small><h2>{title}</h2><p>{copy}</p></div>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def _field_figure(positions, title):
+    fig, ax = plt.subplots(figsize=(7, 6), facecolor="#080b14")
+    ax.set_facecolor("#0b2b1c")
+    boundary = plt.Circle((0, 0), 1.02, fill=False, color="#f5a623", linewidth=2)
+    inner = plt.Circle((0, 0), 0.66, fill=False, color="#ffffff", alpha=.18, linewidth=1)
+    ax.add_patch(boundary)
+    ax.add_patch(inner)
+    ax.plot([0, 0], [-0.34, .34], color="#d8b36b", linewidth=12, alpha=.85)
+    ax.scatter([0], [0], s=90, color="#ffd37a", edgecolor="#080b14", zorder=5)
+    type_colors = {"wk": "#65d7ff", "close": "#ef4444", "ring": "#f5a623", "deep": "#8b5cf6"}
+    for pos in positions or []:
+        x = float(pos.get("x", 0))
+        y = float(pos.get("z", 0))
+        kind = pos.get("type", pos.get("t", "ring"))
+        name = pos.get("name", pos.get("n", "Fielder"))
+        ax.scatter([x], [y], s=105, color=type_colors.get(kind, "#f5a623"),
+                   edgecolor="#ffffff", linewidth=.7, zorder=6)
+        ax.annotate(name, (x, y), xytext=(0, 8), textcoords="offset points",
+                    ha="center", color="#f4f7fb", fontsize=8, fontweight="bold")
+    ax.set_title(title, color="#ffd37a", fontsize=13, fontweight="bold", pad=12)
+    ax.set_xlim(-1.15, 1.15)
+    ax.set_ylim(-1.15, 1.15)
+    ax.set_aspect("equal")
+    ax.axis("off")
+    plt.tight_layout()
+    return fig
+
+
+if current_view == "command":
+    _subpage_header(
+        "Tournament operations",
+        "Tournament Command Center",
+        "Standings, qualification picture, awards and venue intelligence in one cloud-ready view.",
+        "tournament",
+    )
+    command_data = api_get("/api/dashboard") or {}
+    command_standings = command_data.get("standings") or []
+    bracket = command_data.get("bracket") or {}
+    awards = (command_data.get("awards") or {}).get("labels") or []
+    venue_profiles = command_data.get("venue_profiles") or []
+
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Projected champion", bracket.get("champion", "—"))
+    c2.metric("Runner-up", bracket.get("runner_up", "—"))
+    c3.metric("Qualified teams", len(bracket.get("qualified") or []))
+    c4.metric("Model status", "Online" if (command_data.get("model_status") or {}).get("match_model_loaded") else "Fallback")
+
+    st.markdown("### Projected standings")
+    if command_standings:
+        standings_df = pd.DataFrame(command_standings)
+        standings_cols = [c for c in ["pos", "team", "p", "w", "l", "pts", "nrr", "cup", "qualifies"] if c in standings_df.columns]
+        st.dataframe(
+            standings_df[standings_cols].rename(columns={
+                "pos": "Rank", "team": "Team", "p": "P", "w": "W", "l": "L",
+                "pts": "Points", "nrr": "NRR", "cup": "Cup %", "qualifies": "Qualifies",
+            }),
+            width="stretch",
+            hide_index=True,
+        )
+
+    left, right = st.columns(2)
+    with left:
+        st.markdown("### Tournament awards")
+        if awards:
+            award_df = pd.DataFrame(awards)
+            award_cols = [c for c in ["label_type", "label_value", "confidence_pct", "basis"] if c in award_df.columns]
+            st.dataframe(
+                award_df[award_cols].rename(columns={
+                    "label_type": "Award", "label_value": "Prediction",
+                    "confidence_pct": "Confidence %", "basis": "Model basis",
+                }),
+                width="stretch",
+                hide_index=True,
+            )
+    with right:
+        st.markdown("### Venue intelligence")
+        if venue_profiles:
+            venue_df = pd.DataFrame(venue_profiles)
+            venue_cols = [c for c in [
+                "label", "pitch_type", "safe_score_target", "spin_advantage_pct",
+                "pace_advantage_pct", "dew_factor",
+            ] if c in venue_df.columns]
+            st.dataframe(
+                venue_df[venue_cols].rename(columns={
+                    "label": "Venue", "pitch_type": "Pitch", "safe_score_target": "Safe target",
+                    "spin_advantage_pct": "Spin %", "pace_advantage_pct": "Pace %",
+                    "dew_factor": "Dew",
+                }),
+                width="stretch",
+                hide_index=True,
+            )
+
+
+if current_view == "forecast":
+    _subpage_header(
+        "Monte-Carlo outlook",
+        "AI Tournament Forecast",
+        "Match probabilities and tournament progression generated from the trained prediction stack.",
+        "tournament",
+    )
+    with st.spinner("Running tournament simulations…"):
+        forecast = api_get("/api/tournament-forecast?sims=2000") or {}
+
+    if forecast:
+        f1, f2, f3, f4 = st.columns(4)
+        f1.metric("Champion", forecast.get("projected_champion", "—"))
+        f2.metric("Runner-up", forecast.get("projected_runner_up", "—"))
+        f3.metric("Simulations", f"{forecast.get('n_simulations', 0):,}")
+        f4.metric("Scheduled matches", len(forecast.get("matches") or []))
+
+        progression = pd.DataFrame(forecast.get("progression") or [])
+        if not progression.empty:
+            st.markdown("### Qualification probabilities")
+            chart_df = progression.set_index("team")[
+                [c for c in ["semi_pct", "final_pct", "champion_pct"] if c in progression.columns]
+            ].rename(columns={"semi_pct": "Semi-final %", "final_pct": "Final %", "champion_pct": "Champion %"})
+            st.bar_chart(chart_df, color=["#65d7ff", "#f5a623", "#8b5cf6"])
+
+        projected = pd.DataFrame(forecast.get("standings_projection") or [])
+        if not projected.empty:
+            st.markdown("### Projected points table")
+            st.dataframe(projected, width="stretch", hide_index=True)
+
+        matches = pd.DataFrame(forecast.get("matches") or [])
+        if not matches.empty:
+            st.markdown("### Match-by-match forecast")
+            match_cols = [c for c in [
+                "date", "time", "team1", "team2", "venue", "win_prob_team1",
+                "win_prob_team2", "predicted_winner",
+            ] if c in matches.columns]
+            st.dataframe(
+                matches[match_cols].rename(columns={
+                    "date": "Date", "time": "Time", "team1": "Team 1", "team2": "Team 2",
+                    "venue": "Venue", "win_prob_team1": "Team 1 %", "win_prob_team2": "Team 2 %",
+                    "predicted_winner": "Predicted winner",
+                }),
+                width="stretch",
+                hide_index=True,
+            )
+    else:
+        st.error("Tournament forecast is unavailable. Check the prediction-engine logs.")
+
+
+if current_view in {"tactics", "field_lab"}:
+    cloud_field_data = api_get("/api/fielding") or {}
+    cloud_field_teams = cloud_field_data.get("teams") or []
+    cloud_field_venues = cloud_field_data.get("venues") or []
+
+
+if current_view == "tactics":
+    _subpage_header(
+        "AI match planning",
+        "Strategy Room",
+        "Choose a batter, venue and match phase to generate a model-backed delivery and field plan.",
+        "home",
+    )
+    player_options = []
+    for team in cloud_field_teams:
+        for batter in team.get("batsmen") or []:
+            player_options.append((f"{batter.get('name')} · {team.get('name')}", batter.get("name")))
+    venue_options = [v.get("venue_name") for v in cloud_field_venues if v.get("venue_name")]
+
+    if player_options and venue_options:
+        p1, p2, p3 = st.columns(3)
+        player_label = p1.selectbox("Target batter", [p[0] for p in player_options], key="strategy_player")
+        strategy_venue = p2.selectbox("Venue", venue_options, key="strategy_venue")
+        strategy_phase = p3.selectbox("Match phase", ["Powerplay", "Middle Overs", "Death Overs"], key="strategy_phase")
+        target_player = dict(player_options)[player_label]
+
+        if st.button("Generate tactical plan", type="primary", width="stretch"):
+            st.session_state["cloud_tactical_result"] = api_post("/api/tactical-plan", {
+                "target_batsman": target_player,
+                "venue": strategy_venue,
+                "match_phase": strategy_phase,
+            })
+
+        tactical_result = st.session_state.get("cloud_tactical_result")
+        if tactical_result:
+            plan = tactical_result.get("tactical_plan") or {}
+            delivery = plan.get("recommended_delivery") or {}
+            outcome = plan.get("expected_outcome") or {}
+            analysis = plan.get("analysis") or {}
+            t1, t2, t3, t4 = st.columns(4)
+            t1.metric("Bowler", plan.get("bowler", "—"))
+            t2.metric("Delivery", delivery.get("type", "—"))
+            t3.metric("Expected outcome", outcome.get("outcome", "—"))
+            t4.metric("Probability", f"{outcome.get('probability', 0)}%")
+            st.info(
+                f"{delivery.get('line', '—')} · {delivery.get('length', '—')} · "
+                f"{delivery.get('movement', '—')} · {delivery.get('speed', '—')}"
+            )
+            fig = _field_figure(
+                plan.get("optimal_field_setup") or [],
+                f"Optimal field · {analysis.get('pitch_type', strategy_venue)}",
+            )
+            st.pyplot(fig)
+            plt.close(fig)
+
+
+if current_view == "field_lab":
+    _subpage_header(
+        "Interactive placement map",
+        "Full Field Lab",
+        "Explore batter-specific, venue-aware field placements from the tactical dataset.",
+        "field",
+    )
+    if cloud_field_teams and cloud_field_venues:
+        team_names = [t.get("name") for t in cloud_field_teams]
+        fl1, fl2 = st.columns(2)
+        selected_team_name = fl1.selectbox("Team", team_names, key="field_lab_team")
+        selected_team = next(t for t in cloud_field_teams if t.get("name") == selected_team_name)
+        batters = selected_team.get("batsmen") or []
+        selected_batter_name = fl2.selectbox(
+            "Batter", [b.get("name") for b in batters], key="field_lab_batter"
+        )
+        selected_batter = next(b for b in batters if b.get("name") == selected_batter_name)
+
+        available_plans = selected_batter.get("plans") or {}
+        plan_venues = list(available_plans) or [v.get("venue_name") for v in cloud_field_venues]
+        selected_plan_venue = st.selectbox("Venue", plan_venues, key="field_lab_venue")
+        field_plan = available_plans.get(selected_plan_venue) or {}
+
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("Model score", selected_batter.get("modelScore", "—"))
+        m2.metric("Pitch", field_plan.get("pitchType", "—"))
+        m3.metric("Timing", field_plan.get("matchTiming", "—"))
+        m4.metric("Safe target", (field_plan.get("summary") or "—").split("|")[0].strip())
+        st.info(field_plan.get("fieldType") or selected_batter.get("fieldType") or "Field plan ready.")
+        fig = _field_figure(
+            field_plan.get("pos") or [],
+            f"{selected_batter_name} · {selected_plan_venue}",
+        )
+        st.pyplot(fig)
+        plt.close(fig)
+    else:
+        st.error("Fielding data is unavailable. Check the prediction-engine logs.")
+
 
 st.markdown("""
 <footer class="site-footer">
