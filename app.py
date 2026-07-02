@@ -52,6 +52,7 @@ HERO_ART = asset_data_uri("lpl-command-center.png")
 PLAYER_ART = asset_data_uri("player-analysis-lab.png")
 LIVE_ART = asset_data_uri("live-simulation-lab.png")
 TOURNAMENT_ART = asset_data_uri("tournament-command-center.png")
+FORECAST_ART = asset_data_uri("ai-tournament-forecast.png")
 
 # ── Premium Dark CSS ──────────────────────────────────────────────────────────
 st.markdown("""
@@ -1730,6 +1731,62 @@ def _field_figure(positions, title):
     return fig
 
 
+def _render_original_forecast(initial_tab="progression"):
+    """Render the project's original forecast.html with live API data."""
+    with st.spinner("Loading the original AI Forecast…"):
+        forecast_payload = api_get("/api/tournament-forecast?sims=5000")
+    if not forecast_payload:
+        st.error("The original AI Forecast could not load its model data.")
+        return
+
+    forecast_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "frontend", "forecast.html")
+    try:
+        with open(forecast_path, "r", encoding="utf-8") as forecast_file:
+            forecast_html = forecast_file.read()
+    except OSError as exc:
+        st.error(f"Could not open frontend/forecast.html: {exc}")
+        return
+
+    payload_json = json.dumps(
+        {"/api/tournament-forecast": forecast_payload},
+        ensure_ascii=False,
+    ).replace("</", "<\\/")
+    bridge = f"""
+    <script>
+    const __STREAMLIT_API_DATA__ = {payload_json};
+    const __nativeFetch = window.fetch.bind(window);
+    window.fetch = async function(input, options) {{
+      const raw = typeof input === "string" ? input : input.url;
+      const path = new URL(raw, "https://streamlit.local").pathname;
+      if (Object.prototype.hasOwnProperty.call(__STREAMLIT_API_DATA__, path)) {{
+        return new Response(JSON.stringify(__STREAMLIT_API_DATA__[path]), {{
+          status: 200,
+          headers: {{"Content-Type": "application/json"}}
+        }});
+      }}
+      return __nativeFetch(input, options);
+    }};
+    </script>
+    """
+    forecast_html = forecast_html.replace("</head>", f"{bridge}</head>", 1)
+    forecast_html = forecast_html.replace(
+        "const FORECAST_ART=location.protocol==='file:'?'assets/ai-tournament-forecast.png':'/frontend/assets/ai-tournament-forecast.png';",
+        f"const FORECAST_ART={json.dumps(FORECAST_ART)};",
+        1,
+    )
+    forecast_html = forecast_html.replace(
+        "const initialTab=location.hash.slice(1);",
+        f"const initialTab={json.dumps(initial_tab)};",
+        1,
+    )
+    forecast_html = forecast_html.replace(
+        'href="http://localhost:8501"',
+        'href="#" onclick="window.open(new URL(\'?page=home\', document.referrer).href, \'_top\'); return false;"',
+        1,
+    )
+    st.iframe(forecast_html, height=2600)
+
+
 if current_view == "command":
     _subpage_header(
         "Tournament operations",
@@ -1796,109 +1853,17 @@ if current_view == "command":
 
 
 if current_view == "forecast":
-    _subpage_header(
-        "Monte-Carlo outlook",
-        "AI Tournament Forecast",
-        "Match probabilities and tournament progression generated from the trained prediction stack.",
-        "tournament",
-    )
-    with st.spinner("Running tournament simulations…"):
-        forecast = api_get("/api/tournament-forecast?sims=2000") or {}
-
-    if forecast:
-        f1, f2, f3, f4 = st.columns(4)
-        f1.metric("Champion", forecast.get("projected_champion", "—"))
-        f2.metric("Runner-up", forecast.get("projected_runner_up", "—"))
-        f3.metric("Simulations", f"{forecast.get('n_simulations', 0):,}")
-        f4.metric("Scheduled matches", len(forecast.get("matches") or []))
-
-        progression = pd.DataFrame(forecast.get("progression") or [])
-        if not progression.empty:
-            st.markdown("### Qualification probabilities")
-            chart_df = progression.set_index("team")[
-                [c for c in ["semi_pct", "final_pct", "champion_pct"] if c in progression.columns]
-            ].rename(columns={"semi_pct": "Semi-final %", "final_pct": "Final %", "champion_pct": "Champion %"})
-            st.bar_chart(chart_df, color=["#65d7ff", "#f5a623", "#8b5cf6"])
-
-        projected = pd.DataFrame(forecast.get("standings_projection") or [])
-        if not projected.empty:
-            st.markdown("### Projected points table")
-            st.dataframe(projected, width="stretch", hide_index=True)
-
-        matches = pd.DataFrame(forecast.get("matches") or [])
-        if not matches.empty:
-            st.markdown("### Match-by-match forecast")
-            match_cols = [c for c in [
-                "date", "time", "team1", "team2", "venue", "win_prob_team1",
-                "win_prob_team2", "predicted_winner",
-            ] if c in matches.columns]
-            st.dataframe(
-                matches[match_cols].rename(columns={
-                    "date": "Date", "time": "Time", "team1": "Team 1", "team2": "Team 2",
-                    "venue": "Venue", "win_prob_team1": "Team 1 %", "win_prob_team2": "Team 2 %",
-                    "predicted_winner": "Predicted winner",
-                }),
-                width="stretch",
-                hide_index=True,
-            )
-    else:
-        st.error("Tournament forecast is unavailable. Check the prediction-engine logs.")
+    _render_original_forecast("progression")
 
 
-if current_view in {"tactics", "field_lab"}:
+if current_view == "field_lab":
     cloud_field_data = api_get("/api/fielding") or {}
     cloud_field_teams = cloud_field_data.get("teams") or []
     cloud_field_venues = cloud_field_data.get("venues") or []
 
 
 if current_view == "tactics":
-    _subpage_header(
-        "AI match planning",
-        "Strategy Room",
-        "Choose a batter, venue and match phase to generate a model-backed delivery and field plan.",
-        "home",
-    )
-    player_options = []
-    for team in cloud_field_teams:
-        for batter in team.get("batsmen") or []:
-            player_options.append((f"{batter.get('name')} · {team.get('name')}", batter.get("name")))
-    venue_options = [v.get("venue_name") for v in cloud_field_venues if v.get("venue_name")]
-
-    if player_options and venue_options:
-        p1, p2, p3 = st.columns(3)
-        player_label = p1.selectbox("Target batter", [p[0] for p in player_options], key="strategy_player")
-        strategy_venue = p2.selectbox("Venue", venue_options, key="strategy_venue")
-        strategy_phase = p3.selectbox("Match phase", ["Powerplay", "Middle Overs", "Death Overs"], key="strategy_phase")
-        target_player = dict(player_options)[player_label]
-
-        if st.button("Generate tactical plan", type="primary", width="stretch"):
-            st.session_state["cloud_tactical_result"] = api_post("/api/tactical-plan", {
-                "target_batsman": target_player,
-                "venue": strategy_venue,
-                "match_phase": strategy_phase,
-            })
-
-        tactical_result = st.session_state.get("cloud_tactical_result")
-        if tactical_result:
-            plan = tactical_result.get("tactical_plan") or {}
-            delivery = plan.get("recommended_delivery") or {}
-            outcome = plan.get("expected_outcome") or {}
-            analysis = plan.get("analysis") or {}
-            t1, t2, t3, t4 = st.columns(4)
-            t1.metric("Bowler", plan.get("bowler", "—"))
-            t2.metric("Delivery", delivery.get("type", "—"))
-            t3.metric("Expected outcome", outcome.get("outcome", "—"))
-            t4.metric("Probability", f"{outcome.get('probability', 0)}%")
-            st.info(
-                f"{delivery.get('line', '—')} · {delivery.get('length', '—')} · "
-                f"{delivery.get('movement', '—')} · {delivery.get('speed', '—')}"
-            )
-            fig = _field_figure(
-                plan.get("optimal_field_setup") or [],
-                f"Optimal field · {analysis.get('pitch_type', strategy_venue)}",
-            )
-            st.pyplot(fig)
-            plt.close(fig)
+    _render_original_forecast("tactics")
 
 
 if current_view == "field_lab":
