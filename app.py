@@ -49,6 +49,7 @@ original_page_component = components.declare_component(
 )
 
 
+@st.cache_data
 def asset_data_uri(filename):
     path = os.path.join(ASSET_DIR, filename)
     try:
