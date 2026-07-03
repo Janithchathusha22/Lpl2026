@@ -262,7 +262,12 @@ function showTab(id,btn){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   if(btn)btn.classList.add('active');
-  if(history.replaceState)history.replaceState(null,'','#'+id);
+  // Streamlit renders this document inside an about:srcdoc iframe. Updating
+  // history there raises a SecurityError and previously stopped init() before
+  // the forecast data could render. Keep hash navigation for direct pages only.
+  if(location.protocol!=='about:' && history.replaceState){
+    history.replaceState(null,'','#'+id);
+  }
 }
 function stagePill(stage){
   const s=(stage||'').toLowerCase();
