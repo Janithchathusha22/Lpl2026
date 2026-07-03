@@ -872,20 +872,20 @@ def nav_class(view, primary=False):
 with st.container(key="site_nav"):
     st.markdown(f"""
     <nav class="website-nav" aria-label="Main navigation">
-      <a class="website-brand" href="?page=home">
+      <a class="website-brand" href="?page=home" target="_self">
         <i>🏏</i><div><b>LPL Intelligence</b><span>2026 Decision OS</span></div>
       </a>
       <div class="website-links">
-        <a class="{nav_class('home')}" href="?page=home">Home</a>
-        <a class="{nav_class('match')}" href="?page=match">Match Predictor</a>
-        <a class="{nav_class('player')}" href="?page=player">Player Analysis</a>
-        <a class="{nav_class('live')}" href="?page=live">Live Simulator</a>
-        <a class="{nav_class('squad')}" href="?page=squad">Squad Intel</a>
-        <a class="{nav_class('tournament')}" href="?page=tournament">Tournament</a>
-        <a class="{nav_class('field', True)}" href="?page=field">3D Field Lab</a>
-        <a class="{nav_class('delivery')}" href="?page=delivery">Delivery Sim</a>
-        <a class="{nav_class('original_site')}" href="?page=original_site">Original Site</a>
-        <a class="{nav_class('research')}" href="?page=research">Research</a>
+        <a class="{nav_class('home')}" href="?page=home" target="_self">Home</a>
+        <a class="{nav_class('match')}" href="?page=match" target="_self">Match Predictor</a>
+        <a class="{nav_class('player')}" href="?page=player" target="_self">Player Analysis</a>
+        <a class="{nav_class('live')}" href="?page=live" target="_self">Live Simulator</a>
+        <a class="{nav_class('squad')}" href="?page=squad" target="_self">Squad Intel</a>
+        <a class="{nav_class('tournament')}" href="?page=tournament" target="_self">Tournament</a>
+        <a class="{nav_class('field', True)}" href="?page=field" target="_self">3D Field Lab</a>
+        <a class="{nav_class('delivery')}" href="?page=delivery" target="_self">Delivery Sim</a>
+        <a class="{nav_class('original_site')}" href="?page=original_site" target="_self">Original Site</a>
+        <a class="{nav_class('research')}" href="?page=research" target="_self">Research</a>
       </div>
     </nav>
     """, unsafe_allow_html=True)
@@ -927,8 +927,8 @@ if current_view == "home":
     <h1>Strategic <span>Decision Making</span></h1>
     <p>Transform player intelligence, venue conditions and tournament simulations into the clearest match-day call. See the opportunity, understand the risk, then act with confidence.</p>
     <div class="command-actions">
-      <a href="{HTML_TACTICS_URL}" target="_blank" rel="noopener">Open Strategy Room&nbsp; →</a>
-      <a href="{HTML_FORECAST_URL}" target="_blank" rel="noopener">View Tournament Forecast</a>
+      <a href="{HTML_TACTICS_URL}" target="_self">Open Strategy Room&nbsp; →</a>
+      <a href="{HTML_FORECAST_URL}" target="_self">View Tournament Forecast</a>
     </div>
   </div>
   <div class="command-signal">
@@ -946,12 +946,12 @@ if current_view == "home":
 """, unsafe_allow_html=True)
     st.markdown("""
     <div class="home-modules">
-      <a class="home-module" href="?page=match"><i>🔮</i><b>01</b><small>Pre-match</small><h3>Match Predictor</h3><p>Compare teams, conditions and explainable win signals.</p></a>
-      <a class="home-module" href="?page=player"><i>👤</i><b>02</b><small>Scouting</small><h3>Player Analysis</h3><p>Strengths, weaknesses, venue fit and PP-NN projections.</p></a>
-      <a class="home-module" href="?page=live"><i>📡</i><b>03</b><small>In-play</small><h3>Live Simulator</h3><p>Track win probability, pressure and chase requirements.</p></a>
-      <a class="home-module" href="?page=squad"><i>🛡️</i><b>04</b><small>Team build</small><h3>Squad Intel</h3><p>Read team balance, depth and structural vulnerabilities.</p></a>
-      <a class="home-module" href="?page=tournament"><i>🏆</i><b>05</b><small>Competition</small><h3>Tournament View</h3><p>Standings, bracket logic, awards and simulations.</p></a>
-      <a class="home-module" href="?page=field"><i>🎯</i><b>06</b><small>Tactical lab</small><h3>3D Field Lab</h3><p>Field placements, shot paths and catch simulations.</p></a>
+      <a class="home-module" href="?page=match" target="_self"><i>🔮</i><b>01</b><small>Pre-match</small><h3>Match Predictor</h3><p>Compare teams, conditions and explainable win signals.</p></a>
+      <a class="home-module" href="?page=player" target="_self"><i>👤</i><b>02</b><small>Scouting</small><h3>Player Analysis</h3><p>Strengths, weaknesses, venue fit and PP-NN projections.</p></a>
+      <a class="home-module" href="?page=live" target="_self"><i>📡</i><b>03</b><small>In-play</small><h3>Live Simulator</h3><p>Track win probability, pressure and chase requirements.</p></a>
+      <a class="home-module" href="?page=squad" target="_self"><i>🛡️</i><b>04</b><small>Team build</small><h3>Squad Intel</h3><p>Read team balance, depth and structural vulnerabilities.</p></a>
+      <a class="home-module" href="?page=tournament" target="_self"><i>🏆</i><b>05</b><small>Competition</small><h3>Tournament View</h3><p>Standings, bracket logic, awards and simulations.</p></a>
+      <a class="home-module" href="?page=field" target="_self"><i>🎯</i><b>06</b><small>Tactical lab</small><h3>3D Field Lab</h3><p>Field placements, shot paths and catch simulations.</p></a>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1627,7 +1627,7 @@ if current_view == "tournament":
           <div class="launch-metric"><b>{top_cup}</b><span>Top cup probability</span></div>
           <div class="launch-metric"><b>{len(awards_cards) or "-"}</b><span>Award models</span></div>
         </div>
-        <a class="launch-action" href="{HTML_DASHBOARD_URL}" target="_blank" rel="noopener">Open Tournament Command Center</a>
+        <a class="launch-action" href="{HTML_DASHBOARD_URL}" target="_self">Open Tournament Command Center</a>
       </div>
       <div class="launch-panel">
         <h3>Current Signal</h3>
@@ -1636,7 +1636,7 @@ if current_view == "tournament":
           The full dashboard is designed as a match-control room: first glance shows the tournament story,
           then each tab opens the evidence behind standings, simulations, players, caps, and field plans.
         </div>
-        <a class="launch-action secondary" href="{HTML_FORECAST_URL}" target="_blank" rel="noopener">Open AI Tournament Forecast</a>
+        <a class="launch-action secondary" href="{HTML_FORECAST_URL}" target="_self">Open AI Tournament Forecast</a>
       </div>
     </div>
     """, unsafe_allow_html=True)
@@ -1680,7 +1680,7 @@ if current_view == "field":
           <div class="launch-metric"><b>{first_team}</b><span>Default team</span></div>
           <div class="launch-metric"><b>{first_player or "-"}</b><span>Opening batter model</span></div>
         </div>
-        <a class="launch-action" href="{HTML_FIELD_URL}" target="_blank" rel="noopener">Open Full 3D Field View</a>
+        <a class="launch-action" href="{HTML_FIELD_URL}" target="_self">Open Full 3D Field View</a>
       </div>
       <div class="field-mini">
         <span class="field-dot d1"></span>
@@ -1715,7 +1715,7 @@ def _subpage_header(eyebrow, title, copy, back_page):
     st.markdown(
         f"""
         <div style="margin:1rem 0 1.5rem">
-          <a href="?page={back_page}" style="color:#ffd37a;text-decoration:none;font-weight:800">← Back</a>
+          <a href="?page={back_page}" target="_self" style="color:#ffd37a;text-decoration:none;font-weight:800">← Back</a>
           <div class="web-section-head" style="margin-top:1.3rem">
             <div><small>{eyebrow}</small><h2>{title}</h2><p>{copy}</p></div>
           </div>
